@@ -12,6 +12,8 @@ namespace HRProDataModels.Models
         string Password { get; }
         string? PhoneNumber { get; }
         DateTime DateOfBirth { get; }
+        string? Gender { get; }
+        string? City { get; }
         RoleEnum Role { get; }
     }
 }
