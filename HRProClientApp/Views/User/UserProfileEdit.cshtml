@@ -36,7 +36,7 @@
 
                 <div class="form-group">
                     <label for="dateOfBirth">Дата рождения:</label>
-                    <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value="@Model?.DateOfBirth.ToShortDateString()" required>
+                    <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value="@Model?.DateOfBirth.ToString()" required>
                     <div class="invalid-feedback">
                         Выберите корректную дату рождения.
                     </div>

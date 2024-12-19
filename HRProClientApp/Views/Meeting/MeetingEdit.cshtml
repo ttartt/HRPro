@@ -1,0 +1,143 @@
+﻿@using HRProContracts.BindingModels
+@using HRProDataModels.Enums
+@model MeetingBindingModel
+
+@{
+    var title = "Собеседование";
+}
+
+<div class="container">
+    <h1>@title</h1>
+    <form method="post" class="row g-3 needs-validation" novalidate>
+        <input type="hidden" name="id" value="@Model?.Id" />
+        <input type="hidden" name="vacancyId" value="@Model?.VacancyId" />
+        <input type="hidden" name="candidateId" value="@Model?.CandidateId" />
+
+        <div class="col-md-6">
+            <label for="Topic" class="form-label">Тема собеседования <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="Topic" name="Topic" value="@Model?.Topic" required placeholder="Введите тему собеседования">
+            <div class="invalid-feedback">Пожалуйста, введите тему собеседования.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="Date" class="form-label">Дата собеседования <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="Date" name="Date" value="@Model?.Date.ToString("yyyy-MM-dd")" required>
+            <div class="invalid-feedback">Пожалуйста, выберите дату собеседования.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="TimeFrom" class="form-label">Время начала <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" id="TimeFrom" name="TimeFrom" value="@Model?.TimeFrom.ToString("HH:mm")" required>
+            <div class="invalid-feedback">Пожалуйста, выберите время начала собеседования.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="TimeTo" class="form-label">Время окончания <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" id="TimeTo" name="TimeTo" value="@Model?.TimeTo.ToString("HH:mm")" required>
+            <div class="invalid-feedback">Пожалуйста, выберите время окончания собеседования.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="Place" class="form-label">Место проведения <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="Place" name="Place" value="@Model?.Place" required placeholder="Введите место проведения">
+            <div class="invalid-feedback">Пожалуйста, введите место проведения собеседования.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="Comment" class="form-label">Комментарий</label>
+            <textarea class="form-control" id="Comment" name="Comment" rows="3" placeholder="Введите комментарий">@Model?.Comment</textarea>
+        </div>
+
+        <div class="col-md-6">
+            @if (Model.Id <= 0)
+            {
+                <button type="submit" class="btn btn-primary">Создать собеседование</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            }
+            <button type="button" class="btn btn-secondary" onclick="window.history.back();">Назад</button>
+        </div>
+
+        <div class="col-md-6">
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#inviteParticipantsModal">
+                Пригласить участников
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="inviteParticipantsModal" tabindex="-1" aria-labelledby="inviteParticipantsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-controller="Meeting" asp-action="InviteParticipants" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inviteParticipantsModalLabel">Выбор участников</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="participant1" name="participantIds" />
+                        <label class="form-check-label" for="participant1">
+                            Участник 1
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="2" id="participant2" name="participantIds" />
+                        <label class="form-check-label" for="participant2">
+                            Участник 2
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="3" id="participant3" name="participantIds" />
+                        <label class="form-check-label" for="participant3">
+                            Участник 3
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Пригласить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict'
+
+        var forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+<style>
+    .btn {
+        background-color: #3E12E3;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #2200A4;
+            transform: scale(1.05);
+        }
+</style>

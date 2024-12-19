@@ -9,5 +9,7 @@ namespace HRProContracts.ViewModels
         public int ResponsibilityId { get; set; }
 
         public int Id { get; set; }
+
+        public string ResponsibilityName { get; set; }
     }
 }

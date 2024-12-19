@@ -9,5 +9,7 @@ namespace HRProContracts.ViewModels
         public int RequirementId { get; set; }
 
         public int Id { get; set; }
+
+        public int RequirementName { get; set; }
     }
 }

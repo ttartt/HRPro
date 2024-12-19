@@ -44,7 +44,7 @@ namespace HRProDatabaseImplement.Implements
                 .FirstOrDefault(x => (!string.IsNullOrEmpty(model.Name) && x.Name == model.Name) || (model.Id.HasValue && x.Id == model.Id))
                 ?.GetViewModel;
         }
-        public ResponsibilityViewModel? Insert(ResponsibilityBindingModel model)
+        public int? Insert(ResponsibilityBindingModel model)
         {
             var newResponsibility = Responsibility.Create(model);
             if (newResponsibility == null)
@@ -54,7 +54,7 @@ namespace HRProDatabaseImplement.Implements
             using var context = new HRproDatabase();
             context.Responsibilities.Add(newResponsibility);
             context.SaveChanges();
-            return newResponsibility.GetViewModel;
+            return newResponsibility.Id;
         }
         public ResponsibilityViewModel? Update(ResponsibilityBindingModel model)
         {

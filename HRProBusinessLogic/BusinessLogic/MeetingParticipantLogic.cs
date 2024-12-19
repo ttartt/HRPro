@@ -12,32 +12,31 @@ using System.Threading.Tasks;
 
 namespace HRProBusinessLogic.BusinessLogic
 {
-    public class ResponsibilityLogic : IResponsibilityLogic
+    public class MeetingParticipantLogic : IMeetingParticipantLogic
     {
         private readonly ILogger _logger;
-        private readonly IResponsibilityStorage _responsibilityStorage;
-        public ResponsibilityLogic(ILogger<ResponsibilityLogic> logger, IResponsibilityStorage responsibilityStorage)
+        private readonly IMeetingParticipantStorage _meetingParticipantStorage;
+        public MeetingParticipantLogic(ILogger<MeetingParticipantLogic> logger, IMeetingParticipantStorage meetingParticipantStorage)
         {
             _logger = logger;
-            _responsibilityStorage = responsibilityStorage;
+            _meetingParticipantStorage = meetingParticipantStorage;
         }
-        public int? Create(ResponsibilityBindingModel model)
+        public bool Create(MeetingParticipantBindingModel model)
         {
             CheckModel(model);
-            int? id = _responsibilityStorage.Insert(model);
-            if (id == null)
+            if (_meetingParticipantStorage.Insert(model) == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return 0;
+                return false;
             }
-            return id;
+            return true;
         }
 
-        public bool Delete(ResponsibilityBindingModel model)
+        public bool Delete(MeetingParticipantBindingModel model)
         {
             CheckModel(model, false);
             _logger.LogInformation("Delete. Id: {Id}", model.Id);
-            if (_responsibilityStorage.Delete(model) == null)
+            if (_meetingParticipantStorage.Delete(model) == null)
             {
                 _logger.LogWarning("Delete operation failed");
                 return false;
@@ -45,13 +44,13 @@ namespace HRProBusinessLogic.BusinessLogic
             return true;
         }
 
-        public ResponsibilityViewModel? ReadElement(ResponsibilitySearchModel model)
+        public MeetingParticipantViewModel? ReadElement(MeetingParticipantSearchModel model)
         {
             if (model == null)
             {
                 throw new ArgumentNullException(nameof(model));
             }
-            var element = _responsibilityStorage.GetElement(model);
+            var element = _meetingParticipantStorage.GetElement(model);
             if (element == null)
             {
                 _logger.LogWarning("ReadElement element not found");
@@ -61,9 +60,9 @@ namespace HRProBusinessLogic.BusinessLogic
             return element;
         }
 
-        public List<ResponsibilityViewModel>? ReadList(ResponsibilitySearchModel? model)
+        public List<MeetingParticipantViewModel>? ReadList(MeetingParticipantSearchModel? model)
         {
-            var list = model == null ? _responsibilityStorage.GetFullList() : _responsibilityStorage.GetFilteredList(model);
+            var list = model == null ? _meetingParticipantStorage.GetFullList() : _meetingParticipantStorage.GetFilteredList(model);
             if (list == null)
             {
                 _logger.LogWarning("ReadList return null list");
@@ -73,10 +72,10 @@ namespace HRProBusinessLogic.BusinessLogic
             return list;
         }
 
-        public bool Update(ResponsibilityBindingModel model)
+        public bool Update(MeetingParticipantBindingModel model)
         {
             CheckModel(model);
-            if (_responsibilityStorage.Update(model) == null)
+            if (_meetingParticipantStorage.Update(model) == null)
             {
                 _logger.LogWarning("Update operation failed");
                 return false;
@@ -84,7 +83,7 @@ namespace HRProBusinessLogic.BusinessLogic
             return true;
         }
 
-        private void CheckModel(ResponsibilityBindingModel model, bool withParams = true)
+        private void CheckModel(MeetingParticipantBindingModel model, bool withParams = true)
         {
             if (model == null)
             {
@@ -96,21 +95,26 @@ namespace HRProBusinessLogic.BusinessLogic
                 return;
             }
 
-            if (string.IsNullOrEmpty(model.Name))
+            if (model.MeetingId <= 0)
             {
-                throw new ArgumentNullException("Нет названия ответственности", nameof(model.Name));
+                throw new ArgumentException("Нет идентификатора встречи", nameof(model.MeetingId));
             }
 
-            var element = _responsibilityStorage.GetElement(new ResponsibilitySearchModel
+            if (model.UserId <= 0)
             {
-                Name = model.Name
+                throw new ArgumentException("Нет идентификатора пользователя", nameof(model.UserId));
+            }
+
+            var element = _meetingParticipantStorage.GetElement(new MeetingParticipantSearchModel
+            {
+                MeetingId = model.MeetingId,
+                UserId = model.UserId
             });
 
             if (element != null && element.Id != model.Id)
             {
-                throw new InvalidOperationException("Ответственность с таким названием уже существует");
+                throw new InvalidOperationException("Этот пользователь уже является участником");
             }
         }
-
     }
 }

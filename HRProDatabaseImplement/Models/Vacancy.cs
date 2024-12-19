@@ -40,8 +40,6 @@ namespace HRproDatabaseImplement.Models
                 Id = model.Id,
                 CompanyId = model.CompanyId,
                 JobTitle = model.JobTitle,
-                Requirements = model.Requirements,
-                Responsibilities = model.Responsibilities,
                 JobType = model.JobType,
                 Salary = model.Salary,
                 Description = model.Description,
@@ -57,8 +55,6 @@ namespace HRproDatabaseImplement.Models
                 Id = model.Id,
                 CompanyId = model.CompanyId,
                 JobTitle = model.JobTitle,
-                Requirements = model.Requirements,
-                Responsibilities = model.Responsibilities,
                 JobType = model.JobType,
                 Salary = model.Salary,
                 Description = model.Description,
@@ -75,8 +71,6 @@ namespace HRproDatabaseImplement.Models
             }
             CompanyId = model.CompanyId;
             JobTitle = model.JobTitle;
-            Requirements = model.Requirements;
-            Responsibilities = model.Responsibilities;
             JobType = model.JobType;
             Salary = model.Salary;
             Description = model.Description;
@@ -88,8 +82,6 @@ namespace HRproDatabaseImplement.Models
             Id = Id,
             CompanyId = CompanyId,
             JobTitle = JobTitle,
-            Requirements = Requirements,
-            Responsibilities = Responsibilities,
             JobType = JobType,
             Salary = Salary,
             Description = Description,

@@ -21,15 +21,16 @@ namespace HRProBusinessLogic.BusinessLogic
             _logger = logger;
             _requirementStorage = requirementStorage;
         }
-        public bool Create(RequirementBindingModel model)
+        public int? Create(RequirementBindingModel model)
         {
             CheckModel(model);
-            if (_requirementStorage.Insert(model) == null)
+            var id = _requirementStorage.Insert(model);
+            if (id == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return false;
+                return 0;
             }
-            return true;
+            return id;
         }
 
         public bool Delete(RequirementBindingModel model)

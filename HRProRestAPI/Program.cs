@@ -4,6 +4,7 @@ using HRProBusinessLogic.OfficePackage.Implements;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.StoragesContracts;
 using HRproDatabaseImplement.Implements;
+using HRProDatabaseImplement.Implements;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,12 +17,35 @@ builder.Services.AddTransient<IUserStorage, UserStorage>();
 builder.Services.AddTransient<ICompanyStorage, CompanyStorage>();
 builder.Services.AddTransient<IVacancyStorage, VacancyStorage>();
 builder.Services.AddTransient<IResumeStorage, ResumeStorage>();
+builder.Services.AddTransient<ICandidateStorage, CandidateStorage>();
+builder.Services.AddTransient<ITestTaskStorage, TestTaskStorage>();
+builder.Services.AddTransient<ITaskStorage, TaskStorage>();
+builder.Services.AddTransient<IMeetingStorage, MeetingStorage>();
+builder.Services.AddTransient<IMeetingParticipantStorage, MeetingParticipantStorage>();
+builder.Services.AddTransient<IRequirementStorage, RequirementStorage>();
+builder.Services.AddTransient<IResponsibilityStorage, ResponsibilityStorage>();
+builder.Services.AddTransient<IVacancyRequirementStorage, VacancyRequirementStorage>();
+builder.Services.AddTransient<IVacancyResponsibilityStorage, VacancyResponsibilityStorage>();
+builder.Services.AddTransient<IDocumentStorage, DocumentStorage>();
+builder.Services.AddTransient<ITemplateStorage, TemplateStorage>();
+builder.Services.AddTransient<ITagStorage, TagStorage>();
 
 builder.Services.AddTransient<IUserLogic, UserLogic>();
 builder.Services.AddTransient<ICompanyLogic, CompanyLogic>();
 builder.Services.AddTransient<IVacancyLogic, VacancyLogic>();
 builder.Services.AddTransient<IResumeLogic, ResumeLogic>();
-builder.Services.AddTransient<IReportLogic, ReportLogic>();
+builder.Services.AddTransient<ICandidateLogic, CandidateLogic>();
+builder.Services.AddTransient<ITestTaskLogic, TestTaskLogic>();
+builder.Services.AddTransient<ITaskLogic, TaskLogic>();
+builder.Services.AddTransient<IMeetingLogic, MeetingLogic>();
+builder.Services.AddTransient<IMeetingParticipantLogic, MeetingParticipantLogic>();
+builder.Services.AddTransient<IRequirementLogic, RequirementLogic>();
+builder.Services.AddTransient<IResponsibilityLogic, ResponsibilityLogic>();
+builder.Services.AddTransient<IVacancyRequirementLogic, VacancyRequirementLogic>();
+builder.Services.AddTransient<IVacancyResponsibilityLogic, VacancyResponsibilityLogic>();
+builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
+builder.Services.AddTransient<ITemplateLogic, TemplateLogic>();
+builder.Services.AddTransient<ITagLogic, TagLogic>();
 
 builder.Services.AddTransient<AbstractSaveToPdf, SaveToPdf>();
 

@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<RequirementViewModel> GetFullList();
         List<RequirementViewModel> GetFilteredList(RequirementSearchModel model);
         RequirementViewModel? GetElement(RequirementSearchModel model);
-        RequirementViewModel? Insert(RequirementBindingModel model);
+        int? Insert(RequirementBindingModel model);
         RequirementViewModel? Update(RequirementBindingModel model);
         RequirementViewModel? Delete(RequirementBindingModel model);
     }

@@ -14,15 +14,19 @@ namespace HRProBusinessLogic.BusinessLogic
         private readonly IVacancyStorage _vacancyStorage;
         private readonly IResumeStorage _resumeStorage;
         private readonly ICompanyStorage _companyStorage;
+        private readonly IVacancyRequirementStorage _vacancyRequirementStorage;
+        private readonly IVacancyResponsibilityStorage _vacancyResponsibilityStorage;
         private readonly IUserStorage _userStorage;
 
-        public VacancyLogic(ILogger<VacancyLogic> logger, IVacancyStorage vacancyStorage, IResumeStorage resumeStorage, ICompanyStorage companyStorage, IUserStorage userStorage)
+        public VacancyLogic(ILogger<VacancyLogic> logger, IVacancyStorage vacancyStorage, IResumeStorage resumeStorage, ICompanyStorage companyStorage, IUserStorage userStorage, IVacancyRequirementStorage vacancyRequirementStorage, IVacancyResponsibilityStorage vacancyResponsibilityStorage)
         {
             _logger = logger;
             _vacancyStorage = vacancyStorage;
             _resumeStorage = resumeStorage;
             _companyStorage = companyStorage;
             _userStorage = userStorage;
+            _vacancyRequirementStorage = vacancyRequirementStorage;
+            _vacancyResponsibilityStorage = vacancyResponsibilityStorage;
         }
         public bool Create(VacancyBindingModel model)
         {
@@ -76,6 +80,9 @@ namespace HRProBusinessLogic.BusinessLogic
                 CreatedAt = r.CreatedAt
             }).ToList() ?? new List<ResumeViewModel>();
 
+            var requirements = _vacancyRequirementStorage.GetFilteredList(new VacancyRequirementSearchModel { VacancyId = element.Id });
+            var responsibilities = _vacancyResponsibilityStorage.GetFilteredList(new VacancyResponsibilitySearchModel { VacancyId = element.Id });
+
             var vacancyViewModel = new VacancyViewModel
             {
                 Id = element.Id,
@@ -85,8 +92,8 @@ namespace HRProBusinessLogic.BusinessLogic
                 Description = element.Description,
                 JobTitle = element.JobTitle,
                 JobType = element.JobType,
-                Requirements = element.Requirements,
-                Responsibilities = element.Responsibilities,                
+                Requirements = requirements,
+                Responsibilities = responsibilities,                
                 Salary = element.Salary,
                 Status = element.Status,
                 Tags = element.Tags,
@@ -145,16 +152,6 @@ namespace HRProBusinessLogic.BusinessLogic
             if (string.IsNullOrEmpty(model.JobTitle))
             {
                 throw new ArgumentNullException("Нет названия вакансии", nameof(model.JobTitle));
-            }
-
-            if (string.IsNullOrEmpty(model.Requirements))
-            {
-                throw new ArgumentNullException("Нет требований к вакансии", nameof(model.Requirements));
-            }
-
-            if (string.IsNullOrEmpty(model.Responsibilities))
-            {
-                throw new ArgumentNullException("Нет обязанностей вакансии", nameof(model.Responsibilities));
             }
 
             if (string.IsNullOrEmpty(model.JobType.ToString()))

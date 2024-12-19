@@ -92,11 +92,8 @@
                             </table>
                         </div>
 
-                        @if (Model.Vacancies.Count() > 5)
-                        {
-                            <a asp-action="Vacancies" asp-controller="Vacancy" asp-route-companyId="@Model.Id"
-                               class="btn btn-primary mt-3">Посмотреть все</a>
-                        }
+                        <a asp-action="Vacancies" asp-controller="Vacancy" asp-route-companyId="@Model.Id"
+                           class="btn btn-primary mt-3">Посмотреть все</a>
                     }
                     else
                     {
@@ -152,6 +149,9 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <a asp-action="Employees" asp-controller="User" asp-route-companyId="@Model.Id"
+                           class="btn btn-primary mt-3">Посмотреть все</a>
                     }
                     else
                     {
@@ -164,7 +164,7 @@
 </div>
 <style>
     .btn {
-        background-color: #0A1128;
+        background-color: #3E12E3;
         color: white;
         border: none;
         border-radius: 10px;
@@ -174,7 +174,7 @@
     }
 
         .btn:hover {
-            background-color: #1C3273;
+            background-color: #2200A4;
             transform: scale(1.05);
         }
 </style>

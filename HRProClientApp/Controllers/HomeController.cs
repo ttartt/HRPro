@@ -81,7 +81,7 @@ namespace HRProUserApp.Controllers
                 }
                 else
                 {
-                    role = RoleEnum.Пользователь;
+                    role = RoleEnum.Сотрудник;
                 }
                 APIClient.PostRequest("api/user/register", new UserBindingModel
                 {

@@ -13,7 +13,7 @@ namespace HRProContracts.BusinessLogicsContracts
     {
         List<ResponsibilityViewModel>? ReadList(ResponsibilitySearchModel? model);
         ResponsibilityViewModel? ReadElement(ResponsibilitySearchModel model);
-        bool Create(ResponsibilityBindingModel model);
+        int? Create(ResponsibilityBindingModel model);
         bool Update(ResponsibilityBindingModel model);
         bool Delete(ResponsibilityBindingModel model);
     }

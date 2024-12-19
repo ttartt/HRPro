@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<ResponsibilityViewModel> GetFullList();
         List<ResponsibilityViewModel> GetFilteredList(ResponsibilitySearchModel model);
         ResponsibilityViewModel? GetElement(ResponsibilitySearchModel model);
-        ResponsibilityViewModel? Insert(ResponsibilityBindingModel model);
+        int? Insert(ResponsibilityBindingModel model);
         ResponsibilityViewModel? Update(ResponsibilityBindingModel model);
         ResponsibilityViewModel? Delete(ResponsibilityBindingModel model);
     }

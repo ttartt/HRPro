@@ -44,7 +44,7 @@ namespace HRProDatabaseImplement.Implements
                 .FirstOrDefault(x => (!string.IsNullOrEmpty(model.Name) && x.Name == model.Name) || (model.Id.HasValue && x.Id == model.Id))
                 ?.GetViewModel;
         }
-        public RequirementViewModel? Insert(RequirementBindingModel model)
+        public int? Insert(RequirementBindingModel model)
         {
             var newRequirement = Requirement.Create(model);
             if (newRequirement == null)
@@ -54,7 +54,7 @@ namespace HRProDatabaseImplement.Implements
             using var context = new HRproDatabase();
             context.Requirements.Add(newRequirement);
             context.SaveChanges();
-            return newRequirement.GetViewModel;
+            return newRequirement.Id;
         }
         public RequirementViewModel? Update(RequirementBindingModel model)
         {

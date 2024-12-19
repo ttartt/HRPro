@@ -28,9 +28,6 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="User" asp-action="UserProfile" asp-route-id="@(APIClient.User?.Id)">Профиль</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Vacancy" asp-action="SearchVacancies">Поиск вакансий</a>
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -43,11 +40,11 @@
     </div>
 
 
-    <footer class="border-top footer text-muted mt-5">
+    @* <footer class="border-top footer text-muted mt-5">
         <div class="container">
             &copy; 2024 - Ревью кандидатов на вакансию
         </div>
-    </footer>
+    </footer> *@
     @await RenderSectionAsync("Scripts", required: false)
     <script>
         function toggleNavbar() {

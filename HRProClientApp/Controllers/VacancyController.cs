@@ -82,6 +82,8 @@ namespace HRProClientApp.Controllers
             if (id.HasValue)
             {
                 vacancy = APIClient.GetRequest<VacancyViewModel?>($"api/vacancy/details?id={id}");
+                ViewBag.Requirements = APIClient.GetRequest<List<RequirementViewModel>>("api/requirement/list");
+                ViewBag.Responsibilities = APIClient.GetRequest<List<ResponsibilityViewModel>>("api/responsibility/list");
                 return View(vacancy);
             }
             return View();
@@ -151,8 +153,6 @@ namespace HRProClientApp.Controllers
                             Description = model.Description,
                             JobTitle = model.JobTitle,
                             JobType = model.JobType,
-                            Requirements = model.Requirements,
-                            Responsibilities = model.Responsibilities,
                             Salary = model.Salary,
                             Status = model.Status,
                             Tags = model.Tags
