@@ -1,0 +1,149 @@
+﻿@using HRProContracts.ViewModels
+@model UserViewModel
+
+@{
+    var title = @Model?.Id <= 0 ? "Добавить сотрудника" : "Редактировать профиль";
+    var userRole = APIClient.User?.Role == HRProDataModels.Enums.RoleEnum.Администратор ? true : false;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4">@title</h2>
+            <form method="post" class="needs-validation" novalidate>
+                <input type="hidden" name="id" value="@Model?.Id" />
+                <input type="hidden" name="CompanyId" value="@Model?.CompanyId" />
+
+                <div class="mb-3">
+                    <label for="Surname" class="form-label">Фамилия *</label>
+                    <input type="text" class="form-control" id="Surname" name="Surname" value="@Model?.Surname" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Name" class="form-label">Имя *</label>
+                    <input type="text" class="form-control" id="Name" name="Name" value="@Model?.Name" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="LastName" class="form-label">Отчество</label>
+                    <input type="text" class="form-control" id="LastName" name="LastName" value="@Model?.LastName" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Email" class="form-label">Электронная почта *</label>
+                    <input type="email" class="form-control" id="Email" name="Email" value="@Model?.Email" @(Model?.Id < 0 ? "readonly" : "") required />
+                </div>
+
+                <div class="form-group">
+                    <label for="dateOfBirth">Дата рождения:</label>
+                    <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value="@Model?.DateOfBirth.ToShortDateString()" required>
+                    <div class="invalid-feedback">
+                        Выберите корректную дату рождения.
+                    </div>
+                </div>
+
+                @if (Model?.Id <= 0)
+                {
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Пароль *</label>
+                        <input type="password" class="form-control" id="Password" name="Password" required />
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" name="password" value="@Model?.Password" />
+                }
+
+                <div class="mb-3">
+                    <label for="PhoneNumber" class="form-label">Телефон</label>
+                    <input type="tel" class="form-control" id="PhoneNumber" name="PhoneNumber" value="@Model?.PhoneNumber" />
+                </div>
+
+                <input type="hidden" name="Role" value="@Model?.Role" />
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">Назад</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dateOfBirthInput = document.getElementById("dateOfBirth");
+        const today = new Date().toISOString().split("T")[0];
+
+        dateOfBirthInput.setAttribute("max", today);
+
+        document.getElementById("submitBtn").addEventListener("click", function (event) {
+            if (!dateOfBirthInput.value || dateOfBirthInput.value > today) {
+                dateOfBirthInput.classList.add("is-invalid");
+                event.preventDefault();
+            } else {
+                dateOfBirthInput.classList.remove("is-invalid");
+                alert("Форма успешно отправлена!");
+            }
+        });
+    });
+</script>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7-beta.29/jquery.inputmask.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#PhoneNumber').inputmask({
+                mask: '+7 (999) 999-99-99',
+                showMaskOnHover: false,
+                onincomplete: function () {
+                    $(this).removeClass('is-valid').addClass('is-invalid');
+                },
+                oncleared: function () {
+                    $(this).removeClass('is-valid is-invalid');
+                },
+                oncomplete: function () {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                }
+            });
+        });
+
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    .btn {
+        background-color: #0A1128;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #1C3273;
+            transform: scale(1.05);
+        }
+</style>
+
+

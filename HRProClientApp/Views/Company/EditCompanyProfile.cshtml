@@ -1,0 +1,97 @@
+﻿@using HRProContracts.ViewModels
+@model CompanyViewModel
+
+@{
+    var title = @Model.Id <= 0 ? "Создать профиль компании" : "Редактировать профиль компании";
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="container">
+    <h1>@title</h1>
+    <form method="post" class="row g-3 needs-validation" novalidate>
+        <input type="hidden" name="id" value="@Model?.Id" />
+
+        <div class="col-md-6">
+            <label for="name" class="form-label">Название <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" value="@Model?.Name" required placeholder="Введите название компании">
+            <div class="invalid-feedback">Пожалуйста, введите название компании.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="description" class="form-label">Описание</label>
+            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Введите описание компании">@Model?.Description</textarea>
+        </div>
+
+        <div class="col-md-6">
+            <label for="website" class="form-label">Официальный сайт</label>
+            <input type="url" class="form-control" id="website" name="website" value="@Model?.Website" placeholder="Введите URL сайта">
+            <div class="invalid-feedback">Пожалуйста, введите валидный URL (например, https://example.com).</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="address" class="form-label">Адрес</label>
+            <input type="text" class="form-control" id="address" name="address" value="@Model?.Address" placeholder="Введите адрес компании">
+        </div>
+
+        <div class="col-12">
+            <label for="contacts" class="form-label">Контакты</label>
+            <textarea class="form-control" id="contacts" name="contacts" rows="3" placeholder="Введите контактную информацию">@Model?.Contacts</textarea>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            @if (Model.Id > 0)
+            {
+                 <a asp-controller="Company" asp-action="CompanyProfile" class="btn btn-secondary">Отмена</a>
+            }        
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        'use strict'
+
+        var forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+<style>
+    .btn {
+        background-color: #0A1128;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #1C3273;
+            transform: scale(1.05);
+        }
+</style>
+

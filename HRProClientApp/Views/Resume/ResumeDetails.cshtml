@@ -1,0 +1,79 @@
+﻿@using HRProDataModels.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using HRProContracts.ViewModels
+@using Newtonsoft.Json
+@model ResumeViewModel
+
+@{
+    ViewData["Title"] = "Резюме";
+    bool userRole = APIClient.User?.Role == HRProDataModels.Enums.RoleEnum.Сотрудник || APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Администратор;
+    bool isAdmin = APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Администратор ? true : false;
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-4">
+        <div class="card-header">
+            <h2>@Model.Title</h2>
+            <input type="hidden" name="id" value="@Model?.Id" />
+        </div>
+        <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
+        <a asp-action="GetReport" asp-controller="Resume" asp-route-id="@Model.Id" class="btn btn-primary">Скачать PDF</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Вакансия:</dt>
+                        <dd class="col-sm-8 text-muted">@Model.VacancyName</dd>
+
+                        <dt class="col-sm-4">Навыки:</dt>
+                        <dd class="col-sm-8 text-muted">@Model.Skills</dd>
+
+                        <dt class="col-sm-4">Статус:</dt>
+                        <dd class="col-sm-8 text-muted">@Model.Status</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Опыт работы:</dt>
+                        <dd class="col-sm-8 text-muted">@Model.Experience</dd>
+
+                        <dt class="col-sm-4">Образование:</dt>
+                        <dd class="col-sm-8 text-muted">@Model.Education</dd>
+
+                        <dt class="col-sm-4">Описание:</dt>
+                        <dd class="col-sm-8 text-muted">@Html.Raw(Model.Description)</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (Model.Status == HRProDataModels.Enums.ResumeStatusEnum.Черновик)
+            {
+                <div class="mt-4 text-end">
+                    <a asp-action="EditResume" asp-controller="Resume" class="btn btn-primary">Отправить на оценку</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .btn {
+        background-color: #0A1128;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #1C3273;
+            transform: scale(1.05);
+        }
+</style>

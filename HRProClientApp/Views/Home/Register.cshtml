@@ -1,0 +1,123 @@
+﻿@{
+    ViewData["Title"] = "Регистрация";
+    Layout = "_LoginLayout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded">
+                <div class="card-header bg-primary text-white text-center rounded-top">
+                    <h3 class="text-center">Регистрация</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-group">
+                            <label for="surname">Фамилия:</label>
+                            <input type="text" class="form-control" id="surname" name="surname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Имя:</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastname">Отчество:</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname">
+                        </div>
+                        <div class="form-group">
+                            <label for="login">Логин:</label>
+                            <input type="text" class="form-control" id="login" name="login" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Пароль:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfBirth">Дата рождения:</label>
+                            <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" required>
+                            <div class="invalid-feedback">
+                                Выберите корректную дату рождения.
+                            </div>
+                        </div>
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                        </div>
+                        <div class="form-group text-center mt-2">
+                            <a asp-area="" asp-controller="Home" asp-action="Enter" class="text-muted text-decoration-none">Уже зарегистрированы? Войти</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dateOfBirthInput = document.getElementById("dateOfBirth");
+        const today = new Date().toISOString().split("T")[0];
+
+        dateOfBirthInput.setAttribute("max", today);
+
+        document.getElementById("submitBtn").addEventListener("click", function (event) {
+            if (!dateOfBirthInput.value || dateOfBirthInput.value > today) {
+                dateOfBirthInput.classList.add("is-invalid");
+                event.preventDefault();
+            } else {
+                dateOfBirthInput.classList.remove("is-invalid");
+                alert("Форма успешно отправлена!");
+            }
+        });
+    });
+</script>
+
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f4f7;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-header {
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        box-shadow: none;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: #0A1128;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+    .btn {
+        background-color: #0A1128;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #1C3273;
+            transform: scale(1.05);
+        }
+
+    .text-muted {
+        font-size: 14px;
+    }
+
+        .text-muted:hover {
+            text-decoration: underline;
+        }
+</style>
