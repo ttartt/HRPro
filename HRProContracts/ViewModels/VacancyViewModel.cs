@@ -11,9 +11,9 @@ namespace HRProContracts.ViewModels
 
         public string JobTitle { get; set; } = string.Empty;
 
-        public string Requirements { get; set; } = string.Empty;
+        public List<VacancyRequirementViewModel> Requirements { get; set; } = new();
 
-        public string Responsibilities { get; set; } = string.Empty;
+        public List<VacancyResponsibilityViewModel> Responsibilities { get; set; } = new();
 
         public JobTypeEnum JobType { get; set; }
 

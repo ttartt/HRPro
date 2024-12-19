@@ -25,7 +25,9 @@ namespace HRproDatabaseImplement.Models
         [Required]
         public RoleEnum Role { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+
+        public string? City { get; set; }
 
         public int Id { get; set; }
         public virtual Company Company { get; set; }
@@ -47,7 +49,8 @@ namespace HRproDatabaseImplement.Models
                 PhoneNumber = model.PhoneNumber,
                 Role = model.Role,
                 CompanyId = model.CompanyId,
-                DateOfBirth = model.DateOfBirth.ToUniversalTime().AddHours(4)
+                DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null,
+                City = model.City
             };
         }
         public static User Create(UserViewModel model)
@@ -63,7 +66,7 @@ namespace HRproDatabaseImplement.Models
                 PhoneNumber = model.PhoneNumber,
                 Role = model.Role,
                 CompanyId = model.CompanyId,
-                DateOfBirth = model.DateOfBirth
+                DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null
             };
         }
         public void Update(UserBindingModel model)
@@ -78,7 +81,7 @@ namespace HRproDatabaseImplement.Models
             Email = model.Email;
             PhoneNumber = model.PhoneNumber;
             CompanyId = model.CompanyId;
-            DateOfBirth = model.DateOfBirth.ToUniversalTime().AddHours(4);
+            DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null;
         }
 
         public UserViewModel GetViewModel => new()
@@ -92,7 +95,8 @@ namespace HRproDatabaseImplement.Models
             PhoneNumber = PhoneNumber,
             Role = Role,
             CompanyId = CompanyId,
-            DateOfBirth = DateOfBirth
+            DateOfBirth = DateOfBirth,
+            City = City
         };
     }
 }

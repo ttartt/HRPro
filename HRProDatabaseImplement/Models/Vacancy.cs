@@ -14,10 +14,6 @@ namespace HRproDatabaseImplement.Models
         [Required]
         public string JobTitle { get; set; } = string.Empty;
         [Required]
-        public string Requirements { get; set; } = string.Empty;
-        [Required]
-        public string Responsibilities { get; set; } = string.Empty;
-        [Required]
         public JobTypeEnum JobType { get; set; }
 
         public string? Salary { get; set; }

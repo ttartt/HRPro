@@ -19,10 +19,12 @@ namespace HRProContracts.ViewModels
         public string? PhoneNumber { get; set; }
         public RoleEnum Role { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         public int Id { get; set; }
 
         public List<ResumeViewModel> Resumes { get; set; } = new();
+
+        public string? City { get; set; }
     }
 }

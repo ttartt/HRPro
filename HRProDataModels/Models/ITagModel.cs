@@ -4,7 +4,7 @@ namespace HRProDataModels.Models
 {
     public interface ITagModel : IId
     {
-        string Tag { get; }
+        string TagName { get; }
         string Name { get; }
         DataTypeEnum Type { get; }
         int TemplateId { get; }

@@ -9,10 +9,6 @@ namespace HRProContracts.BindingModels
 
         public string JobTitle { get; set; } = string.Empty;
 
-        public string Requirements { get; set; } = string.Empty;
-
-        public string Responsibilities { get; set; } = string.Empty;
-
         public JobTypeEnum JobType { get; set; }
 
         public string? Salary { get; set; }
