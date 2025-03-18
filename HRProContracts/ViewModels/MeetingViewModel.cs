@@ -21,6 +21,6 @@ namespace HRProContracts.ViewModels
         public string? Comment { get; set; }
 
         public int Id { get; set; }
-        public List<MeetingParticipantViewModel> Participants { get; set; } = new();
+        public List<UserViewModel> Participants { get; set; } = new();
     }
 }

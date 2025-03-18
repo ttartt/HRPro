@@ -54,10 +54,18 @@ namespace HRproDatabaseImplement.Implements
                 .Select(x => x.GetViewModel)
                 .ToList();
             }
+            else if (model.CompanyId.HasValue)
+            {
+                return context.Users
+                .Where(x => x.CompanyId == model.CompanyId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             else if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
             {
                 return new();
             }
+            
 
             return context.Users
                 .Include(x => x.Company)

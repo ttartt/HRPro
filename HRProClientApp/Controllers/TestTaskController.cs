@@ -6,44 +6,44 @@ using System.Diagnostics;
 
 namespace HRProClientApp.Controllers
 {
-    public class DocumentController : Controller
+    public class TestTaskController : Controller
     {
-        private readonly ILogger<DocumentController> _logger;
+        private readonly ILogger<TestTaskController> _logger;
 
-        public DocumentController(ILogger<DocumentController> logger)
+        public TestTaskController(ILogger<TestTaskController> logger)
         {
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult DocumentDetails(int? id)
+        public IActionResult TestTaskDetails(int? id)
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
-            DocumentViewModel document;
+            TestTaskViewModel testTask;
             if (id.HasValue)
             {
-                document = APIClient.GetRequest<DocumentViewModel?>($"api/document/details?id={id}");
-                return View(document);
+                testTask = APIClient.GetRequest<TestTaskViewModel?>($"api/testTask/details?id={id}");
+                return View(testTask);
             }
             return View();
         }
 
         [HttpGet]
-        public IActionResult Documents()
+        public IActionResult TestTasks()
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
-            var documents = APIClient.GetRequest<List<DocumentViewModel>?>($"api/document/list?userId={APIClient.User?.Id}");
-            return View(documents);
+            var testTasks = APIClient.GetRequest<List<TestTaskViewModel>?>($"api/testTask/list");
+            return View(testTasks);
         }
 
         [HttpGet]
-        public IActionResult DocumentEdit(int? id)
+        public IActionResult TestTaskEdit(int? id)
         {
             if (APIClient.User == null)
             {
@@ -51,15 +51,14 @@ namespace HRProClientApp.Controllers
             }
             if (!id.HasValue)
             {
-                return View(new DocumentViewModel());
+                return View(new TestTaskViewModel());
             }
-            ViewBag.Templates = APIClient.GetRequest<List<TemplateViewModel>>("api/template/list");
-            var model = APIClient.GetRequest<DocumentViewModel?>($"api/document/details?id={id}");
+            var model = APIClient.GetRequest<TestTaskViewModel?>($"api/testTask/details?id={id}");
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult DocumentEdit(DocumentBindingModel model)
+        public IActionResult TestTaskEdit(TestTaskBindingModel model)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
@@ -68,33 +67,17 @@ namespace HRProClientApp.Controllers
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
                 }
-                
+
                 if (model.Id != 0)
                 {
-                    APIClient.PostRequest("api/document/update", model);
+                    APIClient.PostRequest("api/testTask/update", model);
                 }
                 else
                 {
-                    model.CompanyId = APIClient.Company.Id;
-                    APIClient.PostRequest("api/document/create", model);
-                    if (APIClient.Company != null)
-                    {
-                        APIClient.User?.Documents.Add(new DocumentViewModel
-                        {
-                            Id = model.Id,
-                            CompanyId = APIClient.Company.Id,
-                            CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
-                            CompanyName = APIClient.Company.Name,
-                            CreatorId = APIClient.User.Id,
-                            CreatorName = APIClient.User.Name,
-                            Name = model.Name,
-                            Status = model.Status,
-                            TemplateId = model.TemplateId,
-                            TemplateName = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={model.TemplateId}").Name
-                        });
-                    }
+                    APIClient.PostRequest("api/testTask/create", model);
+                   
                 }
-                return Redirect($"~/User/UserProfile/{APIClient.User?.Id}");
+                return Redirect($"~/Vacancy/Vacancies/{APIClient.Company.Id}");
             }
             catch (Exception ex)
             {
@@ -112,7 +95,7 @@ namespace HRProClientApp.Controllers
                     throw new Exception("Компания не определена");
                 }
 
-                APIClient.PostRequest($"api/document/delete", new DocumentBindingModel { Id = id });
+                APIClient.PostRequest($"api/testTask/delete", new TestTaskBindingModel { Id = id });
                 APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
                 return Redirect("~/User/UserProfile");
@@ -123,7 +106,7 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        public IActionResult SearchDocuments(string? tags)
+        public IActionResult SearchTestTasks(string? tags)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
@@ -136,10 +119,10 @@ namespace HRProClientApp.Controllers
                 if (string.IsNullOrEmpty(tags))
                 {
                     ViewBag.Message = "Пожалуйста, введите поисковый запрос.";
-                    return View(new List<DocumentViewModel?>());
+                    return View(new List<TestTaskViewModel?>());
                 }
 
-                var results = APIClient.GetRequest<List<DocumentViewModel?>>($"api/document/search?tags={tags}");
+                var results = APIClient.GetRequest<List<TestTaskViewModel?>>($"api/testTask/search?tags={tags}");
                 return View(results);
             }
             catch (Exception ex)

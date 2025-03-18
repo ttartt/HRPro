@@ -125,25 +125,6 @@ namespace HRProClientApp.Controllers
                     if (resume == null)
                     {
                         APIClient.PostRequest("api/resume/create", model);
-                        if (APIClient.User != null)
-                        {
-                            APIClient.User?.Resumes.Add(new ResumeViewModel
-                            {
-                                Id = model.Id,
-                                Description = model.Description,
-                                Education = model.Education,
-                                Experience = model.Experience,
-                                Skills = model.Skills,
-                                Status = model.Status,
-                                Title = model.Title,
-                                UserId = model.UserId,
-                                VacancyId = model.VacancyId
-                            });
-                        }
-                        else
-                        {
-                            throw new Exception("Пользователь не найден");
-                        }
                         if (vacancy != null && model.Status != HRProDataModels.Enums.ResumeStatusEnum.Черновик)
                         {
                             vacancy.Resumes.Add(new ResumeViewModel

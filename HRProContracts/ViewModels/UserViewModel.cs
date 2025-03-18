@@ -24,6 +24,7 @@ namespace HRProContracts.ViewModels
         public int Id { get; set; }
 
         public List<DocumentViewModel> Documents { get; set; } = new();
+        public List<MeetingViewModel> Meetings { get; set; } = new();
 
         public string? City { get; set; }
     }

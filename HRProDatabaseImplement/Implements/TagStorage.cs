@@ -17,12 +17,15 @@ namespace HRProDatabaseImplement.Implements
                 .ToList();
         }
         public List<TagViewModel> GetFilteredList(TagSearchModel model)
-        {
-            if (string.IsNullOrEmpty(model.TagName))
-            {
-                return new();
-            }
+        {            
             using var context = new HRproDatabase();
+            if (model.TemplateId.HasValue)
+            {
+                return context.Tags
+                .Where(x => x.TemplateId == model.TemplateId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             return context.Tags
                 .Where(x => x.Name.Contains(model.TagName))
                 .Select(x => x.GetViewModel)

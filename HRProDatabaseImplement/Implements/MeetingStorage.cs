@@ -4,11 +4,6 @@ using HRProContracts.StoragesContracts;
 using HRProContracts.ViewModels;
 using HRproDatabaseImplement;
 using HRProDatabaseImplement.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRProDatabaseImplement.Implements
 {
@@ -23,11 +18,14 @@ namespace HRProDatabaseImplement.Implements
         }
         public List<MeetingViewModel> GetFilteredList(MeetingSearchModel model)
         {
-            if (string.IsNullOrEmpty(model.Topic))
-            {
-                return new();
-            }
             using var context = new HRproDatabase();
+            if (model.Id.HasValue)
+            {
+                return context.Meetings
+                .Where(x => x.Id == model.Id)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             return context.Meetings
                 .Where(x => x.Topic.Contains(model.Topic))
                 .Select(x => x.GetViewModel)
@@ -35,13 +33,9 @@ namespace HRProDatabaseImplement.Implements
         }
         public MeetingViewModel? GetElement(MeetingSearchModel model)
         {
-            if (string.IsNullOrEmpty(model.Topic) && !model.Id.HasValue)
-            {
-                return null;
-            }
             using var context = new HRproDatabase();
             return context.Meetings
-                .FirstOrDefault(x => (!string.IsNullOrEmpty(model.Topic) && x.Topic == model.Topic) || (model.Id.HasValue && x.Id == model.Id))
+                .FirstOrDefault(x => x.Id == model.Id)
                 ?.GetViewModel;
         }
         public MeetingViewModel? Insert(MeetingBindingModel model)
@@ -59,14 +53,14 @@ namespace HRProDatabaseImplement.Implements
         public MeetingViewModel? Update(MeetingBindingModel model)
         {
             using var context = new HRproDatabase();
-            var criterion = context.Meetings.FirstOrDefault(x => x.Id == model.Id);
-            if (criterion == null)
+            var meeting = context.Meetings.FirstOrDefault(x => x.Id == model.Id);
+            if (meeting == null)
             {
                 return null;
             }
-            criterion.Update(model);
+            meeting.Update(model);
             context.SaveChanges();
-            return criterion.GetViewModel;
+            return meeting.GetViewModel;
         }
         public MeetingViewModel? Delete(MeetingBindingModel model)
         {

@@ -3,6 +3,7 @@ using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace HRProClientApp.Controllers
 {
@@ -45,7 +46,7 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult UserProfileEdit(int? id)
+        public IActionResult MeetingEdit(int? id)
         {
             if (APIClient.User == null)
             {
@@ -56,68 +57,59 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("/Home/Index");
             }
+            ViewBag.Users = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={APIClient.Company?.Id}");
+            ViewBag.Candidates = APIClient.GetRequest<List<CandidateViewModel>>($"api/candidate/list");
+            ViewBag.Vacancies = APIClient.GetRequest<List<VacancyViewModel>>($"api/vacancy/list?companyId={APIClient.Company.Id}");
+            if (id.HasValue)
+            {
+                var invitedParticipants = APIClient.GetRequest<List<MeetingParticipantViewModel>>($"api/meeting/participants?meetingId={id}");
 
+                var invitedUserIds = invitedParticipants.Select(p => p.UserId).ToList();
+
+                ViewBag.InvitedUserIds = invitedUserIds;
+            }
             if (!id.HasValue)
             {
-                var model = new UserViewModel
-                {
-                    CompanyId = APIClient.Company.Id
-                };
-                return View(model);
+                
+                return View();
             }
-            else if (id.HasValue)
+            else 
             {
-                var employee = APIClient.GetRequest<UserViewModel?>($"api/user/profile?id={id}");
-                return View(employee);
-            }
-            else
-            {
-                var model = APIClient.GetRequest<UserViewModel?>($"api/user/profile?id={APIClient.User.Id}");
-                return View(model);
+                var meeting = APIClient.GetRequest<MeetingViewModel?>($"api/meeting/details?id={id}");
+                return View(meeting);
             }
         }
 
         [HttpPost]
-        public IActionResult UserProfileEdit(UserBindingModel model)
+        public IActionResult MeetingEdit(MeetingBindingModel model)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
             {
                 if (model.Id != 0)
                 {
-                    APIClient.PostRequest("api/user/update", model);
-                    if (model.Role == HRProDataModels.Enums.RoleEnum.Сотрудник)
-                    {
-                        return Redirect($"~/Company/CompanyProfile/{model.CompanyId}");
-                    }
+                    APIClient.PostRequest("api/meeting/update", model);
                 }
                 else
                 {
-                    var existingUser = APIClient.GetRequest<UserViewModel?>($"api/user/login?login={model.Email}&password={model.Password}");
-                    if (existingUser != null)
+                    var createdMeetingId = APIClient.PostRequestAsync("api/meeting/create", model);
+                    model.Id = createdMeetingId.Result;
+
+                    APIClient.User?.Meetings.Add(new MeetingViewModel
                     {
-                        throw new Exception("Такой пользователь уже существует");
-                    }
-                    APIClient.PostRequest("api/user/register", model);
-                    if (APIClient.Company != null)
-                    {
-                        APIClient.Company?.Employees.Add(new UserViewModel
-                        {
-                            Id = model.Id,
-                            Surname = model.Surname,
-                            Name = model.Name,
-                            LastName = model.LastName,
-                            CompanyId = APIClient.Company.Id,
-                            Email = model.Email,
-                            Password = model.Password,
-                            Role = HRProDataModels.Enums.RoleEnum.Сотрудник,
-                            PhoneNumber = model.PhoneNumber,
-                            DateOfBirth = model.DateOfBirth
-                        });
-                    }
-                    return Redirect($"~/Company/CompanyProfile/{model.CompanyId}");
+                        Id = model.Id,
+                        TimeFrom = model.TimeFrom,
+                        CandidateId = model.CandidateId,
+                        Date = model.Date,
+                        Place = model.Place,
+                        TimeTo = model.TimeTo,
+                        Topic = model.Topic,
+                        VacancyId = model.VacancyId,
+                        Comment = model.Comment
+                    });
                 }
-                return Redirect($"/User/UserProfile/{model.Id}");
+
+                return Redirect($"~/Meeting/Meetings/{APIClient.User?.Id}");
             }
             catch (Exception ex)
             {
@@ -125,31 +117,37 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        public IActionResult DeleteEmployee(int id)
+
+        [HttpPost]
+        public IActionResult InviteParticipants(int meetingId, int[] userIds)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+
             try
             {
-                APIClient.PostRequest("api/user/delete", new UserBindingModel
+                if (meetingId == 0)
                 {
-                    Id = id
-                });
-                APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
+                    throw new ArgumentException("Сначала создайте встречу.");
+                }
 
-                return Redirect($"~/Company/CompanyProfile");
+                foreach (int id in userIds)
+                {
+                    APIClient.PostRequest("api/meeting/createParticipant", new MeetingParticipantBindingModel
+                    {
+                        MeetingId = meetingId,
+                        UserId = id
+                    });
+
+                    var meeting = APIClient.GetRequest<MeetingViewModel>($"api/meeting/details?id={meetingId}");
+                    meeting.Participants.Add(APIClient.GetRequest<UserViewModel>($"api/user/profile?id={id}"));
+                }
+
+                return Redirect($"~/Meeting/Meetings/{APIClient.User.Id}");
             }
             catch (Exception ex)
             {
                 return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
             }
-        }
-
-        [HttpGet]
-        public void Logout()
-        {
-            APIClient.User = null;
-            APIClient.Company = null;
-            Response.Redirect("/Home/Enter");
         }
 
         [HttpPost]

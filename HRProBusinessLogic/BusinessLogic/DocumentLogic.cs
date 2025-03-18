@@ -17,10 +17,16 @@ namespace HRProBusinessLogic.BusinessLogic
     {
         private readonly ILogger _logger;
         private readonly IDocumentStorage _documentStorage;
-        public DocumentLogic(ILogger<DocumentLogic> logger, IDocumentStorage documentStorage)
+        private readonly ICompanyStorage _companyStorage;
+        private readonly IUserStorage _userStorage;
+        private readonly ITemplateStorage _templateStorage;
+        public DocumentLogic(ILogger<DocumentLogic> logger, IDocumentStorage documentStorage, ICompanyStorage companyStorage, IUserStorage userStorage, ITemplateStorage templateStorage)
         {
             _logger = logger;
             _documentStorage = documentStorage;
+            _companyStorage = companyStorage;
+            _userStorage = userStorage;
+            _templateStorage = templateStorage;
         }
         public bool Create(DocumentBindingModel model)
         {
@@ -69,8 +75,29 @@ namespace HRProBusinessLogic.BusinessLogic
                 _logger.LogWarning("ReadList return null list");
                 return null;
             }
+            var result = new List<DocumentViewModel>();
+            foreach (var item in list)
+            {
+                var companyName = _companyStorage.GetElement(new CompanySearchModel { Id = item.CompanyId }).Name;
+                var creatorName = _userStorage.GetElement(new UserSearchModel { Id = item.CreatorId }).Name;
+                var templateName = _templateStorage.GetElement(new TemplateSearchModel { Id = item.TemplateId }).Name;
+                var viewModel = new DocumentViewModel
+                {
+                    CompanyId = item.CompanyId,
+                    CompanyName = companyName,
+                    CreatorName = creatorName,
+                    CreatedAt = item.CreatedAt,
+                    CreatorId = item.CreatorId,
+                    Id = item.Id,
+                    Name = item.Name,
+                    Status = item.Status,
+                    TemplateId = item.TemplateId,
+                    TemplateName = templateName
+                };
+                result.Add(viewModel);
+            }
             _logger.LogInformation("ReadList. Count: {Count}", list.Count);
-            return list;
+            return result;
         }
 
         public bool Update(DocumentBindingModel model)

@@ -28,15 +28,16 @@ namespace HRProBusinessLogic.BusinessLogic
             _vacancyRequirementStorage = vacancyRequirementStorage;
             _vacancyResponsibilityStorage = vacancyResponsibilityStorage;
         }
-        public bool Create(VacancyBindingModel model)
+        public int? Create(VacancyBindingModel model)
         {
             CheckModel(model);
-            if (_vacancyStorage.Insert(model) == null)
+            var id = _vacancyStorage.Insert(model);
+            if (id == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return false;
+                return 0;
             }
-            return true;
+            return id;
         }
 
         public bool Delete(VacancyBindingModel model)
@@ -80,9 +81,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 CreatedAt = r.CreatedAt
             }).ToList() ?? new List<ResumeViewModel>();
 
-            var requirements = _vacancyRequirementStorage.GetFilteredList(new VacancyRequirementSearchModel { VacancyId = element.Id });
-            var responsibilities = _vacancyResponsibilityStorage.GetFilteredList(new VacancyResponsibilitySearchModel { VacancyId = element.Id });
-
             var vacancyViewModel = new VacancyViewModel
             {
                 Id = element.Id,
@@ -91,9 +89,7 @@ namespace HRProBusinessLogic.BusinessLogic
                 CreatedAt = element.CreatedAt,
                 Description = element.Description,
                 JobTitle = element.JobTitle,
-                JobType = element.JobType,
-                Requirements = requirements,
-                Responsibilities = responsibilities,                
+                JobType = element.JobType,              
                 Salary = element.Salary,
                 Status = element.Status,
                 Tags = element.Tags,

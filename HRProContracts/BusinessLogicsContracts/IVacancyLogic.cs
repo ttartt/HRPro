@@ -8,7 +8,7 @@ namespace HRProContracts.BusinessLogicsContracts
     {
         List<VacancyViewModel>? ReadList(VacancySearchModel? model);
         VacancyViewModel? ReadElement(VacancySearchModel model);
-        bool Create(VacancyBindingModel model);
+        int? Create(VacancyBindingModel model);
         bool Update(VacancyBindingModel model);
         bool Delete(VacancyBindingModel model);
     }

@@ -23,11 +23,14 @@ namespace HRProDatabaseImplement.Implements
         }
         public List<MeetingParticipantViewModel> GetFilteredList(MeetingParticipantSearchModel model)
         {
-            if (!model.Id.HasValue)
-            {
-                return new();
-            }
             using var context = new HRproDatabase();
+            if (model.UserId.HasValue)
+            {
+                return context.MeetingParticipants
+                .Where(x => x.UserId.Equals(model.UserId))
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             return context.MeetingParticipants
                 .Where(x => x.Id.Equals(model.Id))
                 .Select(x => x.GetViewModel)

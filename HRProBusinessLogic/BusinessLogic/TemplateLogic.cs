@@ -17,10 +17,12 @@ namespace HRProBusinessLogic.BusinessLogic
     {
         private readonly ILogger _logger;
         private readonly ITemplateStorage _templateStorage;
-        public TemplateLogic(ILogger<TemplateLogic> logger, ITemplateStorage templateStorage)
+        private readonly ITagStorage _tagStorage;
+        public TemplateLogic(ILogger<TemplateLogic> logger, ITemplateStorage templateStorage, ITagStorage tagStorage)
         {
             _logger = logger;
             _templateStorage = templateStorage;
+            _tagStorage = tagStorage;
         }
         public bool Create(TemplateBindingModel model)
         {
@@ -52,6 +54,8 @@ namespace HRProBusinessLogic.BusinessLogic
                 throw new ArgumentNullException(nameof(model));
             }
             var element = _templateStorage.GetElement(model);
+            var tags = _tagStorage.GetFilteredList(new TagSearchModel { TemplateId = element.Id });
+            element.Tags = tags;
             if (element == null)
             {
                 _logger.LogWarning("ReadElement element not found");
@@ -111,11 +115,11 @@ namespace HRProBusinessLogic.BusinessLogic
                 throw new ArgumentNullException("Путь к файлу не может быть пустым", nameof(model.FilePath));
             }
 
-            if (!File.Exists(model.FilePath))
+            /*if (!File.Exists(model.FilePath))
             {
                 throw new ArgumentException("Файл по указанному пути не существует", nameof(model.FilePath));
             }
-
+*/
             var existingTemplate = _templateStorage.GetElement(new TemplateSearchModel { Name = model.Name });
             if (existingTemplate != null && existingTemplate.Id != model.Id)
             {

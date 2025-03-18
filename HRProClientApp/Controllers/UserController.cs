@@ -29,6 +29,19 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
+        public IActionResult Employees(int? companyId)
+        {
+            var model = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={companyId}");
+
+            if (model == null)
+            {
+                return Redirect("/Home/Index");
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
         public IActionResult UserProfileEdit(int? id)
         {
             if (APIClient.User == null)

@@ -100,8 +100,7 @@ namespace HRProBusinessLogic.BusinessLogic
                 CompanyId = element.CompanyId,
                 PhoneNumber = element.PhoneNumber,
                 Role = element.Role,
-                DateOfBirth = element.DateOfBirth,
-                Resumes = resumeViewModels
+                DateOfBirth = element.DateOfBirth
             };
             _logger.LogInformation("ReadElement: User found. Id: {Id}", element.Id);
             return userViewModel;

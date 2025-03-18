@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<VacancyViewModel> GetFullList();
         List<VacancyViewModel> GetFilteredList(VacancySearchModel model);
         VacancyViewModel? GetElement(VacancySearchModel model);
-        VacancyViewModel? Insert(VacancyBindingModel model);
+        int? Insert(VacancyBindingModel model);
         VacancyViewModel? Update(VacancyBindingModel model);
         VacancyViewModel? Delete(VacancyBindingModel model);
     }

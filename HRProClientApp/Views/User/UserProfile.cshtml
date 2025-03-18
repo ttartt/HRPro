@@ -30,7 +30,7 @@
                             <dd class="col-sm-8">@Model?.PhoneNumber</dd>
                         }
                         <dt class="col-sm-4 text-muted">Дата рождения:</dt>
-                        <dd class="col-sm-8">@Model?.DateOfBirth.ToString()</dd>
+                        <dd class="col-sm-8">@Model?.DateOfBirth?.ToString("dd.MM.yyyy")</dd>
                     </dl>
 
                     <div class="btn-group mt-4" role="group" aria-label="Действия">
@@ -49,7 +49,11 @@
                             <i class="bi bi-box-arrow-right me-2"></i>Выйти
                         </a>
                     </div>
-
+                    <br></br>
+                    <a asp-action="Meetings" asp-controller="Meeting" asp-route-id="@Model?.Id"
+                       class="btn btn-outline-primary px-4 py-2 me-2">
+                        <i class="bi bi-pencil me-2"></i>Мои собеседования
+                    </a>
                 </div>
             </div>
         </div>
@@ -74,7 +78,7 @@
     }
 
     .btn {
-        background-color: #0A1128;
+        background-color: #3E12E3;
         color: white;
         border: none;
         border-radius: 10px;
@@ -84,7 +88,7 @@
     }
 
         .btn:hover {
-            background-color: #1C3273;
+            background-color: #2200A4;
             transform: scale(1.05);
         }
 

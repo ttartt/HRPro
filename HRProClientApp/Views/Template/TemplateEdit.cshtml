@@ -1,0 +1,178 @@
+﻿@using HRProContracts.ViewModels
+@using HRProDataModels.Enums
+@model TemplateViewModel
+
+<div class="container mt-5">
+    <h1>Шаблон</h1>
+    <form method="post" class="row g-3 needs-validation" novalidate>
+        <input type="hidden" name="id" value="@Model?.Id" />
+
+        <div class="col-md-6">
+            <label for="Name" class="form-label">Название шаблона <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="Name" name="Name" value="@Model?.Name" required placeholder="Введите название шаблона">
+            <div class="invalid-feedback">Пожалуйста, введите название шаблона.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="Type" class="form-label">Тип шаблона <span class="text-danger">*</span></label>
+            <select asp-for="Type" class="form-control" asp-items="@GetTemplateTypeSelectList()"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="FilePath" class="form-label">Путь к файлу</label>
+            <input type="text" class="form-control" id="FilePath" name="FilePath" value="@Model?.FilePath" placeholder="Введите путь к файлу">
+        </div>
+
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTagModal">
+            Добавить тэг
+        </button>
+        <div class="card-body">
+            @if (Model.Tags != null && Model.Tags.Any())
+            {
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle" id="tags">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Название</th>
+                                <th>Тэг</th>
+                                <th>Тип</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tag in Model.Tags)
+                            {
+                                <tr>
+                                    <td>@tag.Name</td>
+                                    <td>@tag.TagName</td>
+                                    <td>@tag.Type</td>
+                                    <td>
+                                        <a asp-action="Delete" asp-controller="Tag" asp-route-id="@tag.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить тэг?');">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            }
+            else
+            {
+                <p>Тегов нет.</p>
+            }
+        </div>
+
+        <div class="col-md-6">
+            <button type="submit" class="btn btn-primary">
+                @if (Model.Id <= 0)
+                {
+                    <span>Создать шаблон</span>
+                }
+                else
+                {
+                    <span>Сохранить изменения</span>
+                }
+            </button>
+        </div>
+
+        <div class="col-md-6">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back();">Назад</button>
+        </div>
+    </form>
+
+</div>
+
+<div class="modal fade" id="addTagModal" tabindex="-1" aria-labelledby="addTagModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-controller="Tag" asp-action="TagEdit" asp-route-templateId="@Model.Id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTagModalLabel">Добавить тэг</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="tagName" class="form-label">Тэг</label>
+                        <input type="text" class="form-control" id="tagName" name="TagName" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Имя тега</label>
+                        <input type="text" class="form-control" id="name" name="Name" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Тип данных</label>
+                        <select asp-for="Type" class="form-control" asp-items="@GetDataTypeSelectList()"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+
+    public SelectList GetDataTypeSelectList()
+    {
+        return new SelectList(Enum.GetValues(typeof(DataTypeEnum)).Cast<DataTypeEnum>());
+    }
+
+    public SelectList GetTemplateTypeSelectList()
+    {
+        return new SelectList(Enum.GetValues(typeof(TemplateTypeEnum)).Cast<TemplateTypeEnum>());
+    }
+}
+
+
+<script>
+    (function () {
+        'use strict'
+
+        var forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+<style>
+    .btn {
+        background-color: #3E12E3;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #2200A4;
+            transform: scale(1.05);
+        }
+
+    .badge {
+        font-size: 0.9rem;
+    }
+
+    .card-body dl dt {
+        font-weight: bold;
+    }
+</style>

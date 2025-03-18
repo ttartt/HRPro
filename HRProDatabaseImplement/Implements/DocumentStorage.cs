@@ -4,6 +4,7 @@ using HRProContracts.StoragesContracts;
 using HRProContracts.ViewModels;
 using HRproDatabaseImplement;
 using HRProDatabaseImplement.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRProDatabaseImplement.Implements
 {
@@ -18,11 +19,16 @@ namespace HRProDatabaseImplement.Implements
         }
         public List<DocumentViewModel> GetFilteredList(DocumentSearchModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
-            {
-                return new();
-            }
+            
             using var context = new HRproDatabase();
+            if (model.CreatorId.HasValue)
+            {
+                return context.Documents
+                    .Include(x => x.Template)
+                .Where(x => x.CreatorId == model.CreatorId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             return context.Documents
                 .Where(x => x.Name.Contains(model.Name))
                 .Select(x => x.GetViewModel)

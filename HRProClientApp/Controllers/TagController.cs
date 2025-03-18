@@ -6,44 +6,44 @@ using System.Diagnostics;
 
 namespace HRProClientApp.Controllers
 {
-    public class TemplateController : Controller
+    public class TagController : Controller
     {
-        private readonly ILogger<TemplateController> _logger;
+        private readonly ILogger<TagController> _logger;
 
-        public TemplateController(ILogger<TemplateController> logger)
+        public TagController(ILogger<TagController> logger)
         {
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult TemplateDetails(int? id)
+        public IActionResult TagDetails(int? id)
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
-            TemplateViewModel template;
+            TagViewModel tag;
             if (id.HasValue)
             {
-                template = APIClient.GetRequest<TemplateViewModel?>($"api/template/details?id={id}");
-                return View(template);
+                tag = APIClient.GetRequest<TagViewModel?>($"api/tag/details?id={id}");
+                return View(tag);
             }
             return View();
         }
 
         [HttpGet]
-        public IActionResult Templates()
+        public IActionResult Tags()
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
-            var templates = APIClient.GetRequest<List<TemplateViewModel>?>($"api/template/list");
-            return View(templates);
+            var tags = APIClient.GetRequest<List<TagViewModel>?>($"api/tag/list?userId={APIClient.User?.Id}");
+            return View(tags);
         }
 
         [HttpGet]
-        public IActionResult TemplateEdit(int? id)
+        public IActionResult TagEdit(int? id)
         {
             if (APIClient.User == null)
             {
@@ -51,14 +51,14 @@ namespace HRProClientApp.Controllers
             }
             if (!id.HasValue)
             {
-                return View(new TemplateViewModel());
+                return View(new TagViewModel());
             }
-            var model = APIClient.GetRequest<TemplateViewModel?>($"api/template/details?id={id}");
+            var model = APIClient.GetRequest<TagViewModel?>($"api/tag/details?id={id}");
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult TemplateEdit(TemplateBindingModel model)
+        public IActionResult TagEdit(TagBindingModel model, int templateId)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
@@ -70,13 +70,24 @@ namespace HRProClientApp.Controllers
 
                 if (model.Id != 0)
                 {
-                    APIClient.PostRequest("api/template/update", model);
+                    APIClient.PostRequest("api/tag/update", model);
                 }
                 else
                 {
-                    APIClient.PostRequest("api/template/create", model);                    
+                    model.TemplateId = templateId;
+                    APIClient.PostRequest("api/tag/create", model);
+                    var template = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={templateId}");
+                    template.Tags.Add(new TagViewModel
+                    {
+                        Id = model.Id,
+                        Name = model.Name,
+                        TagName = model.TagName,
+                        TemplateId = model.TemplateId,
+                        TemplateName = template.Name,
+                        Type = model.Type
+                    });
                 }
-                return Redirect($"~/Template/Templates");
+                return Redirect($"~/Template/TemplateEdit/{templateId}");
             }
             catch (Exception ex)
             {
@@ -94,7 +105,7 @@ namespace HRProClientApp.Controllers
                     throw new Exception("Компания не определена");
                 }
 
-                APIClient.PostRequest($"api/template/delete", new TemplateBindingModel { Id = id });
+                APIClient.PostRequest($"api/tag/delete", new TagBindingModel { Id = id });
                 APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
                 return Redirect("~/User/UserProfile");
@@ -105,30 +116,7 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        public IActionResult SearchTemplates(string? tags)
-        {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
-            {
-                if (APIClient.User == null)
-                {
-                    throw new Exception("Доступно только авторизованным пользователям");
-                }
-
-                if (string.IsNullOrEmpty(tags))
-                {
-                    ViewBag.Message = "Пожалуйста, введите поисковый запрос.";
-                    return View(new List<TemplateViewModel?>());
-                }
-
-                var results = APIClient.GetRequest<List<TemplateViewModel?>>($"api/template/search?tags={tags}");
-                return View(results);
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }
-        }
+       
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(string errorMessage, string returnUrl)

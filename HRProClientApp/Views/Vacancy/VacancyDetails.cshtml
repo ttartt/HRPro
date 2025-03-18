@@ -15,7 +15,7 @@
         <button class="btn btn-secondary" onclick="window.history.back();">
             <i class="bi bi-arrow-left"></i> Назад
         </button>
-        <form asp-controller="Vacancy" asp-action="GetStatistics" method="get" class="row g-3 needs-validation" novalidate>
+       @*  <form asp-controller="Vacancy" asp-action="GetStatistics" method="get" class="row g-3 needs-validation" novalidate>
             <input type="hidden" name="id" value="@Model.Id" />
             <div class="col-md-4">
                 <div class="form-group">
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Скачать статистику</button>
-        </form>
+        </form> *@
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -53,17 +53,17 @@
                         <dt class="col-sm-4">Статус:</dt>
                         <dd class="col-sm-8">@Model.Status</dd>
 
-                        <dt class="col-sm-4">Теги:</dt>
-                        <dd class="col-sm-8">@Model.Tags</dd>
+                        @* <dt class="col-sm-4">Теги:</dt>
+                        <dd class="col-sm-8">@Model.Tags</dd> *@
                     </dl>
                 </div>
                 <div class="col-md-6">
-                    <dl class="row">
+                    <dl class="row">@* 
                         <dt class="col-sm-4">Требования:</dt>
                         <dd class="col-sm-8">@Html.Raw(Model.Requirements)</dd>
 
                         <dt class="col-sm-4">Обязанности:</dt>
-                        <dd class="col-sm-8">@Html.Raw(Model.Responsibilities)</dd>
+                        <dd class="col-sm-8">@Html.Raw(Model.Responsibilities)</dd> *@
 
                         <dt class="col-sm-4">Описание:</dt>
                         <dd class="col-sm-8">@Html.Raw(Model.Description)</dd>
@@ -123,7 +123,7 @@
 
 <style>
     .btn {
-        background-color: #0A1128;
+        background-color: #3E12E3;
         color: white;
         border: none;
         border-radius: 10px;
@@ -133,7 +133,7 @@
     }
 
         .btn:hover {
-            background-color: #1C3273;
+            background-color: #2200A4;
             transform: scale(1.05);
         }
 </style>

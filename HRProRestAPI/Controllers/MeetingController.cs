@@ -42,7 +42,7 @@ namespace HRProRestAPI.Controllers
         {
             try
             {
-                List<MeetingViewModel> result = new(); 
+                /*List<MeetingViewModel> result = new(); 
                 if (userId.HasValue)
                 {
                     var list = _logicMP.ReadList(new MeetingParticipantSearchModel
@@ -59,7 +59,25 @@ namespace HRProRestAPI.Controllers
                     }
                     return result;
                 }
-                else return new List<MeetingViewModel>();
+                else return new List<MeetingViewModel>();*/
+                var list = _logic.ReadList(null);
+                return list;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения собеседований");
+                throw;
+            }
+        }
+
+
+        [HttpGet]
+        public List<MeetingParticipantViewModel>? Participants(int? meetingId)
+        {
+            try
+            {
+                var list = _logicMP.ReadList(new MeetingParticipantSearchModel { MeetingId = meetingId });
+                return list;
             }
             catch (Exception ex)
             {

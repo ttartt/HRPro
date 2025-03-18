@@ -53,6 +53,20 @@ namespace HRProRestApi.Controllers
             }
         }
 
+        [HttpGet]
+        public List<UserViewModel>? List(int? companyId)
+        {
+            try
+            {
+                return _logic.ReadList(new UserSearchModel { CompanyId = companyId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения данных");
+                throw;
+            }
+        }
+
         [HttpPost]
         public void Register(UserBindingModel model)
         {

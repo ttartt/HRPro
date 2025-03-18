@@ -106,7 +106,7 @@ namespace HRproDatabaseImplement.Implements
                 .Select(x => x.GetViewModel).ToList();
         }
 
-        public VacancyViewModel? Insert(VacancyBindingModel model)
+        public int? Insert(VacancyBindingModel model)
         {
             var newVacancy = Vacancy.Create(model);
 
@@ -120,10 +120,7 @@ namespace HRproDatabaseImplement.Implements
             context.Vacancies.Add(newVacancy);
             context.SaveChanges();
 
-            return context.Vacancies
-                .Include(x => x.Company)
-                .FirstOrDefault(x => x.Id == newVacancy.Id)
-                ?.GetViewModel;
+            return newVacancy.Id;
         }
 
         public VacancyViewModel? Update(VacancyBindingModel model)

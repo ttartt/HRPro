@@ -82,8 +82,7 @@ namespace HRProClientApp.Controllers
             if (id.HasValue)
             {
                 vacancy = APIClient.GetRequest<VacancyViewModel?>($"api/vacancy/details?id={id}");
-                ViewBag.Requirements = APIClient.GetRequest<List<RequirementViewModel>>("api/requirement/list");
-                ViewBag.Responsibilities = APIClient.GetRequest<List<ResponsibilityViewModel>>("api/responsibility/list");
+                
                 return View(vacancy);
             }
             return View();
@@ -107,11 +106,15 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("~/Home/Enter");
             }
+            ViewBag.Requirements = APIClient.GetRequest<List<RequirementViewModel>>("api/requirement/list");
+            ViewBag.Responsibilities = APIClient.GetRequest<List<ResponsibilityViewModel>>("api/responsibility/list");
             if (!id.HasValue)
             {
                 return View(new VacancyViewModel());
             }
             var model = APIClient.GetRequest<VacancyViewModel?>($"api/vacancy/details?id={id}");
+            
+
             return View(model);
         }
 

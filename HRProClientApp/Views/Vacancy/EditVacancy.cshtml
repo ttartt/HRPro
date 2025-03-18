@@ -32,7 +32,7 @@
         <div class="col-md-6">
             <label for="salary" class="form-label">Заработная плата (руб.)</label>
             <input type="text" class="form-control" id="salary" name="salary" value="@Model?.Salary" placeholder="Введите заработную плату или поставьте '-'">
-        </div>       
+        </div>
 
         <div class="col-md-6">
             <label asp-for="Status" class="form-label">Статус вакансии</label>
@@ -47,129 +47,97 @@
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
         </div>
+
     </form>
-</div>
+   @*  <form method="post" asp-controller="Requirement" asp-action="AddVacancyRequirement">
+        <input type="hidden" name="vacancyId" value="@Model.Id" />
 
-<!-- Модальное окно для добавления требования -->
-<div class="modal fade" id="addRequirementModal" tabindex="-1" aria-labelledby="addRequirementModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" asp-controller="Vacancy" asp-action="AddRequirement">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addRequirementModalLabel">Добавить требование</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="requirement" class="form-label">Требование</label>
-                        <input type="text" class="form-control" id="requirement" name="requirement" required />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                </div>
+        <div id="requirement-container">
+            <div id="existing-requirements-container">
+                @if (Model.Requirements.Any())
+                {
+                    foreach (var requirement in Model.Requirements)
+                    {
+                        <p> - @requirement.Name</p>
+                    }
+                }
+                else
+                {
+                    <p>Требований нет.</p>
+                }
+            </div>
 
-                
-
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                    <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
-                </div>
-            </form>
-
-            <form method="post" asp-controller="Requirement" asp-action="AddVacancyRequirement">
-                <input type="hidden" name="vacancyId" value="@Model.Id" />
-
-                <div id="requirement-container">
-                    <div id="existing-requirements-container">
-                        @if (Model.Requirements.Any())
-                        {
-                            foreach (var requirement in Model.Requirements)
-                            {                                
-                                <p> - @requirement.Name</p>
-                            }
-                        }
-                        else
-                        {
-                            <p>Требований нет.</p>
-                        }
-                    </div>
-
-                    <div id="new-requirement-container">
-                            <div class="row mb-3 requirement-row">
-                                <div class="col-8">
-                                    <select name="requirement" class="form-control">
-                                        <option value="">Выберите требование</option>
-                                        @if (ViewBag.Requirements is List<RequirementViewModel> requirements)
-                                        {
-                                            foreach (var requirement in requirements)
-                                            {
-                                                <option value="@requirement.Id">@requirement.Name</option>
-                                            }
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-md-1 d-flex align-items-center">
-                                    <button type="button" class="btn btn-danger btn-sm remove-requirement">Х</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="button" class="btn btn-outline-secondary mt-2" id="add-requirement">Добавить требование</button>
-
-                        <button type="submit" class="btn btn-success mt-3">Сохранить</button>
-                    
-                </div>
-            </form>
-
-            <form method="post" asp-controller="Responsibility" asp-action="AddVacancyResponsibility">
-                <input type="hidden" name="vacancyId" value="@Model.Id" />
-
-                <div id="responsibilities-container">
-                    <div id="existing-responsibility-container">
-                        @if (Model.Responsibilities.Any())
-                        {
-                            foreach (var responsibility in Model.Responsibilities)
+            <div id="new-requirement-container">
+                <div class="row mb-3 requirement-row">
+                    <div class="col-8">
+                        <select name="requirement" class="form-control">
+                            <option value="">Выберите требование</option>
+                            @if (ViewBag.Requirements is List<RequirementViewModel> requirements)
                             {
-                                <p> - @responsibility.Name</p>
+                                foreach (var requirement in requirements)
+                                {
+                                    <option value="@requirement.Id">@requirement.Name</option>
+                                }
                             }
-                        }
-                        else
-                        {
-                            <p>Обязанностей нет.</p>
-                        }
+                        </select>
                     </div>
-
-                    <div id="new-responsibility-container">
-                        <div class="row mb-3 responsibility-row">
-                            <div class="col-8">
-                                <select name="responsibility" class="form-control">
-                                    <option value="">Выберите обязанность</option>
-                                    @if (ViewBag.Responsibilities is List<ResponsibilityViewModel> responsibilities)
-                                    {
-                                        foreach (var responsibility in responsibilities)
-                                        {
-                                            <option value="@responsibility.Id">@responsibility.Name</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-1 d-flex align-items-center">
-                                <button type="button" class="btn btn-danger btn-sm remove-responsibility">Х</button>
-                            </div>
-                        </div>
+                    <div class="col-md-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm remove-requirement">Х</button>
                     </div>
-
-                    <button type="button" class="btn btn-outline-secondary mt-2" id="add-responsibility">Добавить обязанность</button>
-
-                    <button type="submit" class="btn btn-success mt-3">Сохранить</button>
-
                 </div>
-            </form>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary mt-2" id="add-requirement">Добавить требование</button>
+
+            <button type="submit" class="btn btn-success mt-3">Сохранить</button>
 
         </div>
-    </div>
+    </form>
+
+    <form method="post" asp-controller="Responsibility" asp-action="AddVacancyResponsibility">
+        <input type="hidden" name="vacancyId" value="@Model.Id" />
+
+        <div id="responsibilities-container">
+            <div id="existing-responsibility-container">
+                @if (Model.Responsibilities.Any())
+                {
+                    foreach (var responsibility in Model.Responsibilities)
+                    {
+                        <p> - @responsibility.Name</p>
+                    }
+                }
+                else
+                {
+                    <p>Обязанностей нет.</p>
+                }
+            </div>
+
+            <div id="new-responsibility-container">
+                <div class="row mb-3 responsibility-row">
+                    <div class="col-8">
+                        <select name="responsibility" class="form-control">
+                            <option value="">Выберите обязанность</option>
+                            @if (ViewBag.Responsibilities is List<ResponsibilityViewModel> responsibilities)
+                            {
+                                foreach (var responsibility in responsibilities)
+                                {
+                                    <option value="@responsibility.Id">@responsibility.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm remove-responsibility">Х</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary mt-2" id="add-responsibility">Добавить обязанность</button>
+
+            <button type="submit" class="btn btn-success mt-3">Сохранить</button>
+
+        </div>
+    </form> *@
 </div>
 
 <script>
@@ -185,18 +153,18 @@
         let selectOptions = '<option value="">Выберите требование</option>';
         requirements.forEach(requirement => {
             if (!existingRequirements.includes(requirement.Id.toString())) {
-                selectOptions += `<option value="${requirement.Id}">${requirement.Name}</option>`;
+                selectOptions += <option value="${requirement.Id}" > ${ requirement.Name } </option>;
             }
         });
 
-        newRow.innerHTML = `
-                    <div class="col-8">
-                            <select name="requirement" class="form-control">${selectOptions}</select>
-                    </div>
-                    <div class="col-md-1 d-flex align-items-center">
-                                <button type="button" class="btn btn-danger btn-sm remove-requirement">✕</button>
-                    </div>
-                `;
+        newRow.innerHTML =
+            <div class="col-8" >
+                <select name="requirement" class="form-control" > ${ selectOptions } </select>
+                    < /div>
+                    < div class="col-md-1 d-flex align-items-center" >
+                        <button type="button" class="btn btn-danger btn-sm remove-requirement" >✕</button>
+                            < /div>
+            ;
 
         container.appendChild(newRow);
         attachRemoveEvent(newRow.querySelector('.remove-requirement'));
@@ -230,18 +198,18 @@
         let selectOptions = '<option value="">Выберите обязанность</option>';
         responsibilitys.forEach(responsibility => {
             if (!existingResponsibilities.includes(responsibility.Id.toString())) {
-                selectOptions += `<option value="${responsibility.Id}">${responsibility.Name}</option>`;
+                selectOptions += <option value="${responsibility.Id}" > ${ responsibility.Name } </option>;
             }
         });
 
-        newRow.innerHTML = `
-                        <div class="col-8">
-                                <select name="responsibility" class="form-control">${selectOptions}</select>
-                        </div>
-                        <div class="col-md-1 d-flex align-items-center">
-                                    <button type="button" class="btn btn-danger btn-sm remove-responsibility">✕</button>
-                        </div>
-                    `;
+        newRow.innerHTML =
+            <div class="col-8" >
+                <select name="responsibility" class="form-control" > ${ selectOptions } </select>
+                    < /div>
+                    < div class="col-md-1 d-flex align-items-center" >
+                        <button type="button" class="btn btn-danger btn-sm remove-responsibility" >✕</button>
+                            < /div>
+            ;
 
         container.appendChild(newRow);
         attachRemoveEvent(newRow.querySelector('.remove-responsibility'));
@@ -310,4 +278,3 @@
             transform: scale(1.05);
         }
 </style>
-
