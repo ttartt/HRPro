@@ -3,6 +3,7 @@ using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using TemplateEngine.Docx;
 
 namespace HRProClientApp.Controllers
 {
@@ -61,6 +62,21 @@ namespace HRProClientApp.Controllers
         [HttpPost]
         public IActionResult DocumentEdit(DocumentBindingModel model)
         {
+/*
+            File.Delete("OutputDocument.docx");
+            File.Copy("InputTemplate.docx", "OutputDocument.docx");
+
+            var valuesToFill = new Content(
+                new FieldContent("Report date", DateTime.Now.ToString()));
+
+            using (var outputDocument = new TemplateProcessor("OutputDocument.docx")
+                .SetRemoveContentControls(true))
+            {
+                outputDocument.FillContent(valuesToFill);
+                outputDocument.SaveChanges();
+            }*/
+
+
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
             {

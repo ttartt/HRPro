@@ -1,4 +1,5 @@
-﻿using HRProClientApp.Models;
+﻿using DocumentFormat.OpenXml.EMMA;
+using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("~/Home/Enter");
             }
-            TemplateViewModel template;
+            TemplateViewModel? template;
             if (id.HasValue)
             {
                 template = APIClient.GetRequest<TemplateViewModel?>($"api/template/details?id={id}");
@@ -42,8 +43,8 @@ namespace HRProClientApp.Controllers
             return View(templates);
         }
 
-        [HttpGet]
-        public IActionResult TemplateEdit(int? id)
+        /*[HttpGet]
+        public IActionResult UploadTemplate(int? id)
         {
             if (APIClient.User == null)
             {
@@ -55,10 +56,10 @@ namespace HRProClientApp.Controllers
             }
             var model = APIClient.GetRequest<TemplateViewModel?>($"api/template/details?id={id}");
             return View(model);
-        }
+        }*/
 
-        [HttpPost]
-        public IActionResult TemplateEdit(TemplateBindingModel model)
+        /*[HttpPost]
+        public IActionResult UploadTemplate(TemplateBindingModel model)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
@@ -82,7 +83,48 @@ namespace HRProClientApp.Controllers
             {
                 return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
             }
+        }*/
+
+        [HttpPost]
+        public async Task<IActionResult> UploadTemplate(IFormFile file, HRProDataModels.Enums.TemplateTypeEnum type)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Файл не выбран.");
+
+            var templatesDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates");
+            if (!Directory.Exists(templatesDir))
+                Directory.CreateDirectory(templatesDir);
+
+            var filePath = Path.Combine(templatesDir, file.FileName);
+            using var stream = System.IO.File.Create(filePath);
+            await file.CopyToAsync(stream);
+
+            var model = new TemplateBindingModel()
+            {
+                Name = file.FileName,
+                FilePath = filePath,
+                Type = type
+            };
+
+            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+
+            try
+            {
+                if (APIClient.User == null)
+                {
+                    throw new Exception("Доступно только авторизованным пользователям");
+                }
+
+                APIClient.PostRequest("api/template/create", model);
+
+                return RedirectToAction("Templates");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+            }
         }
+
 
         public IActionResult Delete(int id)
         {
@@ -97,7 +139,7 @@ namespace HRProClientApp.Controllers
                 APIClient.PostRequest($"api/template/delete", new TemplateBindingModel { Id = id });
                 APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
-                return Redirect("~/User/UserProfile");
+                return Redirect($"~/Template/Templates");
             }
             catch (Exception ex)
             {

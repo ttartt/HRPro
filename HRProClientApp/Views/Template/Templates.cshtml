@@ -3,9 +3,8 @@
 @model List<TemplateViewModel>
 
 <div class="container mt-4">
-    <h1>Список шаблонов</h1>
+    <h1>Шаблоны документов</h1>
 
-    <!-- Панель фильтров -->
     <div class="row mb-4">
         <div class="col-md-4">
             <label for="search" class="form-label">Поиск по названию</label>
@@ -21,9 +20,13 @@
                 }
             </select>
         </div>
+        <div class="mb-4 text-end">
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
+                Загрузить шаблон
+            </button>
+        </div>
     </div>
 
-    <!-- Таблица шаблонов -->
     <table class="table table-striped" id="templatesTable">
         <thead>
             <tr>
@@ -57,7 +60,7 @@
                             <i class="bi bi-pencil"></i>
                         </a>
 
-                        <a asp-action="Delete" asp-controller="Template" asp-route-id="@template.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить сотрудника?');">
+                        <a asp-action="Delete" asp-controller="Template" asp-route-id="@template.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить шаблон?');">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
@@ -71,6 +74,39 @@
         <div class="alert alert-info">Нет доступных шаблонов.</div>
     }
 </div>
+
+<div class="modal fade" id="uploadTemplateModal" tabindex="-1" aria-labelledby="uploadTemplateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-controller="Template" asp-action="UploadTemplate" enctype="multipart/form-data" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadTemplateModalLabel">Загрузка шаблона</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Выберите файл</label>
+                        <input class="form-control" type="file" id="file" name="file" accept=".docx" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Тип шаблона</label>
+                        <select class="form-select" id="type" name="type" required>
+                            @foreach (var type in Enum.GetValues(typeof(HRProDataModels.Enums.TemplateTypeEnum)))
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info">Загрузить шаблон</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <script>
     function filterTemplates() {

@@ -59,7 +59,7 @@ namespace HRProClientApp.Controllers
             }
             ViewBag.Users = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={APIClient.Company?.Id}");
             ViewBag.Candidates = APIClient.GetRequest<List<CandidateViewModel>>($"api/candidate/list");
-            ViewBag.Vacancies = APIClient.GetRequest<List<VacancyViewModel>>($"api/vacancy/list?companyId={APIClient.Company.Id}");
+            ViewBag.Vacancies = APIClient.GetRequest<List<VacancyViewModel>>($"api/vacancy/list?companyId={APIClient.Company?.Id}");
             if (id.HasValue)
             {
                 var invitedParticipants = APIClient.GetRequest<List<MeetingParticipantViewModel>>($"api/meeting/participants?meetingId={id}");
