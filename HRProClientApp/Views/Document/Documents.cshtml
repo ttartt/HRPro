@@ -2,10 +2,6 @@
 @using HRProDataModels.Enums
 @model List<DocumentViewModel>
 
-@{
-    ViewData["Title"] = "Мои документы";
-}
-
 <div class="container mt-4">
     <h1>Мои документы</h1>
 
@@ -94,12 +90,12 @@
 
         rows.forEach(row => {
             const nameCell = row.children[0].textContent.toLowerCase();
-            const typeCell = row.children[1].textContent;
+            const statusCell = row.children[4].textContent;
 
             const matchesSearch = nameCell.includes(searchInput);
-            const matchesType = !typeFilter || typeCell === typeFilter;
+            const matchesStatus = !statusFilter || statusCell === statusFilter;
 
-            if (matchesSearch && matchesType) {
+            if (matchesSearch && matchesStatus) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';

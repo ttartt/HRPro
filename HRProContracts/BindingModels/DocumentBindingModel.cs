@@ -13,9 +13,11 @@ namespace HRProContracts.BindingModels
 
         public DocumentStatusEnum Status { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime().AddHours(4);
 
         public int TemplateId { get; set; }
+
+        public List<string> Tags { get; set; }
 
         public int Id { get; set; }
     }

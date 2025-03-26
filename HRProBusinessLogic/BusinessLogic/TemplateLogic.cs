@@ -24,15 +24,16 @@ namespace HRProBusinessLogic.BusinessLogic
             _templateStorage = templateStorage;
             _tagStorage = tagStorage;
         }
-        public bool Create(TemplateBindingModel model)
+        public int? Create(TemplateBindingModel model)
         {
             CheckModel(model);
-            if (_templateStorage.Insert(model) == null)
+            var templateId = _templateStorage.Insert(model);
+            if (templateId == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return false;
+                return 0;
             }
-            return true;
+            return templateId;
         }
 
         public bool Delete(TemplateBindingModel model)
@@ -72,6 +73,10 @@ namespace HRProBusinessLogic.BusinessLogic
             {
                 _logger.LogWarning("ReadList return null list");
                 return null;
+            }
+            foreach (var item in list)
+            {
+                item.Tags = _tagStorage.GetFilteredList(new TagSearchModel { TemplateId = item.Id });
             }
             _logger.LogInformation("ReadList. Count: {Count}", list.Count);
             return list;
@@ -115,11 +120,11 @@ namespace HRProBusinessLogic.BusinessLogic
                 throw new ArgumentNullException("Путь к файлу не может быть пустым", nameof(model.FilePath));
             }
 
-            /*if (!File.Exists(model.FilePath))
+            if (!File.Exists(model.FilePath))
             {
                 throw new ArgumentException("Файл по указанному пути не существует", nameof(model.FilePath));
             }
-*/
+
             var existingTemplate = _templateStorage.GetElement(new TemplateSearchModel { Name = model.Name });
             if (existingTemplate != null && existingTemplate.Id != model.Id)
             {

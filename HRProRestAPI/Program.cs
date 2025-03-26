@@ -60,6 +60,35 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var userLogic = scope.ServiceProvider.GetRequiredService<IUserLogic>();
+    var existingAdmin = userLogic.ReadElement(new HRProContracts.SearchModels.UserSearchModel
+    {
+        Email = "admin@admin.com"
+    });
+
+    if (existingAdmin == null)
+    {
+        userLogic.Create(new HRProContracts.BindingModels.UserBindingModel
+        {
+            Surname = "Admin",
+            Name = "Admin",
+            Email = "admin@admin.com",
+            Password = "Admin123!",
+            Role = HRProDataModels.Enums.RoleEnum.Администратор,
+            PhoneNumber = "0000000000",
+            City = "AdminCity"
+        });
+        Console.WriteLine("Администратор создан");
+    }
+    else
+    {
+        Console.WriteLine("Администратор уже существует.");
+    }
+}
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

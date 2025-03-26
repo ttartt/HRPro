@@ -22,5 +22,7 @@ namespace HRProContracts.ViewModels
         public string? CreatorName { get; set; }
 
         public string? TemplateName { get; set; }
+
+        public List<string> Tags { get; set; }
     }
 }

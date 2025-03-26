@@ -49,11 +49,6 @@ namespace HRProClientApp.Controllers
                 return Redirect("/Home/Enter");
             }
 
-            if (APIClient.Company == null)
-            {
-                return Redirect("/Home/Index");
-            }
-
             if (!id.HasValue)
             {
                 var model = new UserViewModel

@@ -22,15 +22,16 @@ namespace HRProBusinessLogic.BusinessLogic
             _logger = logger;
             _tagStorage = tagStorage;
         }
-        public bool Create(TagBindingModel model)
+        public int? Create(TagBindingModel model)
         {
             CheckModel(model);
-            if (_tagStorage.Insert(model) == null)
+            var tagId = _tagStorage.Insert(model);
+            if (tagId == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return false;
+                return 0;
             }
-            return true;
+            return tagId;
         }
 
         public bool Delete(TagBindingModel model)
@@ -99,11 +100,6 @@ namespace HRProBusinessLogic.BusinessLogic
             if (string.IsNullOrEmpty(model.TagName))
             {
                 throw new ArgumentNullException("Имя тега не может быть пустым", nameof(model.TagName));
-            }
-
-            if (string.IsNullOrEmpty(model.Name))
-            {
-                throw new ArgumentNullException("Название не может быть пустым", nameof(model.Name));
             }
 
             if (!Enum.IsDefined(typeof(DataTypeEnum), model.Type))

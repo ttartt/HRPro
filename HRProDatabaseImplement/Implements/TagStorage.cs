@@ -27,7 +27,7 @@ namespace HRProDatabaseImplement.Implements
                 .ToList();
             }
             return context.Tags
-                .Where(x => x.Name.Contains(model.TagName))
+                .Where(x => x.TagName.Contains(model.TagName))
                 .Select(x => x.GetViewModel)
                 .ToList();
         }
@@ -42,7 +42,7 @@ namespace HRProDatabaseImplement.Implements
                 .FirstOrDefault(x => (!string.IsNullOrEmpty(model.TagName) && x.TagName == model.TagName) || (model.Id.HasValue && x.Id == model.Id))
                 ?.GetViewModel;
         }
-        public TagViewModel? Insert(TagBindingModel model)
+        public int? Insert(TagBindingModel model)
         {
             var newTag = Tag.Create(model);
             if (newTag == null)
@@ -52,7 +52,7 @@ namespace HRProDatabaseImplement.Implements
             using var context = new HRproDatabase();
             context.Tags.Add(newTag);
             context.SaveChanges();
-            return newTag.GetViewModel;
+            return newTag.Id;
         }
         public TagViewModel? Update(TagBindingModel model)
         {

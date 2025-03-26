@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<TemplateViewModel> GetFullList();
         List<TemplateViewModel> GetFilteredList(TemplateSearchModel model);
         TemplateViewModel? GetElement(TemplateSearchModel model);
-        TemplateViewModel? Insert(TemplateBindingModel model);
+        int? Insert(TemplateBindingModel model);
         TemplateViewModel? Update(TemplateBindingModel model);
         TemplateViewModel? Delete(TemplateBindingModel model);
     }

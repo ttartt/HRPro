@@ -30,16 +30,23 @@ namespace HRProDatabaseImplement.Implements
         }
         public TemplateViewModel? GetElement(TemplateSearchModel model)
         {
+            using var context = new HRproDatabase();
+            if (model.Id.HasValue)
+            {
+                return context.Templates
+                .FirstOrDefault(x => x.Id == model.Id)
+                ?.GetViewModel;
+            }
             if (string.IsNullOrEmpty(model.Name) && !model.Id.HasValue)
             {
                 return null;
             }
-            using var context = new HRproDatabase();
+            
             return context.Templates
                 .FirstOrDefault(x => (!string.IsNullOrEmpty(model.Name) && x.Name == model.Name) || (model.Id.HasValue && x.Id == model.Id))
                 ?.GetViewModel;
         }
-        public TemplateViewModel? Insert(TemplateBindingModel model)
+        public int? Insert(TemplateBindingModel model)
         {
             var newTemplate = Template.Create(model);
             if (newTemplate == null)
@@ -49,7 +56,7 @@ namespace HRProDatabaseImplement.Implements
             using var context = new HRproDatabase();
             context.Templates.Add(newTemplate);
             context.SaveChanges();
-            return newTemplate.GetViewModel;
+            return newTemplate.Id;
         }
         public TemplateViewModel? Update(TemplateBindingModel model)
         {

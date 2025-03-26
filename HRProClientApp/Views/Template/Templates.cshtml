@@ -3,7 +3,7 @@
 @model List<TemplateViewModel>
 
 <div class="container mt-4">
-    <h1>Шаблоны документов</h1>
+    <h1 class="mb-4 text-center">Шаблоны документов</h1>
 
     <div class="row mb-4">
         <div class="col-md-4">
@@ -20,20 +20,20 @@
                 }
             </select>
         </div>
-        <div class="mb-4 text-end">
+        <div class="col-md-4 text-end">
             <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
-                Загрузить шаблон
+                <i class="bi bi-upload"></i> Загрузить шаблон
             </button>
         </div>
     </div>
 
-    <table class="table table-striped" id="templatesTable">
-        <thead>
+    <table class="table table-hover table-bordered" id="templatesTable">
+        <thead class="table-primary">
             <tr>
-                <th>Название</th>
-                <th>Тип</th>
-                <th>Путь к файлу</th>
-                <th>Теги</th>
+                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">Название</th>
+                <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">Тип</th>
+                <th style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">Путь к файлу</th>
+                <th style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">Теги</th>
                 <th>Действия</th>
             </tr>
         </thead>
@@ -47,19 +47,17 @@
                     <td>
                         @if (!template.Tags.Any())
                         {
-
                             <span class="text-muted">Нет тегов</span>
+                        }
+                        else
+                        {
+                            @foreach (var tag in template.Tags)
+                            {
+                                <span class="badge bg-secondary">@tag.TagName</span>
+                            }
                         }
                     </td>
                     <td>
-                        <a asp-action="TemplateDetails" asp-controller="Template" asp-route-id="@template.Id" class="btn btn-info btn-sm me-2" title="Просмотр">
-                            <i class="bi bi-eye"></i>
-                        </a>
-
-                        <a asp-action="TemplateEdit" asp-controller="Template" asp-route-id="@template.Id" class="btn btn-warning btn-sm me-2" title="Редактировать">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-
                         <a asp-action="Delete" asp-controller="Template" asp-route-id="@template.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить шаблон?');">
                             <i class="bi bi-trash"></i>
                         </a>
@@ -75,6 +73,7 @@
     }
 </div>
 
+<!-- Modal для загрузки шаблона -->
 <div class="modal fade" id="uploadTemplateModal" tabindex="-1" aria-labelledby="uploadTemplateModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -107,7 +106,6 @@
     </div>
 </div>
 
-
 <script>
     function filterTemplates() {
         const searchInput = document.getElementById('search').value.toLowerCase();
@@ -132,8 +130,8 @@
 </script>
 
 <style>
-    .table-hover tbody tr:hover {
-        background-color: #f0f4f7;
+    .table-bordered td, .table-bordered th {
+        border: 1px solid #ddd;
     }
 
     .btn-info, .btn-warning, .btn-danger {
@@ -142,9 +140,9 @@
         justify-content: center;
     }
 
-        .btn-info i, .btn-warning i, .btn-danger i {
-            margin-right: 5px;
-        }
+    .btn-info i, .btn-warning i, .btn-danger i {
+        margin-right: 5px;
+    }
 
     .btn {
         background-color: #3E12E3;
@@ -156,8 +154,32 @@
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-        .btn:hover {
-            background-color: #2200A4;
-            transform: scale(1.05);
-        }
+    .btn:hover {
+        background-color: #2200A4;
+        transform: scale(1.05);
+        color:white;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        background-color: #3E12E3;
+        color: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    .form-select, .form-control {
+        border-radius: 8px;
+    }
+
+    .table-primary th {
+        background-color: #f8f9fa;
+        color: #000;
+        font-weight: bold;
+    }
 </style>

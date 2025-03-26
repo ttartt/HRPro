@@ -8,13 +8,8 @@ namespace HRProDatabaseImplement.Models
 {
     public class Tag : ITagModel
     {
-        [Required]
         public string TagName { get; set; } = string.Empty;
 
-        [Required]
-        public string Name { get; set; } = string.Empty;
-
-        [Required]
         public DataTypeEnum Type { get; set; }
 
         [Required]
@@ -34,7 +29,6 @@ namespace HRProDatabaseImplement.Models
             {
                 Id = model.Id,
                 TagName = model.TagName,
-                Name = model.Name,
                 Type = model.Type,
                 TemplateId = model.TemplateId
             };
@@ -46,7 +40,6 @@ namespace HRProDatabaseImplement.Models
             {
                 Id = model.Id,
                 TagName = model.TagName,
-                Name = model.Name,
                 Type = model.Type,
                 TemplateId = model.TemplateId
             };
@@ -59,7 +52,6 @@ namespace HRProDatabaseImplement.Models
                 return;
             }
             TagName = model.TagName;
-            Name = model.Name;
             Type = model.Type;
             TemplateId = model.TemplateId;
         }
@@ -68,7 +60,6 @@ namespace HRProDatabaseImplement.Models
         {
             Id = Id,
             TagName = TagName,
-            Name = Name,
             Type = Type,
             TemplateId = TemplateId
         };

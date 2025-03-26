@@ -30,7 +30,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансии");
+                _logger.LogError(ex, "Ошибка получения шаблона");
                 throw;
             }
         }
@@ -51,7 +51,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансий");
+                _logger.LogError(ex, "Ошибка получения шаблонов");
                 throw;
             }
         }
@@ -66,21 +66,22 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансий");
+                _logger.LogError(ex, "Ошибка получения шаблонов");
                 throw;
             }
         }
 
         [HttpPost]
-        public void Create(TemplateBindingModel model)
+        public IActionResult Create(TemplateBindingModel model)
         {
             try
             {
-                _logic.Create(model);
+                int? id = _logic.Create(model);
+                return Ok(new TemplateBindingModel { Id = (int)id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка создания вакансии");
+                _logger.LogError(ex, "Ошибка создания шаблона");
                 throw;
             }
         }
@@ -94,7 +95,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка обновления вакансии");
+                _logger.LogError(ex, "Ошибка обновления шаблона");
                 throw;
             }
         }
@@ -108,7 +109,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка удаления вакансии");
+                _logger.LogError(ex, "Ошибка удаления шаблона");
                 throw;
             }
         }

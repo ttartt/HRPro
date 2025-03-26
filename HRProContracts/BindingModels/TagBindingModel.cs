@@ -7,8 +7,6 @@ namespace HRProContracts.BindingModels
     {
         public string TagName { get; set; } = string.Empty;
 
-        public string Name { get; set; } = string.Empty;
-
         public DataTypeEnum Type { get; set; }
 
         public int TemplateId { get; set; }

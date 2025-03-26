@@ -80,7 +80,6 @@ namespace HRProClientApp.Controllers
                     template.Tags.Add(new TagViewModel
                     {
                         Id = model.Id,
-                        Name = model.Name,
                         TagName = model.TagName,
                         TemplateId = model.TemplateId,
                         TemplateName = template.Name,

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HRProDatabaseImplement.Migrations
 {
     [DbContext(typeof(HRproDatabase))]
-    [Migration("20241219154406_InitialCreate")]
+    [Migration("20250323170522_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -194,10 +194,6 @@ namespace HRProDatabaseImplement.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("TagName")
                         .IsRequired()

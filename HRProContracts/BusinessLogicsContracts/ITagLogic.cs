@@ -13,7 +13,7 @@ namespace HRProContracts.BusinessLogicsContracts
     {
         List<TagViewModel>? ReadList(TagSearchModel? model);
         TagViewModel? ReadElement(TagSearchModel model);
-        bool Create(TagBindingModel model);
+        int? Create(TagBindingModel model);
         bool Update(TagBindingModel model);
         bool Delete(TagBindingModel model);
     }

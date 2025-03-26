@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<TagViewModel> GetFullList();
         List<TagViewModel> GetFilteredList(TagSearchModel model);
         TagViewModel? GetElement(TagSearchModel model);
-        TagViewModel? Insert(TagBindingModel model);
+        int? Insert(TagBindingModel model);
         TagViewModel? Update(TagBindingModel model);
         TagViewModel? Delete(TagBindingModel model);
     }

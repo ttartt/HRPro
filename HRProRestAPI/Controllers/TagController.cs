@@ -30,21 +30,22 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансии");
+                _logger.LogError(ex, "Ошибка получения тэга");
                 throw;
             }
         }
 
         [HttpPost]
-        public void Create(TagBindingModel model)
+        public IActionResult Create(TagBindingModel model)
         {
             try
             {
-                _logic.Create(model);
+                int? id = _logic.Create(model);
+                return Ok(new TagBindingModel { Id = (int)id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка создания вакансии");
+                _logger.LogError(ex, "Ошибка создания тэга");
                 throw;
             }
         }
@@ -58,7 +59,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка обновления вакансии");
+                _logger.LogError(ex, "Ошибка обновления тэга");
                 throw;
             }
         }
@@ -72,7 +73,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка удаления вакансии");
+                _logger.LogError(ex, "Ошибка удаления тэга");
                 throw;
             }
         }
