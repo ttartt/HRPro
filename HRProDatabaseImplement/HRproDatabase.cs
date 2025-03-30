@@ -30,6 +30,6 @@ namespace HRproDatabaseImplement
         public virtual DbSet<VacancyResponsibility> VacancyResponsibilities { set; get; }
         public virtual DbSet<Meeting> Meetings { set; get; }
         public virtual DbSet<MeetingParticipant> MeetingParticipants { set; get; }
-
+        public virtual DbSet<DocumentTag> DocumentTags { set; get; }
     }
 }

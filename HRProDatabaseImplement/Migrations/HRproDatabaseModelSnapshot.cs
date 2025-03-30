@@ -88,6 +88,29 @@ namespace HRProDatabaseImplement.Migrations
                     b.ToTable("Documents");
                 });
 
+            modelBuilder.Entity("HRProDatabaseImplement.Models.DocumentTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DocumentTags");
+                });
+
             modelBuilder.Entity("HRProDatabaseImplement.Models.Meeting", b =>
                 {
                     b.Property<int>("Id")

@@ -29,6 +29,7 @@ builder.Services.AddTransient<IVacancyResponsibilityStorage, VacancyResponsibili
 builder.Services.AddTransient<IDocumentStorage, DocumentStorage>();
 builder.Services.AddTransient<ITemplateStorage, TemplateStorage>();
 builder.Services.AddTransient<ITagStorage, TagStorage>();
+builder.Services.AddTransient<IDocumentTagStorage, DocumentTagStorage>();
 
 builder.Services.AddTransient<IUserLogic, UserLogic>();
 builder.Services.AddTransient<ICompanyLogic, CompanyLogic>();
@@ -46,6 +47,7 @@ builder.Services.AddTransient<IVacancyResponsibilityLogic, VacancyResponsibility
 builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
 builder.Services.AddTransient<ITemplateLogic, TemplateLogic>();
 builder.Services.AddTransient<ITagLogic, TagLogic>();
+builder.Services.AddTransient<IDocumentTagLogic, DocumentTagLogic>();
 
 builder.Services.AddTransient<AbstractSaveToPdf, SaveToPdf>();
 
@@ -77,7 +79,7 @@ using (var scope = app.Services.CreateScope())
             Email = "admin@admin.com",
             Password = "Admin123!",
             Role = HRProDataModels.Enums.RoleEnum.Администратор,
-            PhoneNumber = "0000000000",
+            PhoneNumber = "89999999999",
             City = "AdminCity"
         });
         Console.WriteLine("Администратор создан");

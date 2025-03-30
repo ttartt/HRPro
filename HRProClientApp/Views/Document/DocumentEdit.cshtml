@@ -26,77 +26,43 @@
         </div>
 
         <div class="col-md-6">
-            <label asp-for="TemplateId" class="form-label">Шаблон</label>
-            <select asp-for="TemplateId" class="form-control" asp-items="@(new SelectList(@ViewBag.Templates, "Id", "Name"))"></select>
+            <label class="form-label">Выберите шаблон</label>
+            <select id="templateSelect" class="form-select" name="TemplateId" onchange="updateTags()">
+                <option value="">Выберите шаблон</option>
+                @foreach (var template in ViewBag.Templates)
+                {
+                    <option value="@template.Id">@template.Name</option>
+                }
+            </select>
         </div>
 
-        <div class="col-md-6">
-            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#inviteParticipantsModal">
-                Настройка тегов
-            </button>
-        </div>
-
-        <!-- Добавляем раздел для отображения тегов -->
-        @if (ViewBag.Tags.Any())
-        {
-            <div class="col-md-12 mt-4">
-                <h5>Теги для заполнения:</h5>
-                <ul class="list-group">
-                    @foreach (var tag in ViewBag.Tags)
+        <div class="col-md-12">
+            <label class="form-label">Теги шаблона</label>
+            <div id="templateTagsContainer">
+                @if (ViewBag.TemplateTags != null && ViewBag.TemplateTags.Count > 0)
+                {
+                    foreach (var tag in ViewBag.TemplateTags)
                     {
-                        <li class="list-group-item">
-                            <label for="@tag" class="form-label">Введите значение для тега: <strong>@tag</strong></label>
-                            <input type="text" class="form-control" id="@tag" name="@tag" placeholder="Введите значение для тега @tag">
-                        </li>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">@tag.TagName</span>
+                            <input type="text" class="form-control tag-value" name="Tags[@tag.Id]" placeholder="Введите значение" value="@tag.TagValue">
+                        </div>
                     }
-                </ul>
+                }
+                else
+                {
+                    <span class="text-muted">Нет тегов</span>
+                }
             </div>
-        }
+        </div>
+
 
         <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
+            <button type="button" class="btn btn-secondary" onclick="window.history.back();">Назад</button>
         </div>
+
     </form>
-</div>
-
-<div class="modal fade" id="editTagsModal" tabindex="-1" aria-labelledby="editTagsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" asp-controller="Document" asp-action="EditTags" asp-route-templateId="@Model?.TemplateId" novalidate>
-                <div class="modal-header">
-                    <h5 class="modal-title" id="inviteParticipantsModalLabel">Выбор участников</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                </div>
-                <div class="modal-body">
-                    @foreach (var user in ViewBag.Users)
-                    {
-                        bool isInvited = ViewBag.InvitedUserIds != null && ViewBag.InvitedUserIds.Contains(user.Id);
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="@user.Id" id="participant@user.Id" name="userIds[]"
-                            @if (isInvited)
-                            {
-                                <text>checked</text>
-                            } />
-                            <label class="form-check-label" for="participant@user.Id">
-                                @user.Name @user.Surname
-                            </label>
-                        </div>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-info"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editTagsModal"
-                            data-meeting-id="@Model?.Id">
-                        Сохранить
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 
 @functions {
@@ -105,3 +71,54 @@
         return new SelectList(Enum.GetValues(typeof(DocumentStatusEnum)).Cast<DocumentStatusEnum>());
     }
 }
+
+<script>
+    function updateTags() {
+        const templateId = document.getElementById("templateSelect").value;
+        const container = document.getElementById("templateTagsContainer");
+
+        if (!templateId) {
+            container.innerHTML = '<span class="text-muted">Нет тегов</span>';
+            return;
+        }
+
+        fetch(`/Document/LoadTags?templateId=${templateId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(tags => {
+                if (!tags || !Array.isArray(tags)) {
+                    throw new Error('Invalid tags data received');
+                }
+
+                container.innerHTML = tags.length
+                    ? tags.map(tag => {
+                        const tagId = tag.id || tag.Id || '';
+                        const tagName = tag.tagName || tag.TagName || 'Без названия';
+                        const tagValue = tag.tagValue || tag.Value || '';
+
+                        return `
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">${tagName}</span>
+                                <input type="text" class="form-control tag-value"
+                                       name="Tags[${tagId}]"
+                                       placeholder="Введите значение"
+                                       value="${tagValue}">
+                            </div>
+                        `;
+                    }).join("")
+                    : '<span class="text-muted">Нет тегов</span>';
+            })
+            .catch(error => {
+                console.error("Ошибка загрузки тегов:", error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        Ошибка загрузки тегов: ${error.message}
+                    </div>
+                `;
+            });
+    }
+</script>

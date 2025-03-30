@@ -3,20 +3,23 @@ using HRProContracts.ViewModels;
 using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRProDatabaseImplement.Models
 {
+    [DataContract]
     public class Template : ITemplateModel
     {
+        [DataMember]
         [Required]
         public string Name { get; set; } = string.Empty;
-
+        [DataMember]
         [Required]
         public TemplateTypeEnum Type { get; set; }
-
+        [DataMember]
         [Required]
         public string FilePath { get; set; } = string.Empty;
-
+        [DataMember]
         public int Id { get; set; }
 
         public static Template? Create(TemplateBindingModel model)

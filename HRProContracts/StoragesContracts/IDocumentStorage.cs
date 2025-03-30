@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<DocumentViewModel> GetFullList();
         List<DocumentViewModel> GetFilteredList(DocumentSearchModel model);
         DocumentViewModel? GetElement(DocumentSearchModel model);
-        DocumentViewModel? Insert(DocumentBindingModel model);
+        int? Insert(DocumentBindingModel model);
         DocumentViewModel? Update(DocumentBindingModel model);
         DocumentViewModel? Delete(DocumentBindingModel model);
     }

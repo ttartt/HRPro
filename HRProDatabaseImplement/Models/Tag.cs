@@ -3,18 +3,21 @@ using HRProContracts.ViewModels;
 using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRProDatabaseImplement.Models
 {
+    [DataContract]
     public class Tag : ITagModel
     {
+        [DataMember]
         public string TagName { get; set; } = string.Empty;
-
+        [DataMember]
         public DataTypeEnum Type { get; set; }
-
+        [DataMember]
         [Required]
         public int TemplateId { get; set; }
-
+        [DataMember]
         public int Id { get; set; }
 
         public virtual Template Template { get; set; }

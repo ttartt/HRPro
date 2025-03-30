@@ -45,7 +45,7 @@ namespace HRProDatabaseImplement.Implements
                 .FirstOrDefault(x => (!string.IsNullOrEmpty(model.Name) && x.Name == model.Name) || (model.Id.HasValue && x.Id == model.Id))
                 ?.GetViewModel;
         }
-        public DocumentViewModel? Insert(DocumentBindingModel model)
+        public int? Insert(DocumentBindingModel model)
         {
             var newDocument = Document.Create(model);
             if (newDocument == null)
@@ -55,7 +55,7 @@ namespace HRProDatabaseImplement.Implements
             using var context = new HRproDatabase();
             context.Documents.Add(newDocument);
             context.SaveChanges();
-            return newDocument.GetViewModel;
+            return newDocument.Id;
         }
         public DocumentViewModel? Update(DocumentBindingModel model)
         {

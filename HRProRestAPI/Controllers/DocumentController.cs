@@ -12,10 +12,12 @@ namespace HRProRestAPI.Controllers
     {
         private readonly ILogger _logger;
         private readonly IDocumentLogic _logic;
-        public DocumentController(IDocumentLogic logic, ILogger<DocumentController> logger)
+        private readonly IDocumentTagLogic _documentTagLogic;
+        public DocumentController(IDocumentLogic logic, IDocumentTagLogic documentTagLogic, ILogger<DocumentController> logger)
         {
             _logger = logger;
             _logic = logic;
+            _documentTagLogic = documentTagLogic;
         }
 
         [HttpGet]
@@ -30,7 +32,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансии");
+                _logger.LogError(ex, "Ошибка получения документа");
                 throw;
             }
         }
@@ -51,7 +53,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансий");
+                _logger.LogError(ex, "Ошибка получения документов");
                 throw;
             }
         }
@@ -72,21 +74,36 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения вакансий");
+                _logger.LogError(ex, "Ошибка получения документов");
                 throw;
             }
         }
 
         [HttpPost]
-        public void Create(DocumentBindingModel model)
+        public IActionResult Create(DocumentBindingModel model)
         {
             try
             {
-                _logic.Create(model);
+                int? id = _logic.Create(model);
+                return Ok(new DocumentBindingModel { Id = (int)id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка создания вакансии");
+                _logger.LogError(ex, "Ошибка создания документа");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public void CreateTag(DocumentTagBindingModel model)
+        {
+            try
+            {
+                _documentTagLogic.Create(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка создания тега документа");
                 throw;
             }
         }
@@ -100,7 +117,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка обновления вакансии");
+                _logger.LogError(ex, "Ошибка обновления документа");
                 throw;
             }
         }
@@ -114,7 +131,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка удаления вакансии");
+                _logger.LogError(ex, "Ошибка удаления документа");
                 throw;
             }
         }

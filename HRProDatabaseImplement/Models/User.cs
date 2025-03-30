@@ -3,32 +3,39 @@ using HRProContracts.ViewModels;
 using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRproDatabaseImplement.Models
 {
+    [DataContract]
     public class User : IUserModel
     {
+        [DataMember]
         public int? CompanyId { get; set; }
         [Required]
+        [DataMember]
         public string Surname { get; set; } = string.Empty;
+        [DataMember]
         [Required]
         public string Name { get; set; } = string.Empty;
-
+        [DataMember]
         public string? LastName { get; set; }
+        [DataMember]
         [Required]
         public string Email { get; set; } = string.Empty;
+        [DataMember]
         [Required]
         public string Password { get; set; } = string.Empty;
-
+        [DataMember]
         public string? PhoneNumber { get; set; }
-
+        [DataMember]
         [Required]
         public RoleEnum Role { get; set; }
-
+        [DataMember]
         public DateTime? DateOfBirth { get; set; }
-
+        [DataMember]
         public string? City { get; set; }
-
+        [DataMember]
         public int Id { get; set; }
         public virtual Company Company { get; set; }
 

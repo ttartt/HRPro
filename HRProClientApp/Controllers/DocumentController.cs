@@ -1,8 +1,10 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
+﻿using DocumentFormat.OpenXml.Drawing.Diagrams;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Template;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Xml;
@@ -46,51 +48,6 @@ namespace HRProClientApp.Controllers
             return View(documents);
         }
 
-        /*[HttpGet]
-        public IActionResult DocumentEdit(int? id)
-        {
-            if (APIClient.User == null)
-            {
-                return Redirect("~/Home/Enter");
-            }
-            ViewBag.Templates = APIClient.GetRequest<List<TemplateViewModel>?>($"api/template/list");
-            if (!id.HasValue)
-            {
-                return View(new DocumentViewModel());
-            }            
-            var model = APIClient.GetRequest<DocumentViewModel?>($"api/document/details?id={id}");
-            if (model != null)
-                return View(model);
-            else
-                return View();
-        }*/
-
-        [HttpGet]
-        public IActionResult EditTags(int? templateId)
-        {
-            if (APIClient.User == null)
-            {
-                return Redirect("~/Home/Enter");
-            }
-            ViewBag.Tags = APIClient.GetRequest<List<TagViewModel>?>($"api/tag/list?templateId={templateId}");
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult EditTags(List<string> tagsValues)
-        {
-            if (APIClient.User == null)
-            {
-                return Redirect("~/Home/Enter");
-            }
-            foreach (var tag in tagsValues)
-            {
-                APIClient.PostRequest("api/tag/update", new TagBindingModel { TagName = tag });
-            }
-            return View();
-        }
-
-
         [HttpGet]
         public IActionResult DocumentEdit(int? id)
         {
@@ -98,48 +55,39 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("~/Home/Enter");
             }
-            ViewBag.Templates = APIClient.GetRequest<List<TemplateViewModel>?>($"api/template/list");
-            if (!id.HasValue)
-            {
-                return View(new DocumentViewModel());
-            }
-            
-            var model = APIClient.GetRequest<DocumentViewModel?>($"api/document/details?id={id}");
-            if (model != null)
-                return View(model);
-            else
-                return View();
-/*
-            try
-            {
-                var template = APIClient.GetRequest<TemplateViewModel>($"api/document/details?id={templateId}");
 
-                if (template == null)
-                {
-                    return RedirectToAction("Error", new { errorMessage = "Шаблон не найден." });
-                }
+            var templates = APIClient.GetRequest<List<TemplateViewModel>>("api/template/list") ?? new List<TemplateViewModel>();
+            ViewBag.Templates = templates;
 
-                var templatePath = $"{template.FilePath}";
-                var tags = ExtractTags(templatePath);
+            DocumentViewModel model = id.HasValue
+                ? APIClient.GetRequest<DocumentViewModel?>($"api/document/details?id={id}") ?? new DocumentViewModel()
+                : new DocumentViewModel();
 
-                var model = new DocumentViewModel
-                {
-                    TemplateId = templateId.Value,
-                    Tags = tags 
-                };
-
-                ViewBag.Templates = APIClient.GetRequest<List<TemplateViewModel>>("api/template/list");
-
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = ex.Message });
-            }*/
+            return View(model);
         }
 
+
+        [HttpGet]
+        public IActionResult LoadTags(int? templateId)
+        {
+            if (APIClient.User == null)
+            {
+                return Unauthorized("Доступ запрещен. Необходимо авторизоваться.");
+            }
+
+            if (!templateId.HasValue)
+            {
+                return BadRequest("TemplateId не указан.");
+            }
+
+            var tags = APIClient.GetRequest<List<TagViewModel>>($"api/template/tags?templateId={templateId}");
+
+            return Json(tags ?? new List<TagViewModel>());
+        }
+
+
         [HttpPost]
-        public IActionResult DocumentEdit(DocumentBindingModel model)
+        public async Task<IActionResult> DocumentEdit(DocumentBindingModel model)
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
@@ -150,33 +98,70 @@ namespace HRProClientApp.Controllers
                 }
 
                 var template = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={model.TemplateId}");
+                if (template == null)
+                {
+                    throw new Exception("Шаблон не найден.");
+                }
+
                 var templatePath = $"{template.FilePath}";
-                var outputPath = $"GeneratedDocuments/Document_{model.Id}_{DateTime.Now.Ticks}.docx";
+                var outputPath = $"GeneratedDocuments/{model.Name}_{DateTime.Now.Date.ToShortDateString()}.docx";
 
                 var contentToFill = new Content();
+                var tags = APIClient.GetRequest<List<TagViewModel>?>($"api/template/tags?templateId={template.Id}");
 
-                foreach (var tag in model.Tags)
+                foreach (var tag in tags)
                 {
-                    contentToFill.Append(new FieldContent(tag, Request.Form[tag]));
+                    var tagValue = Request.Form[$"Tags[{tag.Id}]"];
+                    if (!string.IsNullOrEmpty(tagValue))
+                    {
+                        contentToFill.Append(new FieldContent(tag.TagName, tagValue));
+                    }
                 }
 
                 System.IO.File.Copy(templatePath, outputPath, true);
-                using (var outputDoc = new TemplateProcessor(outputPath)
-                    .SetRemoveContentControls(true))
+                using (var outputDoc = new TemplateProcessor(outputPath).SetRemoveContentControls(true))
+                {
+                    var content = new Content();
+
+                    foreach (var tag in tags)
                     {
-                        outputDoc.FillContent(contentToFill);
-                        outputDoc.SaveChanges();
+                        var value = Request.Form[$"Tags[{tag.Id}]"];
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            content.Fields.Add(new FieldContent(tag.TagName, value));
+                        }
                     }
 
+                    outputDoc.FillContent(content);
+                    outputDoc.SaveChanges();
+                }
+
+                var createdDocumentId = 0;
                 if (model.Id != 0)
                 {
                     APIClient.PostRequest("api/document/update", model);
+                    createdDocumentId = model.Id;
                 }
                 else
                 {
                     model.CompanyId = APIClient.Company.Id;
                     model.CreatorId = APIClient.User.Id;
-                    APIClient.PostRequest("api/document/create", model);
+                    createdDocumentId = await APIClient.PostRequestAsync("api/document/create", model);
+                }
+
+                foreach (var tag in tags)
+                {
+                    var tagValue = Request.Form[$"Tags[{tag.Id}]"];
+                    if (!string.IsNullOrEmpty(tagValue))
+                    {
+                        var tagModel = new DocumentTagBindingModel
+                        {
+                            DocumentId = createdDocumentId,
+                            TagId = tag.Id,
+                            Value = tagValue
+                        };
+                        APIClient.PostRequest("api/document/createTag", tagModel);
+                    }
                 }
 
                 return Redirect($"~/Document/Documents?userId={APIClient.User?.Id}");
@@ -185,6 +170,92 @@ namespace HRProClientApp.Controllers
             {
                 return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
             }
+        }
+
+
+        private static List<string> ExtractTags(string filePath)
+        {
+            var tags = new List<string>();
+
+            using (var archive = ZipFile.OpenRead(filePath))
+            {
+                var entry = archive.GetEntry("word/document.xml");
+                if (entry != null)
+                {
+                    using var stream = entry.Open();
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.Load(stream);
+
+                    var namespaceManager = new XmlNamespaceManager(xmlDoc.NameTable);
+                    namespaceManager.AddNamespace("w", "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
+
+                    // Извлечение тегов bookmarkStart
+                    var bookmarkNodes = xmlDoc.SelectNodes("//w:bookmarkStart", namespaceManager);
+                    if (bookmarkNodes != null)
+                    {
+                        foreach (XmlNode node in bookmarkNodes)
+                        {
+                            var nameAttr = node.Attributes?["w:name"];
+                            if (nameAttr != null && !nameAttr.Value.StartsWith("_"))
+                            {
+                                tags.Add(nameAttr.Value);
+                            }
+                        }
+                    }
+
+                    // Извлечение тегов из sdt
+                    var sdtNodes = xmlDoc.SelectNodes("//w:sdt/w:sdtPr/w:tag", namespaceManager);
+                    if (sdtNodes != null)
+                    {
+                        foreach (XmlNode node in sdtNodes)
+                        {
+                            var nameAttr = node.Attributes?["w:val"];
+                            if (nameAttr != null && !nameAttr.Value.StartsWith("_"))
+                            {
+                                tags.Add(nameAttr.Value);
+                            }
+                        }
+                    }
+
+                    // Извлечение тегов MERGEFIELD
+                    var instrTextNodes = xmlDoc.SelectNodes("//w:instrText", namespaceManager);
+                    if (instrTextNodes != null)
+                    {
+                        foreach (XmlNode node in instrTextNodes)
+                        {
+                            if (!string.IsNullOrWhiteSpace(node.InnerText) && node.InnerText.Contains("MERGEFIELD"))
+                            {
+                                var parts = node.InnerText.Split(' ');
+                                if (parts.Length > 1)
+                                {
+                                    var tagName = parts[1].Trim();
+                                    if (!tagName.StartsWith("_"))
+                                    {
+                                        tags.Add(tagName);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"Найдено {tags.Count} тегов: {string.Join(", ", tags)}");
+            return tags;
+        }
+
+
+        [HttpGet]
+        public IActionResult GetTemplateTags(int templateId)
+        {
+            if (APIClient.User == null)
+            {
+                return Unauthorized("Доступно только авторизованным пользователям");
+            }
+
+            var tags = APIClient.GetRequest<List<TemplateViewModel>?>($"api/template/tags?templateId={templateId}");
+
+            return Json(tags);
         }
 
         public IActionResult Delete(int id)

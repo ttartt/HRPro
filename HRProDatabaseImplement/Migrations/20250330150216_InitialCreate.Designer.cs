@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HRProDatabaseImplement.Migrations
 {
     [DbContext(typeof(HRproDatabase))]
-    [Migration("20250323170522_InitialCreate")]
+    [Migration("20250330150216_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -89,6 +89,29 @@ namespace HRProDatabaseImplement.Migrations
                     b.HasIndex("TemplateId");
 
                     b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("HRProDatabaseImplement.Models.DocumentTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DocumentTags");
                 });
 
             modelBuilder.Entity("HRProDatabaseImplement.Models.Meeting", b =>

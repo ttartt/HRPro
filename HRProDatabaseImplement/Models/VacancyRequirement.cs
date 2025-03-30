@@ -3,21 +3,21 @@ using HRProContracts.ViewModels;
 using HRproDatabaseImplement.Models;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRProDatabaseImplement.Models
 {
+    [DataContract]
     public class VacancyRequirement : IVacancyRequirement
     {
+        [DataMember]
         [Required]
         public int VacancyId { get; set; }
-
+        [DataMember]
         [Required]
         public int RequirementId { get; set; }
-
+        [DataMember]
         public int Id { get; set; }
-
-        /*public virtual Vacancy Vacancy { get; set; }
-        public virtual Requirement Requirement { get; set; }*/
 
         public static VacancyRequirement? Create(VacancyRequirementBindingModel model)
         {

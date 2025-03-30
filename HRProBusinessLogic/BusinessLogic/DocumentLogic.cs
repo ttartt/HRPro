@@ -5,11 +5,6 @@ using HRProContracts.StoragesContracts;
 using HRProContracts.ViewModels;
 using HRProDataModels.Enums;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRProBusinessLogic.BusinessLogic
 {
@@ -28,15 +23,16 @@ namespace HRProBusinessLogic.BusinessLogic
             _userStorage = userStorage;
             _templateStorage = templateStorage;
         }
-        public bool Create(DocumentBindingModel model)
+        public int? Create(DocumentBindingModel model)
         {
             CheckModel(model);
-            if (_documentStorage.Insert(model) == null)
+            var documentId = _documentStorage.Insert(model);
+            if (documentId == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return false;
+                return 0;
             }
-            return true;
+            return documentId;
         }
 
         public bool Delete(DocumentBindingModel model)

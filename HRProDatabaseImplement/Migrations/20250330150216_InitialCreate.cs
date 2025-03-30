@@ -31,6 +31,21 @@ namespace HRProDatabaseImplement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DocumentTags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DocumentId = table.Column<int>(type: "integer", nullable: false),
+                    TagId = table.Column<int>(type: "integer", nullable: false),
+                    Value = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentTags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MeetingParticipants",
                 columns: table => new
                 {
@@ -423,6 +438,9 @@ namespace HRProDatabaseImplement.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Documents");
+
+            migrationBuilder.DropTable(
+                name: "DocumentTags");
 
             migrationBuilder.DropTable(
                 name: "MeetingParticipants");

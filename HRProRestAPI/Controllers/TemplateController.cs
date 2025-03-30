@@ -12,10 +12,12 @@ namespace HRProRestAPI.Controllers
     {
         private readonly ILogger _logger;
         private readonly ITemplateLogic _logic;
-        public TemplateController(ITemplateLogic logic, ILogger<TemplateController> logger)
+        private readonly ITagLogic _tagLogic;
+        public TemplateController(ITemplateLogic logic, ITagLogic tagLogic, ILogger<TemplateController> logger)
         {
             _logger = logger;
             _logic = logic;
+            _tagLogic = tagLogic;
         }
 
         [HttpGet]
@@ -52,6 +54,21 @@ namespace HRProRestAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка получения шаблонов");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        public List<TagViewModel>? Tags(int? templateId)
+        {
+            try
+            {
+                var list = _tagLogic.ReadList(new TagSearchModel { TemplateId = templateId });
+                return list;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения тэгов шаблона");
                 throw;
             }
         }

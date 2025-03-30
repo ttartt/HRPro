@@ -4,28 +4,35 @@ using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
 namespace HRproDatabaseImplement.Models
 {
+    [DataContract]
     public class Vacancy : IVacancyModel
     {
+        [DataMember]
         [Required]
         public int CompanyId { get; set; }
+        [DataMember]
         [Required]
         public string JobTitle { get; set; } = string.Empty;
+        [DataMember]
         [Required]
         public JobTypeEnum JobType { get; set; }
-
+        [DataMember]
         public string? Salary { get; set; }
-
+        [DataMember]
         public string? Description { get; set; }
+        [DataMember]
         [Required]
         public VacancyStatusEnum Status { get; set; }
+        [DataMember]
         [Required]
         public DateTime CreatedAt { get; set; }
-
+        [DataMember]
         public string? Tags { get; set; }
-
+        [DataMember]
         public int Id { get; set; }
         public virtual Company Company { get; set; }
 

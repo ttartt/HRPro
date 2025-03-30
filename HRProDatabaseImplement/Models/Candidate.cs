@@ -2,16 +2,23 @@
 using HRProContracts.ViewModels;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRProDatabaseImplement.Models
 {
+    [DataContract]
     public class Candidate : ICandidateModel
     {
+        [DataMember]
         public int? TestTaskId { get; set; }
         [Required]
+        [DataMember]
         public string FIO { get; set; } = string.Empty;
+        [DataMember]
         public string? Email { get; set; }
+        [DataMember]
         public string? PhoneNumber { get; set; }
+        [DataMember]
         public int Id { get; set; }
         public virtual TestTask? TestTask { get; set; }
 

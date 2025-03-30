@@ -3,30 +3,40 @@ using HRProContracts.ViewModels;
 using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
 namespace HRproDatabaseImplement.Models
 {
+    [DataContract]
     public class Resume : IResumeModel
     {
         [Required]
+        [DataMember]
         public int VacancyId { get; set; }
         [Required]
+        [DataMember]
         public int UserId { get; set; }
         [Required]
+        [DataMember]
         public string Title { get; set; } = string.Empty;
         [Required]
+        [DataMember]
         public string Experience { get; set; } = string.Empty;
         [Required]
+        [DataMember]
         public string Education { get; set; } = string.Empty;
+        [DataMember]
         public string? Description { get; set; }
         [Required]
+        [DataMember]
         public string Skills { get; set; } = string.Empty;
         [Required]
+        [DataMember]
         public ResumeStatusEnum Status { get; set; }
         [Required]
+        [DataMember]
         public DateTime CreatedAt { get; set; }
-
+        [DataMember]
         public int Id { get; set; }
 
         public virtual Vacancy Vacancy { get; set; }

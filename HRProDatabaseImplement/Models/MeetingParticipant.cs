@@ -1,23 +1,23 @@
 ﻿using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
-using HRproDatabaseImplement.Models;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRProDatabaseImplement.Models
 {
+    [DataContract]
     public class MeetingParticipant : IMeetingParticipantModel
     {
         [Required]
+        [DataMember]
         public int UserId { get; set; }
 
         [Required]
+        [DataMember]
         public int MeetingId { get; set; }
-
+        [DataMember]
         public int Id { get; set; }
-
-        /*public virtual Meeting Meeting { get; set; }
-        public virtual User User { get; set; }*/
 
         public static MeetingParticipant? Create(MeetingParticipantBindingModel model)
         {

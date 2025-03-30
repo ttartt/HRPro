@@ -7,57 +7,64 @@ using HRProDatabaseImplement.Models;
 
 namespace HRProDatabaseImplement.Implements
 {
-    public class MeetingParticipantStorage : IMeetingParticipantStorage
+    public class DocumentTagStorage : IDocumentTagStorage
     {
-        public List<MeetingParticipantViewModel> GetFullList()
+        public List<DocumentTagViewModel> GetFullList()
         {
             using var context = new HRproDatabase();
-            return context.MeetingParticipants
+            return context.DocumentTags
                 .Select(x => x.GetViewModel)
                 .ToList();
         }
-        public List<MeetingParticipantViewModel> GetFilteredList(MeetingParticipantSearchModel model)
+        public List<DocumentTagViewModel> GetFilteredList(DocumentTagSearchModel model)
         {
             using var context = new HRproDatabase();
-            if (model.UserId.HasValue)
+            if (model.DocumentId.HasValue)
             {
-                return context.MeetingParticipants
-                .Where(x => x.UserId.Equals(model.UserId))
+                return context.DocumentTags
+                .Where(x => x.DocumentId.Equals(model.DocumentId))
                 .Select(x => x.GetViewModel)
                 .ToList();
             }
-            return context.MeetingParticipants
+            else if (model.TagId.HasValue)
+            {
+                return context.DocumentTags
+                .Where(x => x.TagId.Equals(model.TagId))
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
+            return context.DocumentTags
                 .Where(x => x.Id.Equals(model.Id))
                 .Select(x => x.GetViewModel)
                 .ToList();
         }
-        public MeetingParticipantViewModel? GetElement(MeetingParticipantSearchModel model)
+        public DocumentTagViewModel? GetElement(DocumentTagSearchModel model)
         {
             if (!model.Id.HasValue)
             {
                 return null;
             }
             using var context = new HRproDatabase();
-            return context.MeetingParticipants
+            return context.DocumentTags
                 .FirstOrDefault(x => x.Id == model.Id)
                 ?.GetViewModel;
         }
-        public MeetingParticipantViewModel? Insert(MeetingParticipantBindingModel model)
+        public DocumentTagViewModel? Insert(DocumentTagBindingModel model)
         {
-            var newMeetingParticipant = MeetingParticipant.Create(model);
-            if (newMeetingParticipant == null)
+            var newDocumentTag = DocumentTag.Create(model);
+            if (newDocumentTag == null)
             {
                 return null;
             }
             using var context = new HRproDatabase();
-            context.MeetingParticipants.Add(newMeetingParticipant);
+            context.DocumentTags.Add(newDocumentTag);
             context.SaveChanges();
-            return newMeetingParticipant.GetViewModel;
+            return newDocumentTag.GetViewModel;
         }
-        public MeetingParticipantViewModel? Update(MeetingParticipantBindingModel model)
+        public DocumentTagViewModel? Update(DocumentTagBindingModel model)
         {
             using var context = new HRproDatabase();
-            var criterion = context.MeetingParticipants.FirstOrDefault(x => x.Id == model.Id);
+            var criterion = context.DocumentTags.FirstOrDefault(x => x.Id == model.Id);
             if (criterion == null)
             {
                 return null;
@@ -66,13 +73,13 @@ namespace HRProDatabaseImplement.Implements
             context.SaveChanges();
             return criterion.GetViewModel;
         }
-        public MeetingParticipantViewModel? Delete(MeetingParticipantBindingModel model)
+        public DocumentTagViewModel? Delete(DocumentTagBindingModel model)
         {
             using var context = new HRproDatabase();
-            var element = context.MeetingParticipants.FirstOrDefault(rec => rec.Id == model.Id);
+            var element = context.DocumentTags.FirstOrDefault(rec => rec.Id == model.Id);
             if (element != null)
             {
-                context.MeetingParticipants.Remove(element);
+                context.DocumentTags.Remove(element);
                 context.SaveChanges();
                 return element.GetViewModel;
             }

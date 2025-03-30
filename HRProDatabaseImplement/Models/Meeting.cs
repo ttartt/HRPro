@@ -3,30 +3,39 @@ using HRProContracts.ViewModels;
 using HRproDatabaseImplement.Models;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace HRProDatabaseImplement.Models
 {
+    [DataContract]
     public class Meeting : IMeetingModel
     {
         [Required]
+        [DataMember]
         public int CandidateId { get; set; }
 
         [Required]
+        [DataMember]
         public string Topic { get; set; } = string.Empty;
 
         [Required]
+        [DataMember]
         public DateTime Date { get; set; }
 
         [Required]
+        [DataMember]
         public DateTime TimeFrom { get; set; }
 
         [Required]
+        [DataMember]
         public DateTime TimeTo { get; set; }
 
         [Required]
+        [DataMember]
         public int VacancyId { get; set; }
 
         [Required]
+        [DataMember]
         public string Place { get; set; } = string.Empty;
 
         public string? Comment { get; set; }

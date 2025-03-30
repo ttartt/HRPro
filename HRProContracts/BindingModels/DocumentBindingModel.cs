@@ -17,7 +17,7 @@ namespace HRProContracts.BindingModels
 
         public int TemplateId { get; set; }
 
-        public List<string> Tags { get; set; }
+        public Dictionary<int, string> Tags { get; set; } = new();
 
         public int Id { get; set; }
     }
