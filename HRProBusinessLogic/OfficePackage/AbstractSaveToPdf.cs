@@ -29,7 +29,7 @@ namespace HRProBusinessLogic.OfficePackage
             {
                 CreateParagraph(new PdfParagraph
                 {
-                    Text = $"- Кандидат: {resume.UserName}, Дата создания: {resume.CreatedAt:dd.MM.yyyy}, Статус: {resume.Status}",
+                    Text = $"- Кандидат: {resume.CandidateInfo}, Дата создания: {resume.CreatedAt:dd.MM.yyyy}, Статус: {resume.Status}",
                     Style = "Normal",
                     ParagraphAlignment = PdfParagraphAlignmentType.Left
                 });
@@ -50,7 +50,7 @@ namespace HRProBusinessLogic.OfficePackage
 
             CreateParagraph(new PdfParagraph
             {
-                Text = $"ФИО: {info.Resume.UserName ?? "Не указано"}",
+                Text = $"О кандидате: {info.Resume.CandidateInfo ?? "Не указано"}",
                 Style = "Normal",
                 ParagraphAlignment = PdfParagraphAlignmentType.Left
             });

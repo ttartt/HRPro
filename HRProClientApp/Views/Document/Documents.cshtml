@@ -59,10 +59,6 @@
                     <td>@document.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
                     <td>
                         <div class="d-flex justify-content-center">
-                            <a asp-action="DocumentEdit" asp-controller="Document" asp-route-id="@document.Id"
-                               class="btn btn-warning btn-sm me-2" title="Редактировать">
-                                <i class="bi bi-pencil-square"></i> Редактировать
-                            </a>
                             <a asp-action="Delete" asp-controller="Document" asp-route-id="@document.Id"
                                class="btn btn-danger btn-sm" title="Удалить"
                                onclick="return confirm('Вы уверены, что хотите удалить документ?');">

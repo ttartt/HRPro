@@ -265,31 +265,25 @@ namespace HRProDatabaseImplement.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    VacancyId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Experience = table.Column<string>(type: "text", nullable: false),
-                    Education = table.Column<string>(type: "text", nullable: false),
+                    VacancyId = table.Column<int>(type: "integer", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Experience = table.Column<string>(type: "text", nullable: true),
+                    Education = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    Skills = table.Column<string>(type: "text", nullable: false),
+                    Skills = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Salary = table.Column<string>(type: "text", nullable: true),
+                    CandidateInfo = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Resumes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Resumes_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Resumes_Vacancies_VacancyId",
                         column: x => x.VacancyId,
                         principalTable: "Vacancies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -396,11 +390,6 @@ namespace HRProDatabaseImplement.Migrations
                 name: "IX_Meetings_VacancyId",
                 table: "Meetings",
                 column: "VacancyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Resumes_UserId",
-                table: "Resumes",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Resumes_VacancyId",

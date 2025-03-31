@@ -1,0 +1,152 @@
+﻿@using HRProContracts.ViewModels
+@model List<ResumeViewModel>
+
+<div class="container mt-4">
+    <h1>Список резюме</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="search" class="form-label">Поиск по названию</label>
+            <input type="text" id="search" class="form-control" placeholder="Введите название..." oninput="filterResumes()">
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectModal">
+                <i class="bi bi-download"></i> Собрать резюме
+            </button>
+        </div>
+    </div>
+
+    <table class="table table-striped" id="resumesTable">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Опыт работы</th>
+                <th>Описание</th>
+                <th>Зарплата</th>
+                <th>Кандидат</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resume in Model)
+            {
+                <tr>
+                    <td>@resume.Title</td>
+                    <td>@resume.Experience</td>
+                    <td>@resume.Description</td>
+                    <td>@resume.Salary</td>
+                    <td>@resume.CandidateInfo</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Нет доступных резюме.</div>
+    }
+</div>
+
+<!-- Модальное окно для выбора города -->
+<div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="collectModalLabel">Выберите город</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <label for="citySelect" class="form-label">Город:</label>
+                <select id="citySelect" class="form-control">
+                    <option value="ulyanovsk">Ульяновск</option>
+                    <option value="novosibirsk">Новосибирск</option>
+                    <option value="kazan">Казань</option>
+                    <option value="samara">Самара</option>
+                    <option value="moskva">Москва</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="startCollectBtn">Начать сбор</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Лоадер -->
+<div id="loading" class="d-none text-center mt-4">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Загрузка...</span>
+    </div>
+    <p>Идет сбор резюме...</p>
+</div>
+
+<script>
+    function filterResumes() {
+        const searchInput = document.getElementById('search').value.toLowerCase();
+        const table = document.getElementById('resumesTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const titleCell = row.children[0].textContent.toLowerCase();
+            row.style.display = titleCell.includes(searchInput) ? '' : 'none';
+        });
+    }
+
+    document.getElementById("startCollectBtn").addEventListener("click", function () {
+        const city = document.getElementById("citySelect").value;
+        const loader = document.getElementById("loading");
+
+        var modal = new bootstrap.Modal(document.getElementById('collectModal'));
+        modal.hide();
+
+        loader.classList.remove("d-none");
+
+        fetch(`https://localhost:7072/api/Parser/Parse?cityName=${city}`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || `Ошибка HTTP: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || "Неизвестная ошибка");
+                }
+                loader.classList.add("d-none");
+                location.reload();
+            })
+            .catch(error => {
+                console.error("Ошибка:", error);
+                loader.classList.add("d-none");
+                alert("Ошибка при сборе резюме: " + error.message);
+            });
+    });
+</script>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f0f4f7;
+    }
+
+    .btn {
+        background-color: #3E12E3;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #2200A4;
+            transform: scale(1.05);
+        }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+</style>

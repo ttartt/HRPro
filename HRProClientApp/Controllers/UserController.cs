@@ -111,9 +111,25 @@ namespace HRProClientApp.Controllers
                 }
                 return Redirect($"/User/UserProfile/{model.Id}");
             }
+            catch (ArgumentNullException ex)
+            {
+                return Json(new { success = false, error = ex.ParamName, message = ex.Message });
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return Json(new { success = false, error = ex.ParamName, message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return Json(new { success = false, error = ex.ParamName, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new { success = false, error = "operation", message = ex.Message });
+            }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, error = "general", message = ex.Message });
             }
         }
 

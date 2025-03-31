@@ -5,24 +5,26 @@ namespace HRProContracts.BindingModels
 {
     public class ResumeBindingModel : IResumeModel
     {
-        public int VacancyId { get; set; }
+        public int? VacancyId { get; set; }
 
-        public int UserId { get; set; }
+        public string? Title { get; set; } = string.Empty;
 
-        public string Title { get; set; } = string.Empty;
+        public string? Experience { get; set; } = string.Empty;
 
-        public string Experience { get; set; } = string.Empty;
-
-        public string Education { get; set; } = string.Empty;
+        public string? Education { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
-        public string Skills { get; set; } = string.Empty;
+        public string? Skills { get; set; } = string.Empty;
 
         public ResumeStatusEnum Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public int Id { get; set; }
+
+        public string? Salary { get; set; } = string.Empty;
+
+        public string? CandidateInfo { get; set; } = string.Empty;
     }
 }

@@ -76,16 +76,16 @@ namespace HRProBusinessLogic.BusinessLogic
                 {
                     Id = element.Id,
                     VacancyId = element.VacancyId,
-                    VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = element.VacancyId }).JobTitle,
-                    UserId = element.UserId,
-                    UserName = _userStorage.GetElement(new UserSearchModel { Id = element.UserId }).Name + " " + _userStorage.GetElement(new UserSearchModel { Id = element.UserId }).Surname,
+                    //VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = element.VacancyId }).JobTitle,
                     Title = element.Title,
                     Experience = element.Experience,
                     Education = element.Education,
                     Description = element.Description,
                     Skills = element.Skills,
                     Status = element.Status,
-                    CreatedAt = element.CreatedAt
+                    CreatedAt = element.CreatedAt,
+                    Salary = element.Salary,
+                    CandidateInfo = element.CandidateInfo
                 };
                 result.Add(resumeViewModel);
             }
@@ -116,45 +116,9 @@ namespace HRProBusinessLogic.BusinessLogic
                 return;
             }
 
-            if (model.VacancyId <= 0)
-            {
-                throw new ArgumentException("Нет идентификатора вакансии", nameof(model.VacancyId));
-            }
-
-            if (model.UserId <= 0)
-            {
-                throw new ArgumentException("Нет идентификатора пользователя", nameof(model.UserId));
-            }
-
-            if (string.IsNullOrEmpty(model.Title))
-            {
-                throw new ArgumentNullException("Нет названия резюме", nameof(model.Title));
-            }
-
-            if (string.IsNullOrEmpty(model.Experience))
-            {
-                throw new ArgumentNullException("Нет опыта работы в резюме", nameof(model.Experience));
-            }
-
-            if (string.IsNullOrEmpty(model.Education))
-            {
-                throw new ArgumentNullException("Нет образования в резюме", nameof(model.Education));
-            }
-
-            if (string.IsNullOrEmpty(model.Skills))
-            {
-                throw new ArgumentNullException("Нет навыков в резюме", nameof(model.Skills));
-            }
-
-            if (string.IsNullOrEmpty(model.Status.ToString()))
-            {
-                throw new ArgumentNullException("Нет статуса резюме", nameof(model.Status));
-            }
-
             var element = _resumeStorage.GetElement(new ResumeSearchModel
             {
                 VacancyId = model.VacancyId,
-                UserId = model.UserId,
                 Title = model.Title
             });
 

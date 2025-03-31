@@ -15,7 +15,6 @@ namespace HRproDatabaseImplement.Implements
 
             var element = context.Resumes
                 .Include(x => x.Vacancy)
-                .Include(x => x.User)
                 .FirstOrDefault(rec => rec.Id == model.Id);
 
             if (element != null)
@@ -36,8 +35,7 @@ namespace HRproDatabaseImplement.Implements
             {
                 return context.Resumes
                     .Include(x => x.Vacancy)
-                    .Include(x => x.User)
-                    .FirstOrDefault(x => x.VacancyId == model.VacancyId && x.UserId == model.UserId)
+                    .FirstOrDefault(x => x.VacancyId == model.VacancyId)
                     ?.GetViewModel;
             }
 
@@ -45,19 +43,11 @@ namespace HRproDatabaseImplement.Implements
             {
                 return context.Resumes
                     .Include(x => x.Vacancy)
-                    .Include(x => x.User)
                     .FirstOrDefault(x => x.VacancyId == model.VacancyId)
                     ?.GetViewModel;
             }
 
-            if (model.UserId.HasValue)
-            {
-                return context.Resumes
-                    .Include(x => x.Vacancy)
-                    .Include(x => x.User)
-                    .FirstOrDefault(x => x.UserId == model.UserId)
-                    ?.GetViewModel;
-            }
+            
             if (!model.Id.HasValue)
             {
                 return null;
@@ -67,14 +57,12 @@ namespace HRproDatabaseImplement.Implements
             {
                 return context.Resumes
                     .Include(x => x.Vacancy)
-                    .Include(x => x.User)
                     .FirstOrDefault(x => x.Title == model.Title)
                     ?.GetViewModel;
             }
 
             return context.Resumes
                 .Include(x => x.Vacancy)
-                .Include(x => x.User)
                 .FirstOrDefault(x => model.Id.HasValue && x.Id == model.Id)
                 ?.GetViewModel;
         }
@@ -90,29 +78,17 @@ namespace HRproDatabaseImplement.Implements
             {
                 return context.Resumes
                     .Include(x => x.Vacancy)
-                    .Include(x => x.User)
                     .Where(x => x.VacancyId == model.VacancyId)
                     .ToList()
                     .Select(x => x.GetViewModel)
                     .ToList();
             }
 
-            if (model.UserId.HasValue)
-            {
-                return context.Resumes
-                    .Include(x => x.Vacancy)
-                    .Include(x => x.User)
-                    .Where(x => x.UserId == model.UserId)
-                    .ToList()
-                    .Select(x => x.GetViewModel)
-                    .ToList();
-            }
 
             if (!string.IsNullOrEmpty(model.Title))
             {
                 return context.Resumes
                     .Include(x => x.Vacancy)
-                    .Include(x => x.User)
                     .Where(x => x.Title == model.Title)
                     .ToList()
                     .Select(x => x.GetViewModel)
@@ -120,7 +96,6 @@ namespace HRproDatabaseImplement.Implements
             }
             return context.Resumes
                 .Include(x => x.Vacancy)
-                .Include(x => x.User)
                 .ToList()
                 .Select(x => x.GetViewModel)  
                 .ToList();
@@ -132,7 +107,6 @@ namespace HRproDatabaseImplement.Implements
 
             return context.Resumes
                 .Include(x => x.Vacancy)
-                .Include(x => x.User)
                 .Select(x => x.GetViewModel).ToList();
         }
 
@@ -152,7 +126,6 @@ namespace HRproDatabaseImplement.Implements
 
             return context.Resumes
                 .Include(x => x.Vacancy)
-                .Include(x => x.User)
                 .FirstOrDefault(x => x.Id == newResume.Id)
                 ?.GetViewModel;
         }
@@ -163,7 +136,6 @@ namespace HRproDatabaseImplement.Implements
 
             var resume = context.Resumes
                 .Include(x => x.Vacancy)
-                .Include(x => x.User)
                 .FirstOrDefault(x => x.Id == model.Id);
 
             if (resume == null)

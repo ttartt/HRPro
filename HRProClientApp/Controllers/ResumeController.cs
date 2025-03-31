@@ -30,7 +30,7 @@ namespace HRProClientApp.Controllers
                 return NotFound("Резюме не найдено.");
             }
 
-            var reportFilePath = $"C:\\Users\\User\\source\\repos\\HRPro\\Резюме_{resume.UserName}.pdf";
+            var reportFilePath = $"C:\\Users\\User\\source\\repos\\HRPro\\Резюме_{resume.CandidateInfo}.pdf";
 
             APIClient.PostRequest("api/report/resume", new ReportBindingModel
             {
@@ -43,7 +43,24 @@ namespace HRProClientApp.Controllers
                 return NotFound("Файл отчета не найден.");
             }
 
-            return PhysicalFile(reportFilePath, "application/pdf", $"Резюме_{resume.UserName}.pdf");
+            return PhysicalFile(reportFilePath, "application/pdf", $"Резюме_{resume.CandidateInfo}.pdf");
+        }
+
+        [HttpGet]
+        public IActionResult Resumes()
+        {
+            if (APIClient.User == null)
+            {
+                return Redirect("~/Home/Enter");
+            }
+
+            var list = APIClient.GetRequest <List<ResumeViewModel>?>($"api/resume/list");
+            if (list == null)
+            {
+                return View();
+            }
+
+            return View(list);
         }
 
         [HttpGet]
@@ -82,7 +99,7 @@ namespace HRProClientApp.Controllers
             }
             else
             {
-                model = new ResumeViewModel { UserId = APIClient.User.Id, VacancyId = vacancyId ?? 0 };
+                model = new ResumeViewModel { VacancyId = vacancyId ?? 0 };
             }
             return View(model);
         }
@@ -111,7 +128,6 @@ namespace HRProClientApp.Controllers
                 }
                 else
                 {
-                    model.UserId = APIClient.User.Id;
                     if (isDraft)
                     {
                         model.Status = HRProDataModels.Enums.ResumeStatusEnum.Черновик;
@@ -121,7 +137,7 @@ namespace HRProClientApp.Controllers
                         model.Status = HRProDataModels.Enums.ResumeStatusEnum.Обрабатывается;
                     }
                     var vacancy = APIClient.GetRequest<VacancyViewModel>($"api/vacancy/details?id={model.VacancyId}");
-                    var resume = APIClient.GetRequest<ResumeViewModel>($"api/resume/check?userId={model.UserId}&vacancyId={model.VacancyId}");
+                    var resume = APIClient.GetRequest<ResumeViewModel>($"api/resume/check?vacancyId={model.VacancyId}");
                     if (resume == null)
                     {
                         APIClient.PostRequest("api/resume/create", model);
@@ -136,7 +152,6 @@ namespace HRProClientApp.Controllers
                                 Skills = model.Skills,
                                 Status = model.Status,
                                 Title = model.Title,
-                                UserId = model.UserId,
                                 VacancyId = model.VacancyId
                             });
                         }
@@ -150,7 +165,7 @@ namespace HRProClientApp.Controllers
                         throw new Exception("Вы уже создавали резюме на эту вакансию!");
                     }
                 }
-                return Redirect($"~/User/UserProfile/{model.UserId}");
+                return Redirect($"~/User/UserProfile/{APIClient.User.Id}");
             }
             catch (Exception ex)
             {

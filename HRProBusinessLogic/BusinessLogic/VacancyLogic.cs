@@ -70,8 +70,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 Id = r.Id,
                 VacancyId = r.VacancyId,
                 VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = r.VacancyId }).JobTitle,
-                UserName = _userStorage.GetElement(new UserSearchModel { Id = r.UserId}).Name + " " + _userStorage.GetElement(new UserSearchModel { Id = r.UserId }).Surname,
-                UserId = r.UserId,
                 Title = r.Title,
                 Experience = r.Experience,
                 Education = r.Education,

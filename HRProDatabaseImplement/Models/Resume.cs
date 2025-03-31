@@ -10,26 +10,18 @@ namespace HRproDatabaseImplement.Models
     [DataContract]
     public class Resume : IResumeModel
     {
-        [Required]
         [DataMember]
-        public int VacancyId { get; set; }
-        [Required]
+        public int? VacancyId { get; set; }
         [DataMember]
-        public int UserId { get; set; }
-        [Required]
+        public string? Title { get; set; } = string.Empty;
         [DataMember]
-        public string Title { get; set; } = string.Empty;
-        [Required]
+        public string? Experience { get; set; } = string.Empty;
         [DataMember]
-        public string Experience { get; set; } = string.Empty;
-        [Required]
-        [DataMember]
-        public string Education { get; set; } = string.Empty;
+        public string? Education { get; set; } = string.Empty;
         [DataMember]
         public string? Description { get; set; }
-        [Required]
         [DataMember]
-        public string Skills { get; set; } = string.Empty;
+        public string? Skills { get; set; } = string.Empty;
         [Required]
         [DataMember]
         public ResumeStatusEnum Status { get; set; }
@@ -37,10 +29,13 @@ namespace HRproDatabaseImplement.Models
         [DataMember]
         public DateTime CreatedAt { get; set; }
         [DataMember]
+        public string? Salary { get; set; } = string.Empty;
+        [DataMember]
+        public string? CandidateInfo { get; set; } = string.Empty;
+        [DataMember]
         public int Id { get; set; }
 
         public virtual Vacancy Vacancy { get; set; }
-        public virtual User User { get; set; }
 
         public static Resume? Create(ResumeBindingModel model)
         {
@@ -52,14 +47,15 @@ namespace HRproDatabaseImplement.Models
             {
                 Id = model.Id,
                 VacancyId = model.VacancyId,
-                UserId = model.UserId,
                 Title = model.Title,
                 Experience = model.Experience,
                 Education = model.Education,
                 Description = model.Description,
                 Skills = model.Skills,
-                Status = model.Status,
-                CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4)
+                Status = ResumeStatusEnum.Обрабатывается,
+                CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
+                Salary = model.Salary,
+                CandidateInfo = model.CandidateInfo
             };
         }
         public static Resume Create(ResumeViewModel model)
@@ -68,14 +64,15 @@ namespace HRproDatabaseImplement.Models
             {
                 Id = model.Id,
                 VacancyId = model.VacancyId,
-                UserId = model.UserId,
                 Title = model.Title,
                 Experience = model.Experience,
                 Education = model.Education,
                 Description = model.Description,
                 Skills = model.Skills,
-                Status = model.Status,
-                CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4)
+                Status = ResumeStatusEnum.Обрабатывается,
+                CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
+                Salary = model.Salary,
+                CandidateInfo = model.CandidateInfo
             };
         }
         public void Update(ResumeBindingModel model)
@@ -84,27 +81,28 @@ namespace HRproDatabaseImplement.Models
             {
                 return;
             }
-            VacancyId = model.VacancyId;
-            UserId = model.UserId;
             Title = model.Title;
             Experience = model.Experience;
             Education = model.Education;
             Description = model.Description;
             Skills = model.Skills;
             Status = model.Status;
+            Salary = model.Salary;
+            CandidateInfo = model.CandidateInfo;
         }
         public ResumeViewModel GetViewModel => new()
         {
             Id = Id,
             VacancyId = VacancyId,
-            UserId = UserId,
             Title = Title,
             Experience = Experience,
             Education = Education,
             Description = Description,
             Skills = Skills,
-            Status = Status,
-            CreatedAt = CreatedAt
+            Status = ResumeStatusEnum.Обрабатывается,
+            CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
+            Salary = Salary,
+            CandidateInfo = CandidateInfo
         };
     }
 }

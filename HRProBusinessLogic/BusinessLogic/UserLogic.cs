@@ -66,22 +66,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 _logger.LogWarning("ReadElement: User not found for Id: {Id}", model.Id);
                 return null;
             }
-            var resumes = _resumeStorage.GetFilteredList(new ResumeSearchModel { UserId = element.Id });
-            var resumeViewModels = resumes?.Select(r => new ResumeViewModel
-            {
-                Id = r.Id,
-                VacancyId = r.VacancyId,
-                UserName = element.Name + " " + element.Surname,
-                VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = r.VacancyId }).JobTitle,
-                UserId = r.UserId,
-                Title = r.Title,
-                Experience = r.Experience,
-                Education = r.Education,
-                Description = r.Description,
-                Skills = r.Skills,
-                CreatedAt = r.CreatedAt,
-                Status = r.Status
-            }).ToList() ?? new List<ResumeViewModel>();
 
             string hashedPassword = element.Password;
             if (model.Password != element.Password && model.Password != null)

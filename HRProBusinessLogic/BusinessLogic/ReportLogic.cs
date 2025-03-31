@@ -28,7 +28,6 @@ namespace HRProBusinessLogic.BusinessLogic
             {
                 Id = model.ResumeId
             });
-            resume.UserName = _userStorage.GetElement(new UserSearchModel { Id = resume.UserId }).Surname + " " + _userStorage.GetElement(new UserSearchModel { Id = resume.UserId }).Name + " " + _userStorage.GetElement(new UserSearchModel { Id = resume.UserId }).LastName;
             resume.VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = resume.VacancyId }).JobTitle;
             if (resume != null)
             {
@@ -53,10 +52,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 (!model.DateFrom.HasValue || resume.CreatedAt >= model.DateFrom.Value) &&
                 (!model.DateTo.HasValue || resume.CreatedAt <= model.DateTo.Value)).ToList();
 
-            foreach (var item in list)
-            {
-                item.UserName = _userStorage.GetElement(new UserSearchModel { Id = item.UserId }).Surname + " " + _userStorage.GetElement(new UserSearchModel { Id = item.UserId }).Name + " " + _userStorage.GetElement(new UserSearchModel { Id = item.UserId }).LastName;
-            }
             
             if (list != null)
             {

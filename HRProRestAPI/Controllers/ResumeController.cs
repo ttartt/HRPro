@@ -36,6 +36,20 @@ namespace HRProRestApi.Controllers
         }
 
         [HttpGet]
+        public List<ResumeViewModel>? List()
+        {
+            try
+            {
+                return _logic.ReadList(null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения резюме");
+                throw;
+            }
+        }
+
+        [HttpGet]
         public ResumeViewModel? Check(int userId, int vacancyId)
         {
             try

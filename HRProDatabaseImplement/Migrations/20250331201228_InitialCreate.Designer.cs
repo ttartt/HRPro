@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HRProDatabaseImplement.Migrations
 {
     [DbContext(typeof(HRproDatabase))]
-    [Migration("20250330150216_InitialCreate")]
+    [Migration("20250331201228_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -390,6 +390,9 @@ namespace HRProDatabaseImplement.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CandidateInfo")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -397,33 +400,27 @@ namespace HRProDatabaseImplement.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Education")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Experience")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Salary")
                         .HasColumnType("text");
 
                     b.Property<string>("Skills")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("VacancyId")
+                    b.Property<int?>("VacancyId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("VacancyId");
 
@@ -609,19 +606,9 @@ namespace HRProDatabaseImplement.Migrations
 
             modelBuilder.Entity("HRproDatabaseImplement.Models.Resume", b =>
                 {
-                    b.HasOne("HRproDatabaseImplement.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("HRproDatabaseImplement.Models.Vacancy", "Vacancy")
                         .WithMany()
-                        .HasForeignKey("VacancyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                        .HasForeignKey("VacancyId");
 
                     b.Navigation("Vacancy");
                 });
