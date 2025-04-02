@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HtmlAgilityPack;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using HRproDatabaseImplement.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
+using HRProContracts.ViewModels;
 
 namespace HRProRestApi.Controllers
 {
@@ -18,58 +14,121 @@ namespace HRProRestApi.Controllers
         private readonly ILogger _logger;
         private readonly IResumeLogic _logic;
 
-        public ParserController(IHttpClientFactory httpClientFactory, IResumeLogic logic, ILogger<ParserController> logger)
+        public ParserController(IHttpClientFactory httpClientFactory,
+                              IResumeLogic logic,
+                              ILogger<ParserController> logger)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
             _logger = logger;
             _logic = logic;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Parse(string? cityName)
+        public async Task<IActionResult> Parse([FromQuery] string? cityName)
         {
-            string url = cityName != null ? $"https://www.avito.ru/{cityName}/rezume" : "https://www.avito.ru/ulyanovsk/rezume";
-            var response = await _httpClient.GetStringAsync(url);
-
-            var doc = new HtmlDocument();
-            doc.LoadHtml(response);
-
-            var resumes = new List<ResumeBindingModel>();
-
-            var resumeNodes = doc.DocumentNode.SelectNodes("/html/body/div[1]/div/buyer-location/div/div/div/div[2]/div/div[2]/div[3]/div[3]/div[4]/div[2]");
-
-            if (resumeNodes == null || !resumeNodes.Any())
+            try
             {
-                _logger.LogWarning("Резюме не найдены на странице: {Url}", url);
-                return BadRequest(new { success = false, message = "Резюме не найдены" }); // ⬅ Теперь отдаем ошибку
-            }
+                string url = cityName != null
+                    ? $"https://www.avito.ru/{cityName}/rezume"
+                    : "https://www.avito.ru/ulyanovsk/rezume";
 
-            foreach (var node in resumeNodes)
-            {
-                var resume = new ResumeBindingModel
-                {
-                    Title = node.SelectSingleNode("./div[5]/div/div/div[2]/div[2]/div[1]/div/a/h3")?.InnerText.Trim(),
-                    Experience = node.SelectSingleNode("./div[5]/div/div/div[2]/div[4]/div[2]/p")?.InnerText.Trim(),
-                    Description = node.SelectSingleNode("./div[1]/div/div/div[2]/div[4]/div[1]/p")?.InnerText.Trim(),
-                    Salary = node.SelectSingleNode("./div[5]/div/div/div[2]/div[2]/div[2]/span/div/div/p/strong/span")?.InnerText.Trim(),
-                    CandidateInfo = node.SelectSingleNode("./div[5]/div/div/div[2]/div[4]/div[1]/p/span/span")?.InnerText.Trim()
-                };
+                var response = await _httpClient.GetStringAsync(url);
+                var doc = new HtmlDocument();
+                doc.LoadHtml(response);
 
-                try
+                var savedCount = 0;
+                var resumes = new List<ResumeBindingModel>();
+                var resumeNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'iva-item-content')]");
+
+                if (resumeNodes == null || !resumeNodes.Any())
                 {
-                    _logic.Create(resume);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Ошибка создания резюме");
-                    return StatusCode(500, new { success = false, message = "Ошибка сервера" }); // ⬅ Теперь корректно отдаем ошибку
+                    return Ok(new ApiResponse<List<ResumeBindingModel>>
+                    {
+                        Success = true,
+                        Message = "Резюме не найдены на странице",
+                        Data = new List<ResumeBindingModel>()
+                    });
                 }
 
-                resumes.Add(resume);
-            }
+                foreach (var node in resumeNodes)
+                {
+                    try
+                    {
+                        var resume = ParseResumeNode(node, cityName ?? "Неизвестен");
 
-            return Ok(new { success = true, resumes });
+                        if (resume != null && !string.IsNullOrEmpty(resume.Title))
+                        {
+                            var created = _logic.Create(resume);
+                            if (created)
+                            {
+                                savedCount++;
+                                resumes.Add(resume);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Ошибка обработки резюме");
+                    }
+                }
+
+                return Ok(new ApiResponse<List<ResumeBindingModel>>
+                {
+                    Success = true,
+                    Message = savedCount > 0
+                        ? $"Успешно сохранено {savedCount} резюме"
+                        : "Новые резюме не найдены",
+                    Data = resumes.Take(20).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка сбора резюме");
+                return StatusCode(500, new ApiResponse<List<ResumeBindingModel>>
+                {
+                    Success = false,
+                    Message = $"Ошибка сервера: {ex.Message}",
+                    Data = new List<ResumeBindingModel>()
+                });
+            }
         }
 
+        private ResumeBindingModel? ParseResumeNode(HtmlNode node, string city)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Parsing node: " + node.OuterHtml);
+
+                return new ResumeBindingModel
+                {
+                    Title = node.SelectSingleNode(".//h3[@itemprop='name']")?.InnerText?.Trim()
+                           ?? node.SelectSingleNode(".//h3[contains(@class, 'title')]")?.InnerText?.Trim(),
+
+                    City = city,
+
+                    Experience = node.SelectSingleNode(".//p[contains(@data-marker, 'experience')]")?.InnerText?.Trim()
+                                ?? node.SelectSingleNode(".//span[contains(text(), 'опыт')]")?.InnerText?.Trim(),
+
+                    Description = node.SelectSingleNode(".//div[contains(@data-marker, 'description')]")?.InnerText?.Trim()
+                                 ?? node.SelectSingleNode(".//div[contains(@class, 'description')]")?.InnerText?.Trim(),
+
+                    Salary = node.SelectSingleNode(".//*[@data-marker='item-price']")?.InnerText?.Trim()
+                            ?? node.SelectSingleNode(".//meta[@itemprop='price']")?.GetAttributeValue("content", ""),
+
+                    CandidateInfo = node.SelectSingleNode(".//*[@data-marker='item-line']")?.InnerText?.Trim()
+                                  ?? node.SelectSingleNode(".//div[contains(@class, 'data')]//span")?.InnerText?.Trim(),
+
+                    Url = "https://www.avito.ru" +
+                         (node.SelectSingleNode(".//a[contains(@href, '/rezume/')]")?.GetAttributeValue("href", "")
+                          ?? string.Empty)
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error parsing resume: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

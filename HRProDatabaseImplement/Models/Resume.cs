@@ -15,6 +15,10 @@ namespace HRproDatabaseImplement.Models
         [DataMember]
         public string? Title { get; set; } = string.Empty;
         [DataMember]
+        public string? City { get; set; } = string.Empty;
+        [DataMember]
+        public string? Url { get; set; } = string.Empty;
+        [DataMember]
         public string? Experience { get; set; } = string.Empty;
         [DataMember]
         public string? Education { get; set; } = string.Empty;
@@ -47,13 +51,15 @@ namespace HRproDatabaseImplement.Models
             {
                 Id = model.Id,
                 VacancyId = model.VacancyId,
+                Url = model.Url,
                 Title = model.Title,
+                City = model.City,
                 Experience = model.Experience,
                 Education = model.Education,
                 Description = model.Description,
                 Skills = model.Skills,
                 Status = ResumeStatusEnum.Обрабатывается,
-                CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
+                CreatedAt = DateTime.Now.ToUniversalTime(),
                 Salary = model.Salary,
                 CandidateInfo = model.CandidateInfo
             };
@@ -64,13 +70,15 @@ namespace HRproDatabaseImplement.Models
             {
                 Id = model.Id,
                 VacancyId = model.VacancyId,
+                Url = model.Url,
                 Title = model.Title,
+                City = model.City,
                 Experience = model.Experience,
                 Education = model.Education,
                 Description = model.Description,
                 Skills = model.Skills,
                 Status = ResumeStatusEnum.Обрабатывается,
-                CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
+                CreatedAt = DateTime.Now.ToUniversalTime(),
                 Salary = model.Salary,
                 CandidateInfo = model.CandidateInfo
             };
@@ -82,6 +90,8 @@ namespace HRproDatabaseImplement.Models
                 return;
             }
             Title = model.Title;
+            City = model.City;
+            Url = model.Url;
             Experience = model.Experience;
             Education = model.Education;
             Description = model.Description;
@@ -94,13 +104,15 @@ namespace HRproDatabaseImplement.Models
         {
             Id = Id,
             VacancyId = VacancyId,
+            Url = Url,
             Title = Title,
+            City = City,
             Experience = Experience,
             Education = Education,
             Description = Description,
             Skills = Skills,
             Status = ResumeStatusEnum.Обрабатывается,
-            CreatedAt = DateTime.Now.ToUniversalTime().AddHours(4),
+            CreatedAt = DateTime.Now.ToUniversalTime(),
             Salary = Salary,
             CandidateInfo = CandidateInfo
         };

@@ -1,13 +1,23 @@
 ﻿@using HRProContracts.ViewModels
 @model List<ResumeViewModel>
 
-<div class="container mt-4">
-    <h1>Список резюме</h1>
+@{
+    var cities = ViewBag.Cities as List<CityViewModel>;
+}
 
-    <div class="row mb-4">
+<div class="container mt-4">
+    <h1>Резюме</h1>
+    <div class="row mb-3">
         <div class="col-md-4">
             <label for="search" class="form-label">Поиск по названию</label>
             <input type="text" id="search" class="form-control" placeholder="Введите название..." oninput="filterResumes()">
+        </div>
+        <div class="col-md-4">
+            <label for="sortDate" class="form-label">Сортировка по дате</label>
+            <select id="sortDate" class="form-select" onchange="sortResumes()">
+                <option value="desc">Сначала новые</option>
+                <option value="asc">Сначала старые</option>
+            </select>
         </div>
         <div class="col-md-4">
             <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectModal">
@@ -20,21 +30,55 @@
         <thead>
             <tr>
                 <th>Название</th>
-                <th>Опыт работы</th>
-                <th>Описание</th>
                 <th>Зарплата</th>
                 <th>Кандидат</th>
+                <th>Город</th>
+                <th>Дата добавления</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var resume in Model)
             {
+                var cityName = cities?.FirstOrDefault(c => c.Code == resume.City)?.Name ?? "Неизвестен";
                 <tr>
                     <td>@resume.Title</td>
-                    <td>@resume.Experience</td>
-                    <td>@resume.Description</td>
                     <td>@resume.Salary</td>
                     <td>@resume.CandidateInfo</td>
+                    <td>@cityName</td>
+                    <td>@resume.CreatedAt.ToUniversalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a asp-action="ResumeDetails" asp-controller="Resume" asp-route-id="@resume.Id"
+                               class="btn btn-info btn-sm" title="Подробнее">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            @if (!string.IsNullOrEmpty(resume.Url))
+                            {
+                                <a href="@resume.Url"
+                                   class="btn btn-primary btn-sm"
+                                   title="Перейти к резюме"
+                                   target="_blank">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-sm" disabled
+                                        title="Ссылка не указана">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </button>
+                            }
+
+                            <a asp-action="Delete" asp-controller="Resume" asp-route-id="@resume.Id"
+                               class="btn btn-danger btn-sm"
+                               title="Удалить"
+                               onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -44,43 +88,269 @@
     {
         <div class="alert alert-info">Нет доступных резюме.</div>
     }
+
+    <nav aria-label="Page navigation" id="paginationContainer">
+        <ul class="pagination justify-content-center" id="pagination">
+        </ul>
+    </nav>
 </div>
 
-<!-- Модальное окно для выбора города -->
-<div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
+<div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-modal="true" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="collectModalLabel">Выберите город</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
-            <div class="modal-body">
-                <label for="citySelect" class="form-label">Город:</label>
-                <select id="citySelect" class="form-control">
-                    <option value="ulyanovsk">Ульяновск</option>
-                    <option value="novosibirsk">Новосибирск</option>
-                    <option value="kazan">Казань</option>
-                    <option value="samara">Самара</option>
-                    <option value="moskva">Москва</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-primary" id="startCollectBtn">Начать сбор</button>
-            </div>
+            <form id="collectResumeForm" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="collectModalLabel">Выберите город</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="cityName" class="form-label">Город:</label>
+                    <select id="cityName" name="cityName" class="form-select">
+                        @foreach (var city in cities)
+                        {
+                            <option value="@city.Code">@city.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-info" id="collectButton">Начать сбор</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Лоадер -->
-<div id="loading" class="d-none text-center mt-4">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Загрузка...</span>
+<div id="modalLoader" class="d-none" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center;" inert>
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <p class="mt-2">Сбор резюме...</p>
     </div>
-    <p>Идет сбор резюме...</p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const itemsPerPage = 10;
+    let currentPage = 1;
+    let allResumes = @Html.Raw(Json.Serialize(Model));
+    let sortOrder = 'desc';
+
+    const citiesMap = {
+    @foreach (var city in ViewBag.Cities)
+    {
+        @:"@city.Code": "@city.Name",
+    }
+        };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateTable();
+        setupPagination();
+
+        document.getElementById('collectResumeForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const modal = document.getElementById('collectModal');
+            const modalLoader = document.getElementById('modalLoader');
+            const collectButton = document.getElementById('collectButton');
+
+            modalLoader.classList.remove('d-none');
+            collectButton.disabled = true;
+
+            const cityName = document.getElementById('cityName').value;
+
+            try {
+                const response = await fetch(`/Resume/CollectResume?cityName=${cityName}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, "success");
+                    setTimeout(() => {
+                        const modalInstance = bootstrap.Modal.getInstance(modal);
+                        modalInstance.hide();
+                        window.location.href = data.redirectUrl;
+                    }, 1500);
+                } else {
+                    showToast(data.message, "danger");
+                }
+            } catch (error) {
+                showToast("Ошибка сети: " + error.message, "danger");
+            } finally {
+                modalLoader.classList.add('d-none');
+                collectButton.disabled = false;
+            }
+        });
+    });
+    
+
+    function sortResumes() {
+        sortOrder = document.getElementById('sortDate').value;
+        applySorting();
+        updateTable();
+    }
+
+    function applySorting() {
+        allResumes.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        applySorting();
+        updateTable();
+        setupPagination();
+    });
+
+    function updateTable() {
+        const tableBody = document.querySelector("#resumesTable tbody");
+        tableBody.innerHTML = "";
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedResumes = allResumes.slice(startIndex, endIndex);
+
+        paginatedResumes.forEach(resume => {
+            const cityName = citiesMap[resume.city] || 'Неизвестен';
+            const row = `
+                    <tr>
+                        <td>${resume.title ?? 'Нет данных'}</td>
+                        <td>${resume.salary ?? 'Нет данных'}</td>
+                        <td>${resume.candidateInfo ?? 'Нет данных'}</td>
+                        <td>${cityName}</td>
+                            <td>${formatDateTime(resume.createdAt)}</td>
+                            <td>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="/Resume/ResumeDetails/${resume.id}"
+                               class="btn btn-info btn-sm" title="Подробнее">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            ${resume.url
+                    ? `<a href="${resume.url}"
+                                        class="btn btn-primary btn-sm"
+                                        title="Перейти к резюме"
+                                        target="_blank">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                      </a>`
+                    : `<button class="btn btn-secondary btn-sm" disabled
+                                          title="Ссылка не указана">
+                                          <i class="bi bi-box-arrow-up-right"></i>
+                                       </button>`
+                }
+
+                            <a href="/Resume/Delete/${resume.id}"
+                               class="btn btn-danger btn-sm"
+                               title="Удалить"
+                               onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                    </tr>
+                `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function formatDateTime(dateString) {
+        const options = {
+            timeZone: 'Europe/Ulyanovsk',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        return new Date(dateString).toLocaleString('ru-RU', options);
+    }
+
+    function setupPagination() {
+        const pagination = document.getElementById('pagination');
+        const pageCount = Math.ceil(allResumes.length / itemsPerPage);
+
+        pagination.innerHTML = "";
+
+        if (pageCount <= 1) {
+            document.getElementById('paginationContainer').classList.add('d-none');
+            return;
+        }
+
+        document.getElementById('paginationContainer').classList.remove('d-none');
+
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Назад"><span aria-hidden="true">&laquo;</span></a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        addPageItem(1);
+
+        if (currentPage > 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+            pagination.appendChild(dotsLi);
+        }
+
+        const startPage = Math.max(2, currentPage - 1);
+        const endPage = Math.min(pageCount - 1, currentPage + 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            addPageItem(i);
+        }
+
+        if (currentPage < pageCount - 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+            pagination.appendChild(dotsLi);
+        }
+
+        if (pageCount > 1) {
+            addPageItem(pageCount);
+        }
+
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Вперед"><span aria-hidden="true">&raquo;</span></a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+                currentPage++;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(nextLi);
+    }
+
+    function addPageItem(pageNumber) {
+        const pagination = document.getElementById('pagination');
+        const li = document.createElement('li');
+        li.className = `page-item ${pageNumber === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${pageNumber}</a>`;
+
+        li.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage = pageNumber;
+            updateTable();
+            setupPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        pagination.appendChild(li);
+    }
+
     function filterResumes() {
         const searchInput = document.getElementById('search').value.toLowerCase();
         const table = document.getElementById('resumesTable');
@@ -92,42 +362,38 @@
         });
     }
 
-    document.getElementById("startCollectBtn").addEventListener("click", function () {
-        const city = document.getElementById("citySelect").value;
-        const loader = document.getElementById("loading");
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
 
-        var modal = new bootstrap.Modal(document.getElementById('collectModal'));
-        modal.hide();
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
 
-        loader.classList.remove("d-none");
+        toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+            `;
 
-        fetch(`https://localhost:7072/api/Parser/Parse?cityName=${city}`)
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message || `Ошибка HTTP: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data.success) {
-                    throw new Error(data.message || "Неизвестная ошибка");
-                }
-                loader.classList.add("d-none");
-                location.reload();
-            })
-            .catch(error => {
-                console.error("Ошибка:", error);
-                loader.classList.add("d-none");
-                alert("Ошибка при сборе резюме: " + error.message);
-            });
-    });
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
 </script>
 
 <style>
     .table-hover tbody tr:hover {
         background-color: #f0f4f7;
+        cursor: pointer;
     }
 
     .btn {
@@ -140,13 +406,43 @@
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-        .btn:hover {
-            background-color: #2200A4;
-            transform: scale(1.05);
-        }
+    .btn:hover {
+        background-color: #2200A4;
+        transform: scale(1.05);
+    }
 
     .spinner-border {
         width: 3rem;
         height: 3rem;
+    }
+
+    .page-item.active .page-link {
+        background-color: #3E12E3;
+        border-color: #3E12E3;
+    }
+
+    .page-link {
+        color: #3E12E3;
+    }
+
+    select {
+        appearance: auto;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+    }
+
+    #modalLoader {
+        border-radius: 0.5rem;
+    }
+
+    #modalLoader .spinner-border {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    #modalLoader p {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #333;
     }
 </style>

@@ -23,18 +23,20 @@ namespace HRProBusinessLogic.BusinessLogic
         }
         public bool Create(ResumeBindingModel model)
         {
-            CheckModel(model);
-            if (_resumeStorage.Insert(model) == null)
+            if (CheckModel(model))
             {
-                _logger.LogWarning("Insert operation failed");
-                return false;
-            }
+                if (_resumeStorage.Insert(model) == null)
+                {
+                    _logger.LogWarning("Insert operation failed");
+                    return false;
+                }
+            }            
             return true;
         }
 
         public bool Delete(ResumeBindingModel model)
         {
-            CheckModel(model, false);
+            CheckModel(model);
             _logger.LogInformation("Delete. Id: {Id}", model.Id);
             if (_resumeStorage.Delete(model) == null)
             {
@@ -76,6 +78,8 @@ namespace HRProBusinessLogic.BusinessLogic
                 {
                     Id = element.Id,
                     VacancyId = element.VacancyId,
+                    City = element.City,
+                    Url = element.Url,
                     //VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = element.VacancyId }).JobTitle,
                     Title = element.Title,
                     Experience = element.Experience,
@@ -104,28 +108,26 @@ namespace HRProBusinessLogic.BusinessLogic
             return true;
         }
 
-        private void CheckModel(ResumeBindingModel model, bool withParams = true)
+        private bool CheckModel(ResumeBindingModel model)
         {
             if (model == null)
             {
                 throw new ArgumentNullException(nameof(model));
             }
 
-            if (!withParams)
-            {
-                return;
-            }
-
             var element = _resumeStorage.GetElement(new ResumeSearchModel
             {
-                VacancyId = model.VacancyId,
-                Title = model.Title
+                Title = model.Title,
+                City = model.City,
+                Description = model.Description
             });
 
             if (element != null && element.Id != model.Id)
             {
-                throw new InvalidOperationException("Такое резюме уже существует");
+                return false;
             }
+
+            return true;
         }
     }
 }

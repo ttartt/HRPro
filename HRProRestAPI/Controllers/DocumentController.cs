@@ -59,7 +59,7 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpGet]
-        public List<DocumentViewModel>? List(int? userId)
+        public List<DocumentViewModel>? List(int? userId, int? companyId)
         {
             try
             {
@@ -70,7 +70,22 @@ namespace HRProRestAPI.Controllers
                         CreatorId = userId
                     });
                 }
-                else return new List<DocumentViewModel>();
+                else if (companyId.HasValue)
+                {
+                    return _logic.ReadList(new DocumentSearchModel
+                    {
+                        CompanyId = companyId
+                    });
+                }
+                else if (userId.HasValue && companyId.HasValue)
+                {
+                    return _logic.ReadList(new DocumentSearchModel
+                    {
+                        CompanyId = companyId,
+                        CreatorId = userId
+                    });
+                }
+                else return _logic.ReadList(null);
             }
             catch (Exception ex)
             {

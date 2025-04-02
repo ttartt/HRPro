@@ -10,6 +10,10 @@ namespace HRProContracts.SearchModels
 
         public string? Title { get; set; }
 
+        public string? Description { get; set; }
+
+        public string? City { get; set; }
+
         public ResumeStatusEnum? Status { get; set; }
 
         public DateTime? CreatedAt { get; set; }

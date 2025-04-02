@@ -48,12 +48,16 @@ namespace HRProClientApp.Controllers
         [HttpPost]
         public async Task<IActionResult> EditCompanyProfile(CompanyBindingModel model)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/Company/CompanyProfile/{APIClient.Company?.Id}";
             try
             {
                 if (APIClient.User == null)
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
+                }
+                if (string.IsNullOrEmpty(model.Name))
+                {
+                    throw new ArgumentException("Нет названия компании");
                 }
                 if (model.Id != 0)
                 {
@@ -81,12 +85,12 @@ namespace HRProClientApp.Controllers
                 {
                     throw new Exception("Компания не определена");
                 }
-                return Redirect($"~/Company/CompanyProfile/{APIClient.Company.Id}");            
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }  
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -99,14 +103,6 @@ namespace HRProClientApp.Controllers
 
             APIClient.PostRequest($"api/company/delete", new CompanyBindingModel { Id = id });
             Response.Redirect("/Home/Index");
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

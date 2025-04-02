@@ -1,0 +1,26 @@
+[
+    {
+        "Name": "Ульяновск",
+        "Code": "ulyanovsk"
+    },
+    {
+        "Name": "Самара",
+        "Code": "samara"
+    },
+    {
+        "Name": "Москва",
+        "Code": "moskva"
+    },
+    {
+        "Name": "Казань",
+        "Code": "kazan"
+    },    
+    {
+        "Name": "Санкт-Петербург",
+        "Code": "sankt-peterburg"
+    },
+    {
+        "Name": "Новосибирск",
+        "Code": "novosibirsk"
+    }
+]

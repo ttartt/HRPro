@@ -11,7 +11,7 @@
             <h1 class="mb-4 text-center">Сотрудники</h1>
             <div class="mb-4 text-end">
                 <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@APIClient.Company.Id" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i> Добавить сотрудника
+                    <i class="bi bi-plus-circle"></i>
                 </a>
             </div>
             @if (Model != null)
@@ -37,17 +37,17 @@
                                         <td>@employee.Name</td>
                                         <td>@employee.Email</td>
                                         <td>@employee.PhoneNumber</td>
-                                        <td>
-                                                <a asp-action="UserProfile" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-info btn-sm me-2" title="Просмотр">
-                                                <i class="bi bi-eye"></i> Просмотр
+                                        <td class="d-flex justify-content-start">
+                                            <a asp-action="UserProfile" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-info btn-sm me-2" title="Просмотр">
+                                                <i class="bi bi-eye"></i>
                                             </a>
 
-                                                <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-warning btn-sm me-2" title="Редактировать">
-                                                <i class="bi bi-pencil"></i> Редактировать
+                                            <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
                                             </a>
 
-                                                <a asp-action="Delete" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить сотрудника?');">
-                                                <i class="bi bi-trash"></i> Удалить
+                                            <a asp-action="Delete" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить сотрудника?');">
+                                                <i class="bi bi-trash"></i>
                                             </a>
                                         </td>
                                     </tr>
@@ -69,6 +69,7 @@
     </div>
 </div>
 
+
 <style>
     .table-hover tbody tr:hover {
         background-color: #f0f4f7;
@@ -78,24 +79,25 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
     }
 
     .btn-info i, .btn-warning i, .btn-danger i {
-        margin-right: 5px;
+        font-size: 18px;
     }
 
     .btn {
         background-color: #3E12E3;
         color: white;
         border: none;
-        border-radius: 10px;
-        padding: 12px;
-        font-size: 16px;
+        border-radius: 50%;
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .btn:hover {
         background-color: #2200A4;
-        transform: scale(1.05);
+        transform: scale(1.1);
     }
 </style>

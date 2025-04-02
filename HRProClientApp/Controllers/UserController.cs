@@ -3,6 +3,7 @@ using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace HRProClientApp.Controllers
 {
@@ -72,15 +73,41 @@ namespace HRProClientApp.Controllers
         [HttpPost]
         public IActionResult UserProfileEdit(UserBindingModel model)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
-            {
+            {    
+                if (string.IsNullOrEmpty(model.Surname))
+                {
+                    throw new ArgumentException("Нет фамилии пользователя");
+                }
+
+                if (string.IsNullOrEmpty(model.Name))
+                {
+                    throw new ArgumentException("Нет имени пользователя");
+                }
+
+                if (model.DateOfBirth >= DateTime.UtcNow.AddHours(4))
+                {
+                    throw new ArgumentOutOfRangeException("Дата рождения не может быть позже текущей");
+                }
+
+                if (string.IsNullOrEmpty(model.Email))
+                {
+                    throw new ArgumentNullException("Нет почты пользователя");
+                }
+
+                if (!Regex.IsMatch(model.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase))
+                {
+                    throw new ArgumentException("Неправильно введенный email");
+                }
+
+                string redirectUrl = $"/User/UserProfile/{model.Id}";
+
                 if (model.Id != 0)
                 {
                     APIClient.PostRequest("api/user/update", model);
                     if (model.Role == HRProDataModels.Enums.RoleEnum.Сотрудник)
                     {
-                        return Redirect($"~/Company/CompanyProfile/{model.CompanyId}");
+                        redirectUrl = $"/Company/CompanyProfile/{model.CompanyId}";
                     }
                 }
                 else
@@ -90,10 +117,21 @@ namespace HRProClientApp.Controllers
                     {
                         throw new Exception("Такой пользователь уже существует");
                     }
+                    if (string.IsNullOrEmpty(model.Password))
+                    {
+                        throw new ArgumentException("Нет пароля пользователя");
+                    }
+
+                    if (!Regex.IsMatch(model.Password, @"^^((\w+\d+\W+)|(\w+\W+\d+)|(\d+\w+\W+)|(\d+\W+\w+)|(\W+\w+\d+)|(\W+\d+\w+))[\w\d\W]*$", RegexOptions.IgnoreCase))
+                    {
+                        throw new ArgumentException("Неправильно введенный пароль");
+                    }
+
                     APIClient.PostRequest("api/user/register", model);
+
                     if (APIClient.Company != null)
                     {
-                        APIClient.Company?.Employees.Add(new UserViewModel
+                        APIClient.Company.Employees.Add(new UserViewModel
                         {
                             Id = model.Id,
                             Surname = model.Surname,
@@ -107,49 +145,27 @@ namespace HRProClientApp.Controllers
                             DateOfBirth = model.DateOfBirth
                         });
                     }
-                    return Redirect($"~/Company/CompanyProfile/{model.CompanyId}");
+                    redirectUrl = $"/Company/CompanyProfile/{model.CompanyId}";
                 }
-                return Redirect($"/User/UserProfile/{model.Id}");
-            }
-            catch (ArgumentNullException ex)
-            {
-                return Json(new { success = false, error = ex.ParamName, message = ex.Message });
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                return Json(new { success = false, error = ex.ParamName, message = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return Json(new { success = false, error = ex.ParamName, message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Json(new { success = false, error = "operation", message = ex.Message });
+
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, error = "general", message = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
         public IActionResult DeleteEmployee(int id)
-        {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
+        {       
+            APIClient.PostRequest("api/user/delete", new UserBindingModel
             {
-                APIClient.PostRequest("api/user/delete", new UserBindingModel
-                {
-                    Id = id
-                });
-                APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
+                Id = id
+            });
+            APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
-                return Redirect($"~/Company/CompanyProfile");
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }            
+            string redirectUrl = $"/Company/CompanyProfile?id={APIClient.Company?.Id}";
+            return Redirect(redirectUrl);
         }
 
         [HttpGet]
@@ -170,14 +186,6 @@ namespace HRProClientApp.Controllers
 
             APIClient.PostRequest($"api/user/delete", model);
             Response.Redirect("/Home/Enter");
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

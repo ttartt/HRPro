@@ -21,11 +21,27 @@ namespace HRProDatabaseImplement.Implements
         {
             
             using var context = new HRproDatabase();
+            if (model.CompanyId.HasValue && model.CreatorId.HasValue)
+            {
+                return context.Documents
+                    .Include(x => x.Template)
+                .Where(x => x.CompanyId == model.CompanyId && x.CreatorId == model.CreatorId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             if (model.CreatorId.HasValue)
             {
                 return context.Documents
                     .Include(x => x.Template)
                 .Where(x => x.CreatorId == model.CreatorId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
+            if (model.CompanyId.HasValue)
+            {
+                return context.Documents
+                    .Include(x => x.Template)
+                .Where(x => x.CompanyId == model.CompanyId)
                 .Select(x => x.GetViewModel)
                 .ToList();
             }

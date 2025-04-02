@@ -12,7 +12,7 @@
         </div>
         <div class="col-md-4">
             <label for="statusFilter" class="form-label">Статус документа</label>
-            <select id="statusFilter" class="form-control" onchange="filterDocuments()">
+            <select id="statusFilter" class="form-select" onchange="filterDocuments()">
                 <option value="">Все</option>
                 @foreach (DocumentStatusEnum status in Enum.GetValues(typeof(DocumentStatusEnum)))
                 {

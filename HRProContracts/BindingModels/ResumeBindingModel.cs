@@ -9,6 +9,8 @@ namespace HRProContracts.BindingModels
 
         public string? Title { get; set; } = string.Empty;
 
+        public string? City { get; set; } = string.Empty;
+
         public string? Experience { get; set; } = string.Empty;
 
         public string? Education { get; set; } = string.Empty;
@@ -26,5 +28,7 @@ namespace HRProContracts.BindingModels
         public string? Salary { get; set; } = string.Empty;
 
         public string? CandidateInfo { get; set; } = string.Empty;
+
+        public string? Url { get; set; } = string.Empty;
     }
 }

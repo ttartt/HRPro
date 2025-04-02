@@ -1,13 +1,8 @@
-﻿using DocumentFormat.OpenXml.Drawing.Diagrams;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using HRProClientApp.Models;
-using HRProContracts.BindingModels;
+﻿using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
+using HRProDataModels.Enums;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing.Template;
 using System.Diagnostics;
-using System.IO.Compression;
-using System.Xml;
 using TemplateEngine.Docx;
 
 namespace HRProClientApp.Controllers
@@ -89,7 +84,7 @@ namespace HRProClientApp.Controllers
         [HttpPost]
         public async Task<IActionResult> DocumentEdit(DocumentBindingModel model)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/Document/Documents?userId={APIClient.User?.Id}";
             try
             {
                 if (APIClient.User == null)
@@ -97,14 +92,43 @@ namespace HRProClientApp.Controllers
                     throw new Exception("Доступно только авторизованным пользователям");
                 }
 
-                var template = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={model.TemplateId}");
-                if (template == null)
+                if (APIClient.Company == null)
                 {
-                    throw new Exception("Шаблон не найден.");
+                    throw new Exception("Компания не найдена");
                 }
 
+                if (string.IsNullOrEmpty(model.Name))
+                {
+                    throw new ArgumentException("Название документа не может быть пустым");
+                }
+
+                if (!Enum.IsDefined(typeof(DocumentStatusEnum), model.Status))
+                {
+                    throw new ArgumentException("Некорректный статус документа");
+                }
+
+                if (model.TemplateId <= 0)
+                {
+                    throw new ArgumentException("Не выбран шаблон документа.");
+                }
+
+                if (model.Id == 0)
+                {
+                    var existingDocuments = APIClient.GetRequest<List<DocumentViewModel>>($"api/document/list?companyId={model.CompanyId}&userId={APIClient.User.Id}");
+                    var duplicate = existingDocuments?.FirstOrDefault(v =>
+                        v.Name.Equals(model.Name, StringComparison.OrdinalIgnoreCase));
+
+                    if (duplicate != null)
+                    {
+                        throw new InvalidOperationException("Такой документ уже существует");
+                    }
+                }
+
+                var template = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={model.TemplateId}");
+
                 var templatePath = $"{template.FilePath}";
-                var outputPath = $"GeneratedDocuments/{model.Name}_{DateTime.Now.Date.ToShortDateString()}.docx";
+                var outputFolder = "GeneratedDocuments";
+                var outputPath = $"{outputFolder}/{model.Name}_{DateTime.Now:yyyy-MM-dd}.docx";
 
                 var contentToFill = new Content();
                 var tags = APIClient.GetRequest<List<TagViewModel>?>($"api/template/tags?templateId={template.Id}");
@@ -118,7 +142,9 @@ namespace HRProClientApp.Controllers
                     }
                 }
 
+                System.IO.Directory.CreateDirectory(outputFolder);
                 System.IO.File.Copy(templatePath, outputPath, true);
+
                 using (var outputDoc = new TemplateProcessor(outputPath).SetRemoveContentControls(true))
                 {
                     var content = new Content();
@@ -164,17 +190,23 @@ namespace HRProClientApp.Controllers
                     }
                 }
 
-                return Redirect($"~/Document/Documents?userId={APIClient.User?.Id}");
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = Path.GetFullPath(outputFolder),
+                    UseShellExecute = true
+                });
+                
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
         public IActionResult Delete(int id)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/Document/Documents?userId={APIClient.User?.Id}";
             try
             {
                 if (APIClient.Company == null)
@@ -185,45 +217,12 @@ namespace HRProClientApp.Controllers
                 APIClient.PostRequest($"api/document/delete", new DocumentBindingModel { Id = id });
                 APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
-                return Redirect($"~/Document/Documents?userId={APIClient.User?.Id}");
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
-        }
-
-        public IActionResult SearchDocuments(string? tags)
-        {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
-            {
-                if (APIClient.User == null)
-                {
-                    throw new Exception("Доступно только авторизованным пользователям");
-                }
-
-                if (string.IsNullOrEmpty(tags))
-                {
-                    ViewBag.Message = "Пожалуйста, введите поисковый запрос.";
-                    return View(new List<DocumentViewModel?>());
-                }
-
-                var results = APIClient.GetRequest<List<DocumentViewModel?>>($"api/document/search?tags={tags}");
-                return View(results);
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

@@ -390,6 +390,9 @@ namespace HRProDatabaseImplement.Migrations
                     b.Property<string>("CandidateInfo")
                         .HasColumnType("text");
 
+                    b.Property<string>("City")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -412,6 +415,9 @@ namespace HRProDatabaseImplement.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Url")
                         .HasColumnType("text");
 
                     b.Property<int?>("VacancyId")

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HRProDatabaseImplement.Migrations
 {
     [DbContext(typeof(HRproDatabase))]
-    [Migration("20250331201228_InitialCreate")]
+    [Migration("20250402204249_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -393,6 +393,9 @@ namespace HRProDatabaseImplement.Migrations
                     b.Property<string>("CandidateInfo")
                         .HasColumnType("text");
 
+                    b.Property<string>("City")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -415,6 +418,9 @@ namespace HRProDatabaseImplement.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Url")
                         .HasColumnType("text");
 
                     b.Property<int?>("VacancyId")

@@ -121,12 +121,45 @@ namespace HRProClientApp.Controllers
         [HttpPost]
         public IActionResult EditVacancy(VacancyBindingModel model)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/Company/CompanyProfile/{APIClient.Company.Id}";
             try
             {
                 if (APIClient.User == null)
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
+                }
+
+                if (APIClient.Company == null)
+                {
+                    throw new Exception("Компания не найдена");
+                }
+
+                if (string.IsNullOrEmpty(model.JobTitle))
+                {
+                    throw new ArgumentException("Нет названия вакансии");
+                }
+
+                if (string.IsNullOrEmpty(model.JobType.ToString()))
+                {
+                    throw new ArgumentException("Нет типа занятости");
+                }
+
+                if (string.IsNullOrEmpty(model.Status.ToString()))
+                {
+                    throw new ArgumentException("Нет статуса вакансии");
+                }
+
+                if (model.Id == 0)
+                {
+                    var existingVacancies = APIClient.GetRequest<List<VacancyViewModel>>($"api/vacancy/list?companyId={APIClient.Company.Id}");
+                    var duplicate = existingVacancies?.FirstOrDefault(v =>
+                        v.JobTitle.Equals(model.JobTitle, StringComparison.OrdinalIgnoreCase) &&
+                        v.Salary == model.Salary);
+
+                    if (duplicate != null)
+                    {
+                        throw new InvalidOperationException("Такая вакансия уже существует");
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(model.Tags))
@@ -162,11 +195,11 @@ namespace HRProClientApp.Controllers
                         });
                     }
                 }
-                return Redirect($"~/Company/CompanyProfile/{model.CompanyId}");
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 

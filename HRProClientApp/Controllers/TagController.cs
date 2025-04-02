@@ -60,7 +60,7 @@ namespace HRProClientApp.Controllers
         [HttpPost]
         public IActionResult TagEdit(TagBindingModel model, int templateId)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/Template/TemplateEdit/{templateId}";
             try
             {
                 if (APIClient.User == null)
@@ -86,17 +86,17 @@ namespace HRProClientApp.Controllers
                         Type = model.Type
                     });
                 }
-                return Redirect($"~/Template/TemplateEdit/{templateId}");
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
         public IActionResult Delete(int id)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/User/UserProfile?id={APIClient.User.Id}";
             try
             {
                 if (APIClient.Company == null)
@@ -107,22 +107,12 @@ namespace HRProClientApp.Controllers
                 APIClient.PostRequest($"api/tag/delete", new TagBindingModel { Id = id });
                 APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
-                return Redirect("~/User/UserProfile");
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
-        }
-
-       
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

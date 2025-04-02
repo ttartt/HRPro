@@ -5,18 +5,6 @@
     var title = @Model.Id <= 0 ? "Создать профиль компании" : "Редактировать профиль компании";
 }
 
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <li>@error.ErrorMessage</li>
-            }
-        </ul>
-    </div>
-}
-
 <div class="container">
     <h1>@title</h1>
     <form method="post" class="row g-3 needs-validation" novalidate>
@@ -60,23 +48,63 @@
 </div>
 
 <script>
-    (function () {
-        'use strict'
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form.needs-validation");
 
-        var forms = document.querySelectorAll('.needs-validation')
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
 
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
+            const formData = new FormData(form);
 
-                    form.classList.add('was-validated')
-                }, false)
+            fetch(form.action, {
+                method: "POST",
+                body: formData
             })
-    })()
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Ошибка сети или сервера");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        showToast(data.message, "danger");
+                    }
+                })
+                .catch(error => {
+                    showToast("Произошла ошибка при обработке запроса: " + error.message, "danger");
+                });
+        });
+    });
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                        </div>
+                    `;
+
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
 </script>
 <style>
     .btn {
@@ -89,9 +117,9 @@
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-        .btn:hover {
-            background-color: #2200A4;
-            transform: scale(1.05);
-        }
+    .btn:hover {
+        background-color: #2200A4;
+        transform: scale(1.05);
+    }
 </style>
 

@@ -3,6 +3,7 @@ using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace HRProClientApp.Controllers
@@ -47,14 +48,18 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Resumes()
+        public async Task<IActionResult> Resumes()
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cities.json");
+            var json = await System.IO.File.ReadAllTextAsync(filePath);
+            var cities = JsonConvert.DeserializeObject<List<CityViewModel>>(json);
+            ViewBag.Cities = cities;
 
-            var list = APIClient.GetRequest <List<ResumeViewModel>?>($"api/resume/list");
+            var list = APIClient.GetRequest<List<ResumeViewModel>?>($"api/resume/list");
             if (list == null)
             {
                 return View();
@@ -64,14 +69,14 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ResumeDetails(int? id)
+        public IActionResult ResumeDetails(int? id)
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
 
-            var resume = await APIClient.GetRequestAsync<ResumeViewModel?>($"api/resume/details?id={id}");
+            var resume = APIClient.GetRequest<ResumeViewModel?>($"api/resume/details?id={id}");
             if (resume == null || !id.HasValue)
             {
                 return View();
@@ -79,6 +84,53 @@ namespace HRProClientApp.Controllers
 
             return View(resume);
         }
+
+        [HttpGet]
+        public IActionResult CollectResume(string? cityName)
+        {
+            string redirectUrl = "/Resume/Resumes";
+            try
+            {
+                if (APIClient.User == null)
+                    throw new Exception("Доступно только авторизованным пользователям");
+
+                if (APIClient.Company == null)
+                    throw new Exception("Компания не найдена");
+
+                var apiResponse = APIClient.GetRequest<ApiResponse<Dictionary<string, object>>>(
+                    $"api/parser/parse?cityName={cityName}");
+
+                if (apiResponse == null)
+                    return Json(new { success = false, message = "Не получен ответ от API" });
+
+                if (!apiResponse.Success)
+                    return Json(new { success = false, message = apiResponse.Message ?? "Ошибка API" });
+
+                var savedCount = 0;
+                if (apiResponse.Data != null && apiResponse.Data.TryGetValue("savedCount", out var countObj))
+                {
+                    savedCount = Convert.ToInt32(countObj);
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = savedCount > 0
+                        ? $"Успешно сохранено {savedCount} резюме"
+                        : "Новые резюме не найдены",
+                    redirectUrl,
+                    resumes = apiResponse.Data?.ContainsKey("resumes") == true
+                        ? apiResponse.Data["resumes"]
+                        : null
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
 
         [HttpGet]
         public async Task<IActionResult> EditResume(int? id, int? vacancyId)
@@ -175,16 +227,8 @@ namespace HRProClientApp.Controllers
 
         public IActionResult Delete(int id)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
-            {
-                APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
-                return Redirect($"~/User/UserProfile/{APIClient.User?.Id}");
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }
+            APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
+            return Redirect($"~/Resume/Resumes");
         }
 
 
