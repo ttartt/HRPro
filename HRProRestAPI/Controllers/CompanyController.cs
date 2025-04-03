@@ -3,7 +3,6 @@ using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 
 namespace HRProRestApi.Controllers
 {

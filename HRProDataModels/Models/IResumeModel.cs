@@ -15,5 +15,6 @@ namespace HRProDataModels.Models
         ResumeStatusEnum Status { get; }
         string? Salary { get; }
         string? CandidateInfo { get; }
+        int? CompanyId { get; }
     }
 }

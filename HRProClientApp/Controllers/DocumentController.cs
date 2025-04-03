@@ -39,7 +39,7 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("~/Home/Enter");
             }
-            var documents = APIClient.GetRequest<List<DocumentViewModel>?>($"api/document/list?userId={APIClient.User?.Id}");
+            var documents = APIClient.GetRequest<List<DocumentViewModel>?>($"api/document/list?userId={APIClient.User?.Id}&companyId={APIClient.Company?.Id}");
             return View(documents);
         }
 
@@ -51,7 +51,7 @@ namespace HRProClientApp.Controllers
                 return Redirect("~/Home/Enter");
             }
 
-            var templates = APIClient.GetRequest<List<TemplateViewModel>>("api/template/list") ?? new List<TemplateViewModel>();
+            var templates = APIClient.GetRequest<List<TemplateViewModel>>($"api/template/list?companyId={APIClient.Company?.Id}") ?? new List<TemplateViewModel>();
             ViewBag.Templates = templates;
 
             DocumentViewModel model = id.HasValue
@@ -107,7 +107,7 @@ namespace HRProClientApp.Controllers
                     throw new ArgumentException("Некорректный статус документа");
                 }
 
-                if (model.TemplateId <= 0)
+                if (model.TemplateId <= 0 || model.TemplateId == null)
                 {
                     throw new ArgumentException("Не выбран шаблон документа.");
                 }
@@ -206,23 +206,14 @@ namespace HRProClientApp.Controllers
 
         public IActionResult Delete(int id)
         {
-            string redirectUrl = $"/Document/Documents?userId={APIClient.User?.Id}";
-            try
+            if (APIClient.Company == null)
             {
-                if (APIClient.Company == null)
-                {
-                    throw new Exception("Компания не определена");
-                }
-
-                APIClient.PostRequest($"api/document/delete", new DocumentBindingModel { Id = id });
-                APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
-
-                return Json(new { success = true, redirectUrl });
+                throw new Exception("Компания не определена");
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+
+            APIClient.PostRequest($"api/document/delete", new DocumentBindingModel { Id = id });
+            APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
+            return Redirect($"~/Document/Documents?userId={APIClient.User?.Id}");
         }
     }
 }

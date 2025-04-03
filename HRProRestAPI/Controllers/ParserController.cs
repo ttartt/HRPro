@@ -59,12 +59,8 @@ namespace HRProRestApi.Controllers
 
                         if (resume != null && !string.IsNullOrEmpty(resume.Title))
                         {
-                            var created = _logic.Create(resume);
-                            if (created)
-                            {
-                                savedCount++;
-                                resumes.Add(resume);
-                            }
+                            savedCount++;
+                            resumes.Add(resume);
                         }
                     }
                     catch (Exception ex)

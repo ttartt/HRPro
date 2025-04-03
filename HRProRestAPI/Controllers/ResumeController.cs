@@ -36,11 +36,18 @@ namespace HRProRestApi.Controllers
         }
 
         [HttpGet]
-        public List<ResumeViewModel>? List()
+        public List<ResumeViewModel>? List(int? companyId)
         {
             try
             {
-                return _logic.ReadList(null);
+                if (companyId.HasValue)
+                {
+                    return _logic.ReadList(new ResumeSearchModel
+                    {
+                        CompanyId = companyId
+                    });
+                }
+                else return _logic.ReadList(null);
             }
             catch (Exception ex)
             {

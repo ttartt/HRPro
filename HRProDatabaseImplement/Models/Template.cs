@@ -1,5 +1,6 @@
 ﻿using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
+using HRproDatabaseImplement.Models;
 using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
@@ -20,7 +21,11 @@ namespace HRProDatabaseImplement.Models
         [Required]
         public string FilePath { get; set; } = string.Empty;
         [DataMember]
+        public int? CompanyId { get; set; }
+        [DataMember]
         public int Id { get; set; }
+
+        public virtual Company Company { get; set; }
 
         public static Template? Create(TemplateBindingModel model)
         {
@@ -33,7 +38,8 @@ namespace HRProDatabaseImplement.Models
                 Id = model.Id,
                 Name = model.Name,
                 Type = model.Type,
-                FilePath = model.FilePath
+                FilePath = model.FilePath,
+                CompanyId = model.CompanyId
             };
         }
 
@@ -44,7 +50,8 @@ namespace HRProDatabaseImplement.Models
                 Id = model.Id,
                 Name = model.Name,
                 Type = model.Type,
-                FilePath = model.FilePath
+                FilePath = model.FilePath,
+                CompanyId = model.CompanyId
             };
         }
 
@@ -57,6 +64,7 @@ namespace HRProDatabaseImplement.Models
             Name = model.Name;
             Type = model.Type;
             FilePath = model.FilePath;
+            CompanyId = model.CompanyId;
         }
 
         public TemplateViewModel GetViewModel => new()
@@ -64,7 +72,8 @@ namespace HRProDatabaseImplement.Models
             Id = Id,
             Name = Name,
             Type = Type,
-            FilePath = FilePath
+            FilePath = FilePath,
+            CompanyId = CompanyId
         };
     }
 }

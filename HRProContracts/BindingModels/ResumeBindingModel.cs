@@ -25,6 +25,8 @@ namespace HRProContracts.BindingModels
 
         public int Id { get; set; }
 
+        public int? CompanyId { get; set; }
+
         public string? Salary { get; set; } = string.Empty;
 
         public string? CandidateInfo { get; set; } = string.Empty;

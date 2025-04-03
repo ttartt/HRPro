@@ -95,9 +95,9 @@ namespace HRProBusinessLogic.BusinessLogic
                 return;
             }
 
-            if (model.CandidateId <= 0)
+            if (model.ResumeId <= 0)
             {
-                throw new ArgumentException("Некорректный идентификатор кандидата", nameof(model.CandidateId));
+                throw new ArgumentException("Некорректный идентификатор резюме", nameof(model.ResumeId));
             }
 
             if (string.IsNullOrEmpty(model.Topic))
@@ -122,14 +122,14 @@ namespace HRProBusinessLogic.BusinessLogic
 
             var existingMeeting = _meetingStorage.GetElement(new MeetingSearchModel
             {
-                CandidateId = model.CandidateId,
+                ResumeId = model.ResumeId,
                 VacancyId = model.VacancyId,
                 Date = model.Date.Date
             });
 
             if (existingMeeting != null && existingMeeting.Id != model.Id)
             {
-                throw new InvalidOperationException("Встреча для этого кандидата и вакансии на выбранную дату уже существует");
+                throw new InvalidOperationException("Встреча уже существует");
             }
         }
     }

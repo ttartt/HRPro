@@ -13,6 +13,8 @@ namespace HRproDatabaseImplement.Models
         [DataMember]
         public int? VacancyId { get; set; }
         [DataMember]
+        public int? CompanyId { get; set; }
+        [DataMember]
         public string? Title { get; set; } = string.Empty;
         [DataMember]
         public string? City { get; set; } = string.Empty;
@@ -40,6 +42,7 @@ namespace HRproDatabaseImplement.Models
         public int Id { get; set; }
 
         public virtual Vacancy Vacancy { get; set; }
+        public virtual Company Company { get; set; }
 
         public static Resume? Create(ResumeBindingModel model)
         {
@@ -61,7 +64,8 @@ namespace HRproDatabaseImplement.Models
                 Status = ResumeStatusEnum.Обрабатывается,
                 CreatedAt = DateTime.Now.ToUniversalTime(),
                 Salary = model.Salary,
-                CandidateInfo = model.CandidateInfo
+                CandidateInfo = model.CandidateInfo,
+                CompanyId = model.CompanyId
             };
         }
         public static Resume Create(ResumeViewModel model)
@@ -80,7 +84,8 @@ namespace HRproDatabaseImplement.Models
                 Status = ResumeStatusEnum.Обрабатывается,
                 CreatedAt = DateTime.Now.ToUniversalTime(),
                 Salary = model.Salary,
-                CandidateInfo = model.CandidateInfo
+                CandidateInfo = model.CandidateInfo,
+                CompanyId = model.CompanyId
             };
         }
         public void Update(ResumeBindingModel model)
@@ -114,7 +119,8 @@ namespace HRproDatabaseImplement.Models
             Status = ResumeStatusEnum.Обрабатывается,
             CreatedAt = DateTime.Now.ToUniversalTime(),
             Salary = Salary,
-            CandidateInfo = CandidateInfo
+            CandidateInfo = CandidateInfo,
+            CompanyId = CompanyId
         };
     }
 }

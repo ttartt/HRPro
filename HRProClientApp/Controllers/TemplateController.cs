@@ -25,43 +25,59 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("~/Home/Enter");
             }
-            var templates = APIClient.GetRequest<List<TemplateViewModel>?>($"api/template/list");
+            var templates = APIClient.GetRequest<List<TemplateViewModel>?>($"api/template/list?companyId={APIClient.Company?.Id}");
             return View(templates);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadTemplate(IFormFile file, HRProDataModels.Enums.TemplateTypeEnum type)
+        public async Task<IActionResult> UploadTemplate(IFormFile file, HRProDataModels.Enums.TemplateTypeEnum type, string name)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("Файл не выбран.");
-
-            var templatesDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates");
-            if (!Directory.Exists(templatesDir))
-                Directory.CreateDirectory(templatesDir);
-
-            var filePath = Path.Combine(templatesDir, file.FileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                await file.CopyToAsync(stream);
-            } 
-
-            var model = new TemplateBindingModel()
-            {
-                Name = file.FileName,
-                FilePath = filePath,
-                Type = type
-            };
-
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-
+            string redirectUrl = $"/Template/Templates";
             try
             {
+                if (string.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException("Нет названия шаблона");
+                }
+                if (file == null || file.Length == 0)
+                    throw new ArgumentException("Файл не выбран");
+
+                var templatesDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates");
+                if (!Directory.Exists(templatesDir))
+                    Directory.CreateDirectory(templatesDir);
+
+                var filePath = Path.Combine(templatesDir, file.FileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await file.CopyToAsync(stream);
+                } 
+
+                var model = new TemplateBindingModel()
+                {
+                    Name = name,
+                    FilePath = filePath,
+                    Type = type,
+                    CompanyId = APIClient.Company?.Id
+                };
+
+            
                 if (APIClient.User == null)
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
                 }
+                if (model.Id == 0)
+                {
+                    var existingTemplates = APIClient.GetRequest<List<TemplateViewModel>>($"api/template/list?companyId={APIClient.Company.Id}");
+                    var duplicate = existingTemplates?.FirstOrDefault(v =>
+                        v.Name.Equals(model.Name, StringComparison.OrdinalIgnoreCase) &&
+                        v.FilePath == model.FilePath);
 
+                    if (duplicate != null)
+                    {
+                        throw new InvalidOperationException("Такой шаблон докуента уже существует");
+                    }
+                }
                 var templateId = await APIClient.PostRequestAsync("api/template/create", model);
                 DebugXmlStructure(filePath);
                 var tags = ExtractTags(filePath);
@@ -82,11 +98,11 @@ namespace HRProClientApp.Controllers
                     });
                 }
 
-                return RedirectToAction("Templates");
-            }
+                return Json(new { success = true, redirectUrl });
+            }            
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -177,65 +193,22 @@ namespace HRProClientApp.Controllers
                     }
                 }
             }
-
             Console.WriteLine($"Найдено {tags.Count} тегов: {string.Join(", ", tags)}");
             return tags;
         }
 
-
-
         public IActionResult Delete(int id)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
+            if (APIClient.Company == null)
             {
-                if (APIClient.Company == null)
-                {
-                    throw new Exception("Компания не определена");
-                }
-
-                APIClient.PostRequest($"api/template/delete", new TemplateBindingModel { Id = id });
-                APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
-
-                return Redirect($"~/Template/Templates");
+                throw new Exception("Компания не определена");
             }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }
+
+            APIClient.PostRequest($"api/template/delete", new TemplateBindingModel { Id = id });
+            APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
+
+            return Redirect($"~/Template/Templates");
         }
 
-        public IActionResult SearchTemplates(string? tags)
-        {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
-            {
-                if (APIClient.User == null)
-                {
-                    throw new Exception("Доступно только авторизованным пользователям");
-                }
-
-                if (string.IsNullOrEmpty(tags))
-                {
-                    ViewBag.Message = "Пожалуйста, введите поисковый запрос.";
-                    return View(new List<TemplateViewModel?>());
-                }
-
-                var results = APIClient.GetRequest<List<TemplateViewModel?>>($"api/template/search?tags={tags}");
-                return View(results);
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
     }
 }

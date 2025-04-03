@@ -19,5 +19,6 @@ namespace HRProContracts.SearchModels
         public DateTime? CreatedAt { get; set; }
 
         public int? Id { get; set; }
+        public int? CompanyId { get; set; }
     }
 }

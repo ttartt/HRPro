@@ -26,6 +26,13 @@ namespace HRProDatabaseImplement.Implements
                 .Select(x => x.GetViewModel)
                 .ToList();
             }
+            if (model.MeetingId.HasValue)
+            {
+                return context.MeetingParticipants
+                .Where(x => x.MeetingId.Equals(model.MeetingId))
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             return context.MeetingParticipants
                 .Where(x => x.Id.Equals(model.Id))
                 .Select(x => x.GetViewModel)

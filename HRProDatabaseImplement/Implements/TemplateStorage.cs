@@ -18,11 +18,15 @@ namespace HRProDatabaseImplement.Implements
         }
         public List<TemplateViewModel> GetFilteredList(TemplateSearchModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
-            {
-                return new();
-            }
+            
             using var context = new HRproDatabase();
+            if (model.CompanyId.HasValue)
+            {
+                return context.Templates
+                .Where(x => x.CompanyId == model.CompanyId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }            
             return context.Templates
                 .Where(x => x.Name.Contains(model.Name))
                 .Select(x => x.GetViewModel)

@@ -74,12 +74,18 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpGet]
-        public List<TemplateViewModel>? List()
+        public List<TemplateViewModel>? List(int? companyId)
         {
             try
             {
-                var list = _logic.ReadList(null);
-                return list;
+                if (companyId.HasValue)
+                {
+                    return _logic.ReadList(new TemplateSearchModel
+                    {
+                        CompanyId = companyId
+                    });
+                }
+                else return _logic.ReadList(null);
             }
             catch (Exception ex)
             {

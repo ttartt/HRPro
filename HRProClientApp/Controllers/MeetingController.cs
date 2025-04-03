@@ -1,4 +1,5 @@
-﻿using HRProClientApp.Models;
+﻿using DocumentFormat.OpenXml.EMMA;
+using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,7 @@ namespace HRProClientApp.Controllers
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
             {
-                var list = APIClient.GetRequest<List<MeetingViewModel>>($"api/meeting/listByUserId?userId={userId}");
+                var list = APIClient.GetRequest<List<MeetingViewModel>>($"api/meeting/list?userId={userId}&companyId={APIClient.Company?.Id}");
 
                 return View(list);
             }
@@ -57,9 +58,10 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("/Home/Index");
             }
+            
             ViewBag.Users = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={APIClient.Company?.Id}");
-            ViewBag.Candidates = APIClient.GetRequest<List<CandidateViewModel>>($"api/candidate/list");
             ViewBag.Vacancies = APIClient.GetRequest<List<VacancyViewModel>>($"api/vacancy/list?companyId={APIClient.Company?.Id}");
+            ViewBag.Resumes = APIClient.GetRequest<List<ResumeViewModel>>($"api/resume/list?companyId={APIClient.Company?.Id}");
             if (id.HasValue)
             {
                 var invitedParticipants = APIClient.GetRequest<List<MeetingParticipantViewModel>>($"api/meeting/participants?meetingId={id}");
@@ -69,8 +71,7 @@ namespace HRProClientApp.Controllers
                 ViewBag.InvitedUserIds = invitedUserIds;
             }
             if (!id.HasValue)
-            {
-                
+            {                
                 return View();
             }
             else 
@@ -81,73 +82,119 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult MeetingEdit(MeetingBindingModel model)
+        public async Task<IActionResult> MeetingEdit(MeetingBindingModel model)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
+            string redirectUrl = $"/Meeting/Meetings/{APIClient.User?.Id}";
             try
-            {
+            { 
+                if (model.VacancyId <= 0 || model.VacancyId == null)
+                {
+                    throw new ArgumentException("Вакансия не выбрана");
+                }
+                if (model.ResumeId <= 0 || model.ResumeId == null)
+                {
+                    throw new ArgumentException("Резюме не выбрано");
+                }
+
+                if (string.IsNullOrEmpty(model.Topic))
+                {
+                    throw new ArgumentException("Тема встречи не может быть пустой");
+                }
+
+                if (model.TimeFrom >= model.TimeTo)
+                {
+                    throw new ArgumentException("Время начала должно быть меньше времени окончания");
+                }
+
+                
+
+                if (string.IsNullOrEmpty(model.Place))
+                {
+                    throw new ArgumentException("Место проведения встречи не может быть пустым");
+                }
                 if (model.Id != 0)
                 {
                     APIClient.PostRequest("api/meeting/update", model);
                 }
                 else
                 {
-                    var createdMeetingId = APIClient.PostRequestAsync("api/meeting/create", model);
-                    model.Id = createdMeetingId.Result;
+                    model.CompanyId = APIClient.Company?.Id;
+                    APIClient.PostRequest("api/meeting/create", model);
+
+                    var calendarEvent = new YandexCalendarEventModel
+                    {
+                        Title = model.Topic,
+                        Description = model.Comment,
+                        StartDateTime = model.Date.Date.Add(model.TimeFrom.TimeOfDay),
+                        EndDateTime = model.Date.Date.Add(model.TimeTo.TimeOfDay),
+                        Location = model.Place
+                    };
+
+                    await AddToYandexCalendar(calendarEvent);
 
                     APIClient.User?.Meetings.Add(new MeetingViewModel
                     {
                         Id = model.Id,
                         TimeFrom = model.TimeFrom,
-                        CandidateId = model.CandidateId,
+                        ResumeId = model.ResumeId,
                         Date = model.Date,
                         Place = model.Place,
                         TimeTo = model.TimeTo,
                         Topic = model.Topic,
                         VacancyId = model.VacancyId,
-                        Comment = model.Comment
+                        Comment = model.Comment,
+                        CompanyId = model.CompanyId
                     });
                 }
 
-                return Redirect($"~/Meeting/Meetings/{APIClient.User?.Id}");
+                return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
-
         [HttpPost]
-        public IActionResult InviteParticipants(int meetingId, int[] userIds)
+        public async Task<IActionResult> AddToYandexCalendar([FromBody] YandexCalendarEventModel model)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-
             try
             {
-                if (meetingId == 0)
+                var yandexToken = APIClient.User?.YandexToken;
+
+                if (string.IsNullOrEmpty(yandexToken))
                 {
-                    throw new ArgumentException("Сначала создайте встречу.");
+                    return Json(new { success = false, message = "Необходима авторизация через Яндекс" });
                 }
 
-                foreach (int id in userIds)
+                var meeting = new
                 {
-                    APIClient.PostRequest("api/meeting/createParticipant", new MeetingParticipantBindingModel
-                    {
-                        MeetingId = meetingId,
-                        UserId = id
-                    });
+                    AccessToken = yandexToken,
+                    Title = model.Title,
+                    Description = model.Description,
+                    StartDateTime = model.StartDateTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    EndDateTime = model.EndDateTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    Location = model.Location
+                };
 
-                    var meeting = APIClient.GetRequest<MeetingViewModel>($"api/meeting/details?id={meetingId}");
-                    meeting.Participants.Add(APIClient.GetRequest<UserViewModel>($"api/user/profile?id={id}"));
-                }
+                var response = await APIClient.PostRequestAsync("api/calendar/AddToYandexCalendar", meeting);
 
-                return Redirect($"~/Meeting/Meetings/{APIClient.User.Id}");
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                _logger.LogError(ex, "Ошибка при добавлении в Яндекс.Календарь");
+                return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        public class YandexCalendarEventModel
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public DateTime StartDateTime { get; set; }
+            public DateTime EndDateTime { get; set; }
+            public string Location { get; set; }
         }
 
         [HttpPost]
@@ -160,14 +207,6 @@ namespace HRProClientApp.Controllers
 
             APIClient.PostRequest($"api/user/delete", model);
             Response.Redirect("/Home/Enter");
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

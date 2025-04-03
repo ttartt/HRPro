@@ -12,6 +12,7 @@ namespace HRProContracts.ViewModels
         public string FilePath { get; set; } = string.Empty;
 
         public int Id { get; set; }
+        public int? CompanyId { get; set; }
 
         public List<TagViewModel> Tags { get; set; } = new();
     }

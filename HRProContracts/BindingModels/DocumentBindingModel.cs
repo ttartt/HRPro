@@ -15,7 +15,7 @@ namespace HRProContracts.BindingModels
 
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime().AddHours(4);
 
-        public int TemplateId { get; set; }
+        public int? TemplateId { get; set; }
 
         public Dictionary<int, string> Tags { get; set; } = new();
 

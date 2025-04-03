@@ -4,7 +4,9 @@ namespace HRProContracts.ViewModels
 {
     public class MeetingViewModel : IMeetingModel
     {
-        public int CandidateId { get; set; }
+        public int? ResumeId { get; set; }
+
+        public int? CompanyId { get; set; }
 
         public string Topic { get; set; } = string.Empty;
 
@@ -14,9 +16,9 @@ namespace HRProContracts.ViewModels
 
         public DateTime TimeTo { get; set; }
 
-        public int VacancyId { get; set; }
+        public int? VacancyId { get; set; }
 
-        public string Place { get; set; } = string.Empty;
+        public string? Place { get; set; } = string.Empty;
 
         public string? Comment { get; set; }
 

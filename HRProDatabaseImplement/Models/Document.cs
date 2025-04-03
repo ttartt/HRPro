@@ -26,9 +26,8 @@ namespace HRProDatabaseImplement.Models
         [Required]
         [DataMember]
         public DateTime CreatedAt { get; set; }
-        [Required]
         [DataMember]
-        public int TemplateId { get; set; }
+        public int? TemplateId { get; set; }
         [DataMember]
         public int Id { get; set; }
         public virtual Company Company { get; set; }

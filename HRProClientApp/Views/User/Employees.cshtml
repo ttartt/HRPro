@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Сотрудники компании";
+    var isAdmin = APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Администратор ? true : false;
 }
 
 <div class="container mt-5">
@@ -10,9 +11,12 @@
         <div class="col-md-12">
             <h1 class="mb-4 text-center">Сотрудники</h1>
             <div class="mb-4 text-end">
-                <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@APIClient.Company.Id" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i>
-                </a>
+                @if (@isAdmin)
+                {
+                    <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@APIClient.Company.Id" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Добавить сотрудника
+                    </a>
+                }
             </div>
             @if (Model != null)
             {
@@ -38,10 +42,6 @@
                                         <td>@employee.Email</td>
                                         <td>@employee.PhoneNumber</td>
                                         <td class="d-flex justify-content-start">
-                                            <a asp-action="UserProfile" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-info btn-sm me-2" title="Просмотр">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-
                                             <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-warning btn-sm me-2" title="Редактировать">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
@@ -79,25 +79,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
-        padding: 0;
     }
 
-    .btn-info i, .btn-warning i, .btn-danger i {
-        font-size: 18px;
-    }
+        .btn-info i, .btn-warning i, .btn-danger i {
+            margin-right: 5px;
+        }
 
     .btn {
         background-color: #3E12E3;
         color: white;
         border: none;
-        border-radius: 50%;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-    .btn:hover {
-        background-color: #2200A4;
-        transform: scale(1.1);
-    }
+        .btn:hover {
+            background-color: #2200A4;
+            transform: scale(1.05);
+        }
 </style>

@@ -18,12 +18,9 @@ namespace HRproDatabaseImplement
         public virtual DbSet<Company> Companies { set; get; }
         public virtual DbSet<Vacancy> Vacancies { set; get; }
         public virtual DbSet<Resume> Resumes { set; get; }
-        public virtual DbSet<Candidate> Candidates { set; get; }
         public virtual DbSet<Document> Documents { set; get; }
         public virtual DbSet<Template> Templates { set; get; }
         public virtual DbSet<Tag> Tags { set; get; }
-        public virtual DbSet<TestTask> TestTasks { set; get; }
-        public virtual DbSet<HRProDatabaseImplement.Models.Task> Tasks { set; get; }
         public virtual DbSet<Requirement> Requirements { set; get; }
         public virtual DbSet<Responsibility> Responsibilities { set; get; }
         public virtual DbSet<VacancyRequirement> VacancyRequirements { set; get; }

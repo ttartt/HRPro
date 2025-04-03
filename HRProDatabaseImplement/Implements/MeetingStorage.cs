@@ -4,6 +4,7 @@ using HRProContracts.StoragesContracts;
 using HRProContracts.ViewModels;
 using HRproDatabaseImplement;
 using HRProDatabaseImplement.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRProDatabaseImplement.Implements
 {
@@ -26,6 +27,13 @@ namespace HRProDatabaseImplement.Implements
                 .Select(x => x.GetViewModel)
                 .ToList();
             }
+            if (model.CompanyId.HasValue)
+            {
+                return context.Meetings
+                .Where(x => x.CompanyId == model.CompanyId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             return context.Meetings
                 .Where(x => x.Topic.Contains(model.Topic))
                 .Select(x => x.GetViewModel)
@@ -34,6 +42,12 @@ namespace HRProDatabaseImplement.Implements
         public MeetingViewModel? GetElement(MeetingSearchModel model)
         {
             using var context = new HRproDatabase();
+            if (model.Id.HasValue)
+            {
+                return context.Meetings
+                .FirstOrDefault(x => x.Id == model.Id)
+                ?.GetViewModel;
+            }
             return context.Meetings
                 .FirstOrDefault(x => x.Id == model.Id)
                 ?.GetViewModel;

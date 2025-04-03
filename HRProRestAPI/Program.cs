@@ -17,9 +17,6 @@ builder.Services.AddTransient<IUserStorage, UserStorage>();
 builder.Services.AddTransient<ICompanyStorage, CompanyStorage>();
 builder.Services.AddTransient<IVacancyStorage, VacancyStorage>();
 builder.Services.AddTransient<IResumeStorage, ResumeStorage>();
-builder.Services.AddTransient<ICandidateStorage, CandidateStorage>();
-builder.Services.AddTransient<ITestTaskStorage, TestTaskStorage>();
-builder.Services.AddTransient<ITaskStorage, TaskStorage>();
 builder.Services.AddTransient<IMeetingStorage, MeetingStorage>();
 builder.Services.AddTransient<IMeetingParticipantStorage, MeetingParticipantStorage>();
 builder.Services.AddTransient<IRequirementStorage, RequirementStorage>();
@@ -35,9 +32,6 @@ builder.Services.AddTransient<IUserLogic, UserLogic>();
 builder.Services.AddTransient<ICompanyLogic, CompanyLogic>();
 builder.Services.AddTransient<IVacancyLogic, VacancyLogic>();
 builder.Services.AddTransient<IResumeLogic, ResumeLogic>();
-builder.Services.AddTransient<ICandidateLogic, CandidateLogic>();
-builder.Services.AddTransient<ITestTaskLogic, TestTaskLogic>();
-builder.Services.AddTransient<ITaskLogic, TaskLogic>();
 builder.Services.AddTransient<IMeetingLogic, MeetingLogic>();
 builder.Services.AddTransient<IMeetingParticipantLogic, MeetingParticipantLogic>();
 builder.Services.AddTransient<IRequirementLogic, RequirementLogic>();
@@ -80,7 +74,7 @@ using (var scope = app.Services.CreateScope())
             Email = "admin@admin.com",
             Password = "Admin123!",
             Role = HRProDataModels.Enums.RoleEnum.Администратор,
-            PhoneNumber = "89999999999",
+            PhoneNumber = "9999999999",
             City = "AdminCity"
         });
         Console.WriteLine("Администратор создан");

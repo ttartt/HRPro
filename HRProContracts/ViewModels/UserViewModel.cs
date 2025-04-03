@@ -27,5 +27,9 @@ namespace HRProContracts.ViewModels
         public List<MeetingViewModel> Meetings { get; set; } = new();
 
         public string? City { get; set; }
+
+        public string? YandexToken { get; set; }
+
+        public DateTime? YandexTokenExpiresAt { get; set; }
     }
 }

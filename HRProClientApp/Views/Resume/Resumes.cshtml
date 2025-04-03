@@ -166,10 +166,23 @@
 
                 if (data.success) {
                     showToast(data.message, "success");
+
+                    if (data.resumes && data.resumes.length > 0) {
+                        const newResumes = data.resumes.map(r => ({
+                            ...r,
+                            createdAt: new Date(r.createdAt).toISOString()
+                        }));
+
+                        allResumes = [...newResumes, ...allResumes];
+
+                        currentPage = 1;
+                        updateTable();
+                        setupPagination();
+                    }
+
                     setTimeout(() => {
                         const modalInstance = bootstrap.Modal.getInstance(modal);
                         modalInstance.hide();
-                        window.location.href = data.redirectUrl;
                     }, 1500);
                 } else {
                     showToast(data.message, "danger");

@@ -9,6 +9,6 @@ namespace HRProDataModels.Models
         string Name { get; }
         DocumentStatusEnum Status { get; }
         DateTime CreatedAt { get; }
-        int TemplateId { get; }
+        int? TemplateId { get; }
     }
 }

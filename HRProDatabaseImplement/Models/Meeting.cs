@@ -10,9 +10,8 @@ namespace HRProDatabaseImplement.Models
     [DataContract]
     public class Meeting : IMeetingModel
     {
-        [Required]
         [DataMember]
-        public int CandidateId { get; set; }
+        public int? ResumeId { get; set; }
 
         [Required]
         [DataMember]
@@ -30,20 +29,23 @@ namespace HRProDatabaseImplement.Models
         [DataMember]
         public DateTime TimeTo { get; set; }
 
-        [Required]
         [DataMember]
-        public int VacancyId { get; set; }
+        public int? VacancyId { get; set; }
 
-        [Required]
         [DataMember]
-        public string Place { get; set; } = string.Empty;
+        public int? CompanyId { get; set; }
 
+        [DataMember]
+        public string? Place { get; set; }
+
+        [DataMember]
         public string? Comment { get; set; }
 
         public int Id { get; set; }
 
-        public virtual Candidate Candidate { get; set; }
         public virtual Vacancy Vacancy { get; set; }
+        public virtual Resume Resume { get; set; }
+        public virtual Company Company { get; set; }
 
         public static Meeting? Create(MeetingBindingModel model)
         {
@@ -54,14 +56,15 @@ namespace HRProDatabaseImplement.Models
             return new Meeting()
             {
                 Id = model.Id,
-                CandidateId = model.CandidateId,
+                ResumeId = model.ResumeId,
                 Topic = model.Topic,
                 Date = model.Date.ToUniversalTime().AddHours(4),
                 TimeFrom = model.TimeFrom.ToUniversalTime().AddHours(4),
                 TimeTo = model.TimeTo.ToUniversalTime().AddHours(4),
                 VacancyId = model.VacancyId,
                 Place = model.Place,
-                Comment = model.Comment
+                Comment = model.Comment,
+                CompanyId = model.CompanyId
             };
         }
 
@@ -70,14 +73,15 @@ namespace HRProDatabaseImplement.Models
             return new Meeting
             {
                 Id = model.Id,
-                CandidateId = model.CandidateId,
+                ResumeId = model.ResumeId,
                 Topic = model.Topic,
                 Date = model.Date,
                 TimeFrom = model.TimeFrom,
                 TimeTo = model.TimeTo,
                 VacancyId = model.VacancyId,
                 Place = model.Place,
-                Comment = model.Comment
+                Comment = model.Comment,
+                CompanyId = model.CompanyId
             };
         }
 
@@ -99,14 +103,15 @@ namespace HRProDatabaseImplement.Models
         public MeetingViewModel GetViewModel => new()
         {
             Id = Id,
-            CandidateId = CandidateId,
+            ResumeId = ResumeId,
             Topic = Topic,
             Date = Date,
             TimeFrom = TimeFrom,
             TimeTo = TimeTo,
             VacancyId = VacancyId,
             Place = Place,
-            Comment = Comment
+            Comment = Comment,
+            CompanyId = CompanyId
         };
     }
 }

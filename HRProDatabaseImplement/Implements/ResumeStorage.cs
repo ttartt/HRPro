@@ -83,7 +83,14 @@ namespace HRproDatabaseImplement.Implements
                     .Select(x => x.GetViewModel)
                     .ToList();
             }
-
+            if (model.CompanyId.HasValue)
+            {
+                return context.Resumes
+                    .Include(x => x.Vacancy)
+                .Where(x => x.CompanyId == model.CompanyId)
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
 
             if (!string.IsNullOrEmpty(model.Title))
             {

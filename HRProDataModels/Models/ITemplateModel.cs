@@ -7,5 +7,6 @@ namespace HRProDataModels.Models
         string Name { get; }
         TemplateTypeEnum Type { get; }
         string FilePath { get; }
+        int? CompanyId { get; }
     }
 }

@@ -3,6 +3,8 @@ using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace HRProRestAPI.Controllers
 {
@@ -13,6 +15,7 @@ namespace HRProRestAPI.Controllers
         private readonly ILogger _logger;
         private readonly IMeetingLogic _logic;
         private readonly IMeetingParticipantLogic _logicMP;
+
         public MeetingController(IMeetingLogic logic, ILogger<MeetingController> logger, IMeetingParticipantLogic logicMP)
         {
             _logger = logger;
@@ -37,13 +40,14 @@ namespace HRProRestAPI.Controllers
             }
         }
 
+
         [HttpGet]
-        public List<MeetingViewModel>? ListByUserId(int? userId)
+        public List<MeetingViewModel>? List(int? userId, int? companyId)
         {
             try
             {
-                /*List<MeetingViewModel> result = new(); 
-                if (userId.HasValue)
+                List<MeetingViewModel> result = new();
+                if (companyId.HasValue && userId.HasValue)
                 {
                     var list = _logicMP.ReadList(new MeetingParticipantSearchModel
                     {
@@ -55,13 +59,38 @@ namespace HRProRestAPI.Controllers
                         if (found != null)
                         {
                             result.Add(found);
-                        }                        
+                        }
+                    }
+                    result.AddRange(_logic.ReadList(new MeetingSearchModel
+                    {
+                        CompanyId = companyId
+                    }));
+                    return result;
+                }
+                else if (companyId.HasValue)
+                {
+                    return _logic.ReadList(new MeetingSearchModel
+                    {
+                        CompanyId = companyId
+                    });
+                }
+                else if (userId.HasValue)
+                {
+                    var list = _logicMP.ReadList(new MeetingParticipantSearchModel
+                    {
+                        UserId = userId
+                    });
+                    foreach (var item in list)
+                    {
+                        var found = _logic.ReadElement(new MeetingSearchModel { Id = item.MeetingId });
+                        if (found != null)
+                        {
+                            result.Add(found);
+                        }
                     }
                     return result;
                 }
-                else return new List<MeetingViewModel>();*/
-                var list = _logic.ReadList(null);
-                return list;
+                else return _logic.ReadList(null);
             }
             catch (Exception ex)
             {

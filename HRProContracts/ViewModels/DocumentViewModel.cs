@@ -15,7 +15,7 @@ namespace HRProContracts.ViewModels
 
         public DateTime CreatedAt { get; set; }
 
-        public int TemplateId { get; set; }
+        public int? TemplateId { get; set; }
 
         public int Id { get; set; }
         public string? CompanyName { get; set; }

@@ -6,6 +6,7 @@ namespace HRProContracts.ViewModels
     public class ResumeViewModel : IResumeModel
     {
         public int? VacancyId { get; set; }
+        public int? CompanyId { get; set; }
 
         public string? VacancyName { get; set; } = string.Empty;
 

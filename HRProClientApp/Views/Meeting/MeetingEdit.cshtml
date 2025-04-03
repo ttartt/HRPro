@@ -9,9 +9,7 @@
 <div class="container">
     <h1>@title</h1>
     <form method="post" class="row g-3 needs-validation" novalidate>
-        <input type="hidden" name="id" value="@Model?.Id" />
-        <input type="hidden" name="vacancyId" value="@Model?.VacancyId" />
-        <input type="hidden" name="candidateId" value="@Model?.CandidateId" />
+        <input type="hidden" name="Id" value="@Model?.Id" />
 
         <div class="col-md-6">
             <label for="Topic" class="form-label">Тема собеседования <span class="text-danger">*</span></label>
@@ -21,12 +19,24 @@
 
         <div class="col-md-6">
             <label for="VacancyId" class="form-label">Вакансия <span class="text-danger">*</span></label>
-            <select id="vacancy" name="vacancy" class="form-control" asp-items="@(new SelectList(@ViewBag.Vacancies,"Id", "JobTitle"))"></select>
+            <select id="VacancyId" name="VacancyId" class="form-select" required>
+                <option value="" selected>Выбрать вакансию</option>
+                @foreach (var item in ViewBag.Vacancies)
+                {
+                    <option value="@item.Id">@item.JobTitle</option>
+                }
+            </select>
         </div>
 
         <div class="col-md-6">
-            <label for="CandidateId" class="form-label">Кандидат <span class="text-danger">*</span></label>
-            <select id="candidate" name="candidate" class="form-control" asp-items="@(new SelectList(@ViewBag.Candidates,"Id", "FIO"))"></select>
+            <label for="ResumeId" class="form-label">Резюме <span class="text-danger">*</span></label>
+            <select id="ResumeId" name="ResumeId" class="form-select" required>
+                <option value="" selected>Выбрать резюме</option>
+                @foreach (var item in ViewBag.Resumes)
+                {
+                    <option value="@item.Id">@item.Title</option>
+                }
+            </select>
         </div>
 
 
@@ -50,12 +60,11 @@
 
         <div class="col-md-6">
             <label for="Place" class="form-label">Место проведения <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="Place" name="Place" value="@Model?.Place" required placeholder="Введите место проведения">
-            <div class="invalid-feedback">Пожалуйста, введите место проведения собеседования.</div>
+            <input type="text" class="form-control" id="Place" name="Place" value="@Model?.Place" placeholder="Введите место проведения">
         </div>
 
         <div class="col-md-6">
-            <label for="Comment" class="form-label">Комментарий</label>
+            <label for="Comment" class="form-label">Комментарий <span class="text-danger">*</span></label>
             <textarea class="form-control" id="Comment" name="Comment" rows="3" placeholder="Введите комментарий">@Model?.Comment</textarea>
         </div>
 
@@ -111,9 +120,6 @@
     </div>
 </div>
 
-
-
-
 <script>
     (function () {
         'use strict'
@@ -132,6 +138,64 @@
                 }, false)
             })
     })()
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form.needs-validation");
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Ошибка сети или сервера");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        showToast(data.message, "danger");
+                    }
+                })
+                .catch(error => {
+                    showToast("Произошла ошибка при обработке запроса: " + error.message, "danger");
+                });
+        });
+    });
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                        </div>
+                    `;
+
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
 </script>
 
 <style>

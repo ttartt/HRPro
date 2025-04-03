@@ -59,7 +59,7 @@ namespace HRProClientApp.Controllers
             var cities = JsonConvert.DeserializeObject<List<CityViewModel>>(json);
             ViewBag.Cities = cities;
 
-            var list = APIClient.GetRequest<List<ResumeViewModel>?>($"api/resume/list");
+            var list = APIClient.GetRequest<List<ResumeViewModel>?>($"api/resume/list?companyId={APIClient.Company?.Id}");
             if (list == null)
             {
                 return View();
@@ -97,7 +97,7 @@ namespace HRProClientApp.Controllers
                 if (APIClient.Company == null)
                     throw new Exception("Компания не найдена");
 
-                var apiResponse = APIClient.GetRequest<ApiResponse<Dictionary<string, object>>>(
+                var apiResponse = APIClient.GetRequest<ApiResponse<List<ResumeViewModel>>>(
                     $"api/parser/parse?cityName={cityName}");
 
                 if (apiResponse == null)
@@ -106,22 +106,20 @@ namespace HRProClientApp.Controllers
                 if (!apiResponse.Success)
                     return Json(new { success = false, message = apiResponse.Message ?? "Ошибка API" });
 
-                var savedCount = 0;
-                if (apiResponse.Data != null && apiResponse.Data.TryGetValue("savedCount", out var countObj))
+                foreach (var resume in apiResponse.Data)
                 {
-                    savedCount = Convert.ToInt32(countObj);
+                    resume.CompanyId = APIClient.Company.Id;
+                    APIClient.PostRequest("api/resume/create", resume);
                 }
 
                 return Json(new
                 {
                     success = true,
-                    message = savedCount > 0
-                        ? $"Успешно сохранено {savedCount} резюме"
+                    message = apiResponse.Data?.Count > 0
+                        ? $"Успешно собрано {apiResponse.Data.Count} резюме"
                         : "Новые резюме не найдены",
                     redirectUrl,
-                    resumes = apiResponse.Data?.ContainsKey("resumes") == true
-                        ? apiResponse.Data["resumes"]
-                        : null
+                    resumes = apiResponse.Data 
                 });
             }
             catch (Exception ex)
@@ -129,8 +127,6 @@ namespace HRProClientApp.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> EditResume(int? id, int? vacancyId)
@@ -204,7 +200,8 @@ namespace HRProClientApp.Controllers
                                 Skills = model.Skills,
                                 Status = model.Status,
                                 Title = model.Title,
-                                VacancyId = model.VacancyId
+                                VacancyId = model.VacancyId,
+                                CompanyId = model.CompanyId
                             });
                         }
                         else
