@@ -5,67 +5,83 @@ using System.Text;
 
 namespace HRProClientApp
 {
-    public class APIClient
+    public static class APIClient
     {
         private static readonly HttpClient _client = new();
         public static UserViewModel? User { get; set; } = null;
         public static CompanyViewModel? Company { get; set; } = null;
+        public static string? Token { get; set; }
+        public static string? BaseUrl { get; private set; }
+
         public static void Connect(IConfiguration configuration)
         {
-            _client.BaseAddress = new Uri(configuration["IPAddress"]);
+            BaseUrl = configuration["IPAddress"];
+            _client.BaseAddress = new Uri(BaseUrl);
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public static T? GetRequest<T>(string requestUrl)
+
+        private static void ApplyAuthorizationHeader()
         {
-            var response = _client.GetAsync(requestUrl);
-            var result = response.Result.Content.ReadAsStringAsync().Result;
-            if (response.Result.IsSuccessStatusCode)
-            {
-                return JsonConvert.DeserializeObject<T>(result);
-            }
-            else
-            {
-                throw new Exception(result);
-            }
+            _client.DefaultRequestHeaders.Authorization =
+                string.IsNullOrEmpty(Token) ? null : new AuthenticationHeaderValue("Bearer", Token);
         }
 
         public static async Task<T?> GetRequestAsync<T>(string requestUrl)
         {
             try
             {
-                // Асинхронный запрос
-                var response = await _client.GetAsync(requestUrl);
+                ApplyAuthorizationHeader();
 
-                // Чтение содержимого ответа
+                var response = await _client.GetAsync(requestUrl);
                 var result = await response.Content.ReadAsStringAsync();
 
-                // Проверка статуса ответа
                 if (response.IsSuccessStatusCode)
                 {
-                    // Десериализация результата
                     return JsonConvert.DeserializeObject<T>(result);
                 }
-                else
-                {
-                    throw new Exception(result);
-                }
+
+                throw new Exception(result);
             }
             catch (Exception ex)
             {
-                // Логирование или дополнительная обработка исключений, если требуется
-                throw new Exception($"Ошибка при выполнении запроса к {requestUrl}: {ex.Message}", ex);
+                throw new Exception($"Ошибка при GET-запросе к {requestUrl}: {ex.Message}", ex);
             }
         }
 
+        public static T? GetRequest<T>(string requestUrl)
+        {
+            try
+            {
+                ApplyAuthorizationHeader();
+
+                var response = _client.GetAsync(requestUrl).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return JsonConvert.DeserializeObject<T>(result);
+                }
+
+                throw new Exception(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка при синхронном GET-запросе к {requestUrl}: {ex.Message}", ex);
+            }
+        }
 
         public static void PostRequest<T>(string requestUrl, T model)
         {
             var json = JsonConvert.SerializeObject(model);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = _client.PostAsync(requestUrl, data);
-            var result = response.Result.Content.ReadAsStringAsync().Result;
-            if (!response.Result.IsSuccessStatusCode)
+
+            ApplyAuthorizationHeader();
+
+            var response = _client.PostAsync(requestUrl, data).Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            if (!response.IsSuccessStatusCode)
             {
                 throw new Exception(result);
             }
@@ -76,42 +92,43 @@ namespace HRProClientApp
             var json = JsonConvert.SerializeObject(model);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
+            ApplyAuthorizationHeader();
+
             var response = await _client.PostAsync(requestUrl, data);
+            var responseJson = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"HTTP Error {response.StatusCode}: {errorContent}");
+                throw new Exception($"HTTP Error {response.StatusCode}: {responseJson}");
             }
 
-            var responseJson = await response.Content.ReadAsStringAsync();
             dynamic responseObject = JsonConvert.DeserializeObject(responseJson);
-
             try
             {
                 return (int)responseObject.id;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Could not parse ID from response: {responseJson}, Error: {ex.Message}");
+                throw new Exception($"Ошибка при разборе ID из ответа: {responseJson}, Ошибка: {ex.Message}");
             }
         }
 
-        public static async Task PostRequestAsynchron(string requestUrl, object model)
+        public static async Task<TResponse?> PostRequestAsync<TRequest, TResponse>(string url, TRequest data)
         {
-            var json = JsonConvert.SerializeObject(model);
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var json = JsonConvert.SerializeObject(data);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync(requestUrl, data);
+            ApplyAuthorizationHeader();
 
-            if (!response.IsSuccessStatusCode)
+            var response = await _client.PostAsync(url, content);
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"HTTP Error {response.StatusCode}: {errorContent}");
+                return JsonConvert.DeserializeObject<TResponse>(result);
             }
 
-            var responseJson = await response.Content.ReadAsStringAsync();
-            dynamic responseObject = JsonConvert.DeserializeObject(responseJson);
+            throw new Exception($"Ошибка POST-запроса ({response.StatusCode}): {result}");
         }
     }
 }

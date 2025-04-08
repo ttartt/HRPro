@@ -20,7 +20,7 @@ namespace HRProClientApp.Controllers
         {
             if (APIClient.User == null)
             {
-                return Redirect("~Home/Enter");
+                return Redirect("/Home/Enter");
             }
 
             var vacancy = APIClient.GetRequest<VacancyViewModel>($"/api/vacancy/details?id={id}");
@@ -44,7 +44,7 @@ namespace HRProClientApp.Controllers
         {
             if (APIClient.User == null)
             {
-                return Redirect("~Home/Enter");
+                return Redirect("/Home/Enter");
             }
 
             var vacancy = APIClient.GetRequest<VacancyViewModel>($"/api/vacancy/details?id={id}");
@@ -76,7 +76,7 @@ namespace HRProClientApp.Controllers
         {
             if (APIClient.User == null)
             {
-                return Redirect("~/Home/Enter");
+                return Redirect("/Home/Enter");
             }
             VacancyViewModel vacancy;
             if (id.HasValue)
@@ -93,7 +93,7 @@ namespace HRProClientApp.Controllers
         {
             if (APIClient.User == null)
             {
-                return Redirect("~/Home/Enter");
+                return Redirect("/Home/Enter");
             }
             var vacancies = APIClient.GetRequest<List<VacancyViewModel>?>($"api/vacancy/list?companyId={companyId}");
             return View(vacancies);
@@ -104,7 +104,7 @@ namespace HRProClientApp.Controllers
         {
             if (APIClient.User == null)
             {
-                return Redirect("~/Home/Enter");
+                return Redirect("/Home/Enter");
             }
             ViewBag.Requirements = APIClient.GetRequest<List<RequirementViewModel>>("api/requirement/list");
             ViewBag.Responsibilities = APIClient.GetRequest<List<ResponsibilityViewModel>>("api/responsibility/list");
@@ -207,7 +207,11 @@ namespace HRProClientApp.Controllers
         {
             string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
-            { 
+            {
+                if (APIClient.User == null)
+                {
+                    return Redirect("/Home/Enter");
+                }
                 if (APIClient.Company == null)
                 {
                     throw new Exception("Компания не определена");
@@ -247,14 +251,6 @@ namespace HRProClientApp.Controllers
             {
                 return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
             }
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка.";
-            ViewBag.ReturnUrl = returnUrl;
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

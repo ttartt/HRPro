@@ -28,8 +28,10 @@ namespace HRProContracts.ViewModels
 
         public string? City { get; set; }
 
-        public string? YandexToken { get; set; }
+        public string? GoogleToken { get; set; }
 
-        public DateTime? YandexTokenExpiresAt { get; set; }
+        public string? GoogleRefreshToken { get; set; }
+
+        public DateTime? GoogleTokenExpiresAt { get; set; }
     }
 }

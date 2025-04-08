@@ -3,9 +3,11 @@ using HtmlAgilityPack;
 using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRProRestApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class ParserController : ControllerBase

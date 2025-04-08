@@ -1,16 +1,20 @@
-using HRProClientApp;
+using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
+
 namespace HRProClientApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        public HomeController(
-            ILogger<HomeController> logger)
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
         }
 
         public IActionResult Index()
@@ -35,18 +39,22 @@ namespace HRProClientApp.Controllers
                     throw new Exception("Введите логин и пароль");
                 }
 
-                APIClient.User = await APIClient.GetRequestAsync<UserViewModel>(
-                    $"api/user/login?login={login}&password={password}");
+                var response = await APIClient.PostRequestAsync<HRProContracts.BindingModels.LoginRequest, LoginResponse>(
+                    "api/user/login",
+                    new HRProContracts.BindingModels.LoginRequest { Login = login, Password = password });
 
-                if (APIClient.User == null)
+                if (response == null || response.User == null)
                 {
                     throw new Exception("Неверный логин/пароль");
                 }
 
-                if (APIClient.User?.CompanyId != null)
+                APIClient.User = response.User;
+                APIClient.Token = response.Token;
+
+                if (response.User.CompanyId != null)
                 {
                     APIClient.Company = await APIClient.GetRequestAsync<CompanyViewModel>(
-                        $"api/company/profile?id={APIClient.User?.CompanyId}");
+                        $"api/company/profile?id={response.User.CompanyId}");
                 }
 
                 return Json(new { success = true, redirectUrl });
@@ -57,121 +65,108 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        /*[HttpGet]
-        public IActionResult YandexAuth()
+        [HttpGet]
+        public IActionResult GoogleAuth()
         {
             if (APIClient.User == null)
             {
-                TempData["YandexAuthError"] = "Сначала войдите в систему";
                 return RedirectToAction("Enter");
             }
 
-            var clientId = _configuration["Yandex:ClientId"];
-            var redirectUri = Url.Action("YandexCallback", "Home", null, Request.Scheme);
-            var state = $"{Guid.NewGuid()}|{DateTime.UtcNow.ToString("o")}";
+            var clientId = _configuration["Google:ClientId"];
+            var redirectUri = Url.Action("GoogleCallback", "Home", null, Request.Scheme);
+            var state = $"{Guid.NewGuid()}|{DateTime.UtcNow:o}";
 
-            // Сохраняем state в cookies напрямую
             Response.Cookies.Append(
-                "YandexOAuthState",
+                "GoogleOAuthState",
                 state,
                 new CookieOptions
                 {
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Lax,
-                    Expires = DateTimeOffset.Now.AddMinutes(5)
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5)
                 });
 
-            var authUrl = $"https://oauth.yandex.ru/authorize?" +
-                $"response_type=code&" +
-                $"client_id={clientId}&" +
-                $"redirect_uri={Uri.EscapeDataString(redirectUri)}&" +
-                $"state={state}";
+            var authUrl = $"https://accounts.google.com/o/oauth2/v2/auth?" +
+                          $"response_type=code&" +
+                          $"client_id={Uri.EscapeDataString(clientId)}&" +
+                          $"redirect_uri={Uri.EscapeDataString(redirectUri)}&" +
+                          $"scope={Uri.EscapeDataString("https://www.googleapis.com/auth/calendar.events")}&" +
+                          $"state={Uri.EscapeDataString(state)}&" +
+                          $"access_type=offline&" +
+                          $"prompt=consent";
 
             return Redirect(authUrl);
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> YandexCallback(string code, string error, string state)
+        public async Task<IActionResult> GoogleCallback(string code, string state)
         {
-            // Получаем state из cookies
-            var savedState = Request.Cookies["YandexOAuthState"];
-
-            var stateCreationTime = DateTime.ParseExact(
-    savedState.Split('|')[1],
-    "o",
-    CultureInfo.InvariantCulture);
-
-            if (DateTime.UtcNow - stateCreationTime > TimeSpan.FromMinutes(5))
+            var savedState = Request.Cookies["GoogleOAuthState"];
+            if (savedState == null)
             {
-                TempData["YandexAuthError"] = "Время авторизации истекло";
+                TempData["GoogleAuthError"] = "Ошибка безопасности при авторизации";
                 return RedirectToAction("Enter");
             }
 
-            // Удаляем cookie сразу после использования
-            Response.Cookies.Delete("YandexOAuthState");
+            Response.Cookies.Delete("GoogleOAuthState");
 
-            _logger.LogInformation($"YandexAuth: Generated state = {state}");
-            _logger.LogInformation($"YandexCallback: Received state = {state}, savedState = {savedState}");
+            var stateCreationTime = DateTime.ParseExact(
+                savedState.Split('|')[1],
+                "o",
+                CultureInfo.InvariantCulture);
 
-            if (state != savedState)
+            if (DateTime.UtcNow - stateCreationTime > TimeSpan.FromMinutes(5))
             {
-                _logger.LogError($"Несоответствие state параметра. Ожидалось: {savedState}, получено: {state}");
-                TempData["YandexAuthError"] = "Ошибка безопасности при авторизации";
+                TempData["GoogleAuthError"] = "Время авторизации истекло";
                 return RedirectToAction("Enter");
             }
 
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                var requestContent = new FormUrlEncodedContent(
-                [
-                    new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                var tokenRequest = new FormUrlEncodedContent(new[]
+                {
                     new KeyValuePair<string, string>("code", code),
-                    new KeyValuePair<string, string>("client_id", _configuration["Yandex:ClientId"]),
-                    new KeyValuePair<string, string>("client_secret", _configuration["Yandex:ClientSecret"])
-                ]);
+                    new KeyValuePair<string, string>("client_id", _configuration["Google:ClientId"]),
+                    new KeyValuePair<string, string>("client_secret", _configuration["Google:ClientSecret"]),
+                    new KeyValuePair<string, string>("redirect_uri", Url.Action("GoogleCallback", "Home", null, Request.Scheme)),
+                    new KeyValuePair<string, string>("grant_type", "authorization_code")
+                });
 
-                var response = await client.PostAsync("https://oauth.yandex.ru/token", requestContent);
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.PostAsync("https://oauth2.googleapis.com/token", tokenRequest);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Ошибка Яндекс.OAuth: {errorContent}");
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Ошибка Google OAuth: {error}");
                 }
 
-                var tokenResponse = await response.Content.ReadFromJsonAsync<YandexTokenResponse>();
+                var tokenResponse = await response.Content.ReadFromJsonAsync<GoogleTokenResponse>();
 
                 if (APIClient.User == null)
                 {
-                    TempData["YandexAuthError"] = "Пользователь не авторизован";
+                    TempData["GoogleAuthError"] = "Пользователь не авторизован";
                     return RedirectToAction("Enter");
                 }
 
-                // Сохраняем токен
-                APIClient.User.YandexToken = tokenResponse.access_token;
-                APIClient.User.YandexTokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenResponse.expires_in);
+                APIClient.User.GoogleToken = tokenResponse.access_token;
+                APIClient.User.GoogleRefreshToken = tokenResponse.refresh_token;
+                APIClient.User.GoogleTokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenResponse.expires_in);
 
-                // Обновляем пользователя
                 APIClient.PostRequest("api/user/update", APIClient.User);
 
-                TempData["YandexAuthSuccess"] = "Яндекс.Календарь успешно подключен!";
-                return RedirectToAction("Index", "Home"); // Перенаправляем куда нужно
+                TempData["GoogleAuthSuccess"] = "Google Календарь успешно подключен!";
+                return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка авторизации через Яндекс");
-                TempData["YandexAuthError"] = $"Ошибка при подключении: {ex.Message}";
+                _logger.LogError(ex, "Ошибка авторизации через Google");
+                TempData["GoogleAuthError"] = $"Ошибка при подключении: {ex.Message}";
                 return RedirectToAction("Enter");
             }
         }
-
-        public class YandexTokenResponse
-        {
-            public string access_token { get; set; }
-            public string token_type { get; set; }
-            public int expires_in { get; set; }
-        }*/
     }
 }

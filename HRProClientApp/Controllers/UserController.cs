@@ -1,6 +1,8 @@
 ﻿using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
@@ -19,6 +21,11 @@ namespace HRProClientApp.Controllers
         [HttpGet]
         public IActionResult UserProfile(int? id)
         {
+            if (APIClient.User == null)
+            {
+                return Redirect("/Home/Enter");
+            }
+
             var model = APIClient.GetRequest<UserViewModel>($"api/user/profile?id={id}"); 
 
             if (model == null)
@@ -32,6 +39,10 @@ namespace HRProClientApp.Controllers
         [HttpGet]
         public IActionResult Employees(int? companyId)
         {
+            if (APIClient.User == null)
+            {
+                return Redirect("/Home/Enter");
+            }
             var model = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={companyId}");
 
             if (model == null)
@@ -74,7 +85,11 @@ namespace HRProClientApp.Controllers
         public IActionResult UserProfileEdit(UserBindingModel model)
         {
             try
-            {    
+            {
+                if (APIClient.User == null)
+                {
+                    return Redirect("/Home/Enter");
+                }
                 if (string.IsNullOrEmpty(model.Surname))
                 {
                     throw new ArgumentException("Нет фамилии пользователя");
@@ -157,7 +172,11 @@ namespace HRProClientApp.Controllers
         }
 
         public IActionResult DeleteEmployee(int id)
-        {       
+        {
+            if (APIClient.User == null)
+            {
+                return Redirect("/Home/Enter");
+            }
             APIClient.PostRequest("api/user/delete", new UserBindingModel
             {
                 Id = id
@@ -169,23 +188,33 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public void Logout()
+        public IActionResult Logout()
         {
             APIClient.User = null;
             APIClient.Company = null;
-            Response.Redirect("/Home/Enter");
+            APIClient.Token = null;
+
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToAction("Enter", "Home");
         }
 
         [HttpPost]
         public void Delete(UserBindingModel model)
         {
-            if (APIClient.User == null)
+            try
             {
-                throw new Exception("Доступно только авторизованным пользователям");
+                string redirectUrl = $"/User/UserProfile/{model.Id}";
+                if (APIClient.User == null)
+                {
+                    throw new Exception("Доступно только авторизованным пользователям");
+                }
+                APIClient.PostRequest($"api/user/delete", model);                
             }
-
-            APIClient.PostRequest($"api/user/delete", model);
-            Response.Redirect("/Home/Enter");
+            catch 
+            {
+                Response.Redirect("/Home/Enter");
+            }
         }
     }
 }

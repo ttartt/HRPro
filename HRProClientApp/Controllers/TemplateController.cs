@@ -66,6 +66,11 @@ namespace HRProClientApp.Controllers
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
                 }
+
+                if (APIClient.Company == null)
+                {
+                    throw new Exception("Компания не определена");
+                }
                 if (model.Id == 0)
                 {
                     var existingTemplates = APIClient.GetRequest<List<TemplateViewModel>>($"api/template/list?companyId={APIClient.Company.Id}");

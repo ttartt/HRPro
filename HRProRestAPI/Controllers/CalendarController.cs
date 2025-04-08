@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
 namespace HRProRestAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]/[action]")]
-    [ApiController]    
-    public class CalendarController : Controller
+    [ApiController]
+    public class CalendarController : ControllerBase
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
@@ -19,33 +21,48 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToYandexCalendar([FromBody] CalendarEventDto eventDto)
+        public async Task<IActionResult> AddToGoogleCalendar([FromBody] CalendarEventDto eventDto)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post,
-                "https://calendar.yandex.ru/api/v2/events");
+            var calendarId = "c3145d64626c4d8e1abec2bd290fc205b4b49aee6eb533b052947a0adf7343ef@group.calendar.google.com";
 
-            request.Headers.Authorization = new AuthenticationHeaderValue("OAuth", eventDto.AccessToken);
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                $"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", eventDto.AccessToken);
 
             var eventData = new
             {
                 summary = eventDto.Title,
                 description = eventDto.Description,
-                start = new { dateTime = eventDto.StartDateTime },
-                end = new { dateTime = eventDto.EndDateTime },
-                location = eventDto.Location
+                location = eventDto.Location,
+                start = new
+                {
+                    dateTime = eventDto.StartDateTime.ToString(),
+                    timeZone = "Europe/Samara" 
+                },
+                end = new
+                {
+                    dateTime = eventDto.EndDateTime.ToString(),
+                    timeZone = "Europe/Samara"
+                }
             };
 
-            request.Content = new StringContent(JsonSerializer.Serialize(eventData),
-                Encoding.UTF8, "application/json");
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(eventData),
+                Encoding.UTF8,
+                "application/json");
 
             var response = await _httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
-                return BadRequest(await response.Content.ReadAsStringAsync());
+                var error = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Ошибка добавления события: {error}");
+
+                return BadRequest(new { message = "Не удалось добавить событие в Google Календарь", error });
             }
 
-            return Ok();
+            return Ok(new { message = "Событие успешно добавлено" });
         }
     }
 

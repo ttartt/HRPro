@@ -2,11 +2,12 @@
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRProRestAPI.Controllers
 {
-
+    [Authorize]
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class RequirementController : Controller

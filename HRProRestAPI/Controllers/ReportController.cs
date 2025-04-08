@@ -1,9 +1,11 @@
 ﻿using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRProRestApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class ReportController : Controller

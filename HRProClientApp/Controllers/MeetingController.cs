@@ -11,10 +11,12 @@ namespace HRProClientApp.Controllers
     public class MeetingController : Controller
     {
         private readonly ILogger<MeetingController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public MeetingController(ILogger<MeetingController> logger)
+        public MeetingController(ILogger<MeetingController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -37,6 +39,7 @@ namespace HRProClientApp.Controllers
             try
             {
                 var list = APIClient.GetRequest<List<MeetingViewModel>>($"api/meeting/list?userId={userId}&companyId={APIClient.Company?.Id}");
+                ViewData["GoogleClientId"] = _configuration["Google:ClientId"];
 
                 return View(list);
             }
@@ -121,7 +124,7 @@ namespace HRProClientApp.Controllers
                     model.CompanyId = APIClient.Company?.Id;
                     APIClient.PostRequest("api/meeting/create", model);
 
-                    var calendarEvent = new YandexCalendarEventModel
+                    var calendarEvent = new GoogleCalendarEventModel
                     {
                         Title = model.Topic,
                         Description = model.Comment,
@@ -130,7 +133,7 @@ namespace HRProClientApp.Controllers
                         Location = model.Place
                     };
 
-                    await AddToYandexCalendar(calendarEvent);
+                    await AddToGoogleCalendar(calendarEvent);
 
                     APIClient.User?.Meetings.Add(new MeetingViewModel
                     {
@@ -156,20 +159,20 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToYandexCalendar([FromBody] YandexCalendarEventModel model)
+        public async Task<IActionResult> AddToGoogleCalendar([FromBody] GoogleCalendarEventModel model)
         {
             try
             {
-                var yandexToken = APIClient.User?.YandexToken;
+                var googleToken = APIClient.User?.GoogleToken;
 
-                if (string.IsNullOrEmpty(yandexToken))
+                if (string.IsNullOrEmpty(googleToken))
                 {
-                    return Json(new { success = false, message = "Необходима авторизация через Яндекс" });
+                    return Json(new { success = false, message = "Необходима авторизация через Google" });
                 }
 
                 var meeting = new
                 {
-                    AccessToken = yandexToken,
+                    AccessToken = googleToken,
                     Title = model.Title,
                     Description = model.Description,
                     StartDateTime = model.StartDateTime.ToString("yyyy-MM-ddTHH:mm:ss"),
@@ -177,7 +180,7 @@ namespace HRProClientApp.Controllers
                     Location = model.Location
                 };
 
-                var response = await APIClient.PostRequestAsync("api/calendar/AddToYandexCalendar", meeting);
+                var response = await APIClient.PostRequestAsync("api/calendar/AddToGoogleCalendar", meeting);
 
                 return Json(new { success = true });
             }
@@ -188,7 +191,7 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        public class YandexCalendarEventModel
+        public class GoogleCalendarEventModel
         {
             public string Title { get; set; }
             public string Description { get; set; }
