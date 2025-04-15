@@ -93,12 +93,7 @@ namespace HRProBusinessLogic.BusinessLogic
             if (!withParams)
             {
                 return;
-            }
-
-            if (model.ResumeId <= 0)
-            {
-                throw new ArgumentException("Некорректный идентификатор резюме", nameof(model.ResumeId));
-            }
+            }            
 
             if (string.IsNullOrEmpty(model.Topic))
             {
@@ -110,21 +105,12 @@ namespace HRProBusinessLogic.BusinessLogic
                 throw new ArgumentException("Время начала должно быть меньше времени окончания", nameof(model.TimeFrom));
             }
 
-            if (model.VacancyId <= 0)
-            {
-                throw new ArgumentException("Некорректный идентификатор вакансии", nameof(model.VacancyId));
-            }
-
-            if (string.IsNullOrEmpty(model.Place))
-            {
-                throw new ArgumentNullException("Место проведения встречи не может быть пустым", nameof(model.Place));
-            }
 
             var existingMeeting = _meetingStorage.GetElement(new MeetingSearchModel
             {
-                ResumeId = model.ResumeId,
-                VacancyId = model.VacancyId,
-                Date = model.Date.Date
+                Date = model.Date.Date,
+                TimeFrom = model.TimeFrom,
+                TimeTo = model.TimeTo
             });
 
             if (existingMeeting != null && existingMeeting.Id != model.Id)

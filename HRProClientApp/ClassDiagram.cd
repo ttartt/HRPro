@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="HRProClientApp.Controllers.CompanyController">
+    <Position X="11.25" Y="3" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAIAEAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Controllers\CompanyController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.DocumentController">
+    <Position X="9.25" Y="6.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAKAEBAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\DocumentController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.HomeController">
+    <Position X="13.25" Y="3" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAiAAACAAAAAAAAAAAAAAAAAIAAEAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Controllers\HomeController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.MeetingController">
+    <Position X="7.25" Y="3" Width="1.75" />
+    <NestedTypes>
+      <Class Name="HRProClientApp.Controllers.MeetingController.GoogleCalendarEventModel" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Controllers\MeetingController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAIAEAAAAABAEAIAAAQAA=</HashCode>
+      <FileName>Controllers\MeetingController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.ResumeController">
+    <Position X="11.25" Y="5.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAQAAAAAAAAAAIQEBAAAAgAAEAAAAAAA=</HashCode>
+      <FileName>Controllers\ResumeController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.TagController">
+    <Position X="7.25" Y="6.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAABAAAAAAAAAAAAIAEAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\TagController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.TemplateController">
+    <Position X="13.25" Y="6" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEEAAAAAAAAAAgAAIAEAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>Controllers\TemplateController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.UserController">
+    <Position X="5.25" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAAAAIAKAUAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Controllers\UserController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProClientApp.Controllers.VacancyController">
+    <Position X="9.25" Y="3" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAIAAAQAEAAAAAAAAAAAIIEAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>Controllers\VacancyController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

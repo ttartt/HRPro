@@ -34,7 +34,8 @@ namespace HRproDatabaseImplement.Models
         [DataMember]
         public DateTime? DateOfBirth { get; set; }
         [DataMember]
-        public string? City { get; set; }
+        [Required]
+        public bool IsEmailConfirmed { get; set; }
         [DataMember]
         public int Id { get; set; }
         public virtual Company Company { get; set; }
@@ -57,7 +58,7 @@ namespace HRproDatabaseImplement.Models
                 Role = model.Role,
                 CompanyId = model.CompanyId,
                 DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null,
-                City = model.City
+                IsEmailConfirmed = model.IsEmailConfirmed
             };
         }
         public static User Create(UserViewModel model)
@@ -73,7 +74,8 @@ namespace HRproDatabaseImplement.Models
                 PhoneNumber = model.PhoneNumber,
                 Role = model.Role,
                 CompanyId = model.CompanyId,
-                DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null
+                DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null,
+                IsEmailConfirmed = model.Role == RoleEnum.Администратор ? true : false
             };
         }
         public void Update(UserBindingModel model)
@@ -89,6 +91,7 @@ namespace HRproDatabaseImplement.Models
             PhoneNumber = model.PhoneNumber;
             CompanyId = model.CompanyId;
             DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null;
+            IsEmailConfirmed = model.IsEmailConfirmed;
         }
 
         public UserViewModel GetViewModel => new()
@@ -103,7 +106,7 @@ namespace HRproDatabaseImplement.Models
             Role = Role,
             CompanyId = CompanyId,
             DateOfBirth = DateOfBirth,
-            City = City
+            IsEmailConfirmed = IsEmailConfirmed
         };
     }
 }

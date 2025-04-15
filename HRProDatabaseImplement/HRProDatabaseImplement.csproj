@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HRProBusinessLogic\HRProBusinessLogic.csproj" />
     <ProjectReference Include="..\HRProContracts\HRProContracts.csproj" />
   </ItemGroup>
 

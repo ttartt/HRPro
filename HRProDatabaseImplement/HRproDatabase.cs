@@ -21,12 +21,9 @@ namespace HRproDatabaseImplement
         public virtual DbSet<Document> Documents { set; get; }
         public virtual DbSet<Template> Templates { set; get; }
         public virtual DbSet<Tag> Tags { set; get; }
-        public virtual DbSet<Requirement> Requirements { set; get; }
-        public virtual DbSet<Responsibility> Responsibilities { set; get; }
-        public virtual DbSet<VacancyRequirement> VacancyRequirements { set; get; }
-        public virtual DbSet<VacancyResponsibility> VacancyResponsibilities { set; get; }
         public virtual DbSet<Meeting> Meetings { set; get; }
         public virtual DbSet<MeetingParticipant> MeetingParticipants { set; get; }
         public virtual DbSet<DocumentTag> DocumentTags { set; get; }
+        public virtual DbSet<Message> Messages { set; get; }
     }
 }

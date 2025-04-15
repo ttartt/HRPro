@@ -21,8 +21,13 @@
 </div>
 
 <div class="mt-5">
-    <h2 class="mb-3 text-center">Календарь собеседований</h2>
-    <div class="d-flex justify-content-center">
+    <h2 class="mb-3 text-center">Календарь встреч</h2>
+    <div class="mb-4 text-end">
+        <a asp-action="MeetingEdit" asp-controller="Meeting" class="btn btn-success">
+            <i class="bi bi-plus-circle me-2"></i> Создать встречу
+        </a>
+    </div>
+    <div class="d-flex justify-content-center">        
         <iframe src="https://calendar.google.com/calendar/embed?src=c3145d64626c4d8e1abec2bd290fc205b4b49aee6eb533b052947a0adf7343ef%40group.calendar.google.com&ctz=Europe%2FSamara"
                 width="800"
                 height="450"
@@ -35,19 +40,14 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <h1 class="mb-4 text-center">Собеседования</h1>
-            <div class="mb-4 text-end">
-                <a asp-action="MeetingEdit" asp-controller="Meeting" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i> Создать встречу
-                </a>
-            </div>
+            
 
             @if (Model != null)
             {
                 @if (Model.Any())
                 {
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
+                        <table class="table table-striped table-hover align-middle" id="meetingsTable">
                             <thead class="table-light">
                                 <tr>
                                     <th>Тема</th>
@@ -96,42 +96,160 @@
             
         </div>
     </div>
+    <nav aria-label="Page navigation" id="paginationContainer">
+        <ul class="pagination justify-content-center" id="pagination">
+        </ul>
+    </nav>
 </div>
 
-<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="filterModalLabel">Фильтры</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="topicFilter" class="form-label">Тема</label>
-                        <input type="text" class="form-control" id="topicFilter" placeholder="Введите тему" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="dateFilter" class="form-label">Дата</label>
-                        <input type="date" class="form-control" id="dateFilter" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="placeFilter" class="form-label">Место</label>
-                        <input type="text" class="form-control" id="placeFilter" placeholder="Введите место" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="statusFilter" class="form-label">Комментарий</label>
-                        <input type="text" class="form-control" id="commentFilter" placeholder="Введите комментарий" />
-                    </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                        <button type="submit" class="btn btn-primary">Применить фильтры</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+    const itemsPerPage = 5;
+    let currentPage = 1;
+    let allMeetings = @Html.Raw(Json.Serialize(Model)) || [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('meetingsTable')) {
+            updateTable();
+            setupPagination();
+        }
+    });
+
+    function updateTable() {
+        const tableBody = document.querySelector("#meetingsTable tbody");
+        if (!tableBody) return;
+
+        tableBody.innerHTML = "";
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedMeetings = allMeetings.slice(startIndex, endIndex);
+
+        paginatedMeetings.forEach(meeting => {
+            const dateStr = meeting.date ? new Date(meeting.date).toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }) : 'Нет данных';
+
+            const timeFromStr = meeting.timeFrom ? new Date(meeting.timeFrom).toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : '';
+
+            const timeToStr = meeting.timeTo ? new Date(meeting.timeTo).toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : '';
+
+            const timeRange = timeFromStr && timeToStr ? `${timeFromStr} - ${timeToStr}` : 'Нет данных';
+
+            const row = `
+                    <tr>
+                        <td>${meeting.topic || 'Нет данных'}</td>
+                        <td>${dateStr}</td>
+                        <td>${timeRange}</td>
+                        <td>${meeting.place || 'Нет данных'}</td>
+                        <td>${meeting.comment || 'Нет данных'}</td>
+                        <td>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="/Meeting/MeetingEdit/${meeting.id || meeting.Id}" class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="/Meeting/Delete/${meeting.id || meeting.Id}" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить это собеседование?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function setupPagination() {
+        const pagination = document.getElementById('pagination');
+        if (!pagination) return;
+
+        const pageCount = Math.ceil(allMeetings.length / itemsPerPage);
+        pagination.innerHTML = "";
+
+        if (pageCount <= 1) {
+            const container = document.getElementById('paginationContainer');
+            if (container) container.classList.add('d-none');
+            return;
+        }
+
+        const container = document.getElementById('paginationContainer');
+        if (container) container.classList.remove('d-none');
+
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Назад"><span aria-hidden="true">&laquo;</span></a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        for (let i = 1; i <= pageCount; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = i;
+                updateTable();
+                setupPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            pagination.appendChild(li);
+        }
+
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Вперед"><span aria-hidden="true">&raquo;</span></a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+                currentPage++;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(nextLi);
+    }
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+            `;
+
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
+</script>
 
 <style>
     .table-hover tbody tr:hover {

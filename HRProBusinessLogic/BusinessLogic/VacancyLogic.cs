@@ -14,19 +14,15 @@ namespace HRProBusinessLogic.BusinessLogic
         private readonly IVacancyStorage _vacancyStorage;
         private readonly IResumeStorage _resumeStorage;
         private readonly ICompanyStorage _companyStorage;
-        private readonly IVacancyRequirementStorage _vacancyRequirementStorage;
-        private readonly IVacancyResponsibilityStorage _vacancyResponsibilityStorage;
         private readonly IUserStorage _userStorage;
 
-        public VacancyLogic(ILogger<VacancyLogic> logger, IVacancyStorage vacancyStorage, IResumeStorage resumeStorage, ICompanyStorage companyStorage, IUserStorage userStorage, IVacancyRequirementStorage vacancyRequirementStorage, IVacancyResponsibilityStorage vacancyResponsibilityStorage)
+        public VacancyLogic(ILogger<VacancyLogic> logger, IVacancyStorage vacancyStorage, IResumeStorage resumeStorage, ICompanyStorage companyStorage, IUserStorage userStorage)
         {
             _logger = logger;
             _vacancyStorage = vacancyStorage;
             _resumeStorage = resumeStorage;
             _companyStorage = companyStorage;
             _userStorage = userStorage;
-            _vacancyRequirementStorage = vacancyRequirementStorage;
-            _vacancyResponsibilityStorage = vacancyResponsibilityStorage;
         }
         public int? Create(VacancyBindingModel model)
         {

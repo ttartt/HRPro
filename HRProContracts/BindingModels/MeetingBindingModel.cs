@@ -23,5 +23,7 @@ namespace HRProContracts.BindingModels
         public string? Comment { get; set; }
 
         public int Id { get; set; }
+
+        public string? GoogleEventId { get; set; }
     }
 }

@@ -24,5 +24,7 @@ namespace HRProContracts.ViewModels
 
         public int Id { get; set; }
         public List<UserViewModel> Participants { get; set; } = new();
+
+        public string? GoogleEventId { get; set; }
     }
 }

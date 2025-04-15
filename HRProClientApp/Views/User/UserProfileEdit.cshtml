@@ -1,4 +1,5 @@
 ﻿@using HRProContracts.ViewModels
+@using HRProDataModels.Enums
 @model UserViewModel
 
 @{
@@ -13,7 +14,6 @@
             <form method="post" class="needs-validation" novalidate>
                 <input type="hidden" name="id" value="@Model?.Id" />
                 <input type="hidden" name="CompanyId" value="@Model?.CompanyId" />
-                <input type="hidden" name="Role" value="@Model?.Role" />
                 @if (Model?.Id > 0)
                 {
                     <input type="hidden" name="password" value="@Model?.Password" />
@@ -36,13 +36,57 @@
                     <input type="text" class="form-control" id="LastName" name="LastName" value="@Model?.LastName" />
                 </div>
 
+                @if (APIClient.User?.Role == HRProDataModels.Enums.RoleEnum.Администратор)
+                {
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label">Роль</label>
+                        <div class="input-group">
+                            <select asp-for="Role" class="form-select" asp-items="@GetRoleSelectList()" required>
+                            </select>
+                        </div>
+                    </div>
+                }
+
                 <div class="mb-3">
                     <label for="Email" class="form-label">Электронная почта <span class="text-danger">*</span></label>
                     <input type="email" class="form-control" id="Email" name="Email" value="@Model?.Email"
                     @(Model?.Id > 0 ? "readonly" : "") required />
+
+                    @if (Model?.Id > 0 && APIClient.User?.Role != RoleEnum.Администратор)
+                    {
+                        <div class="form-text @(Model.IsEmailConfirmed ? "text-success" : "text-danger")">
+                            Email @(Model.IsEmailConfirmed ? "подтвержден" : "не подтвержден")
+                        </div>
+                    }
+
                     <div class="invalid-feedback">Пожалуйста, укажите корректный email</div>
                 </div>
 
+                @if (!APIClient.User.IsEmailConfirmed)
+                {
+                    <button type="button" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#confirmEmailModal"
+                            title="Подтвердить Email" onclick="sendNewCode()">
+                        Подтвердить Email
+                    </button>
+                }
+
+                <div class="modal" id="confirmEmailModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Подтверждение email</h5>
+                            </div>
+                            <div class="modal-body">
+                                <input type="text" id="confirmCode" class="form-control" placeholder="Введите код">
+                            </div>
+                            <div class="modal-footer">
+                                <button onclick="confirmEmail()" class="btn btn-primary">Подтвердить</button>
+                                <button onclick="sendNewCode()" class="btn btn-secondary">Отправить новый код</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="mb-3">
                     <label for="dateOfBirth" class="form-label">Дата рождения</label>
                     <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth"
@@ -73,6 +117,57 @@
                         <div class="invalid-feedback">Пароль не соответствует требованиям</div>
                     </div>
                 }
+
+                <button type="button" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                        title="Изменить пароль">
+                    <i class="bi bi-key"></i> Изменить пароль
+                </button>
+
+                <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title" id="resetPasswordModalLabel">Изменение пароля</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Новый пароль</label>
+                                    <div class="input-group">
+                                        <input type="password" id="newPassword" class="form-control" placeholder="Введите новый пароль">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newPasswordConfirmation" class="form-label">Подтверждение пароля</label>
+                                    <div class="input-group">
+                                        <input type="password" id="newPasswordConfirmation" class="form-control" placeholder="Повторите новый пароль">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info mb-0">
+                                    <small>Пароль должен содержать:</small>
+                                    <ul class="mb-0">
+                                        <li><small>Не менее 8 символов</small></li>
+                                        <li><small>Буквы в верхнем и нижнем регистре</small></li>
+                                        <li><small>Хотя бы одну цифру</small></li>
+                                        <li><small>Хотя бы один специальный символ</small></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="button" onclick="resetPassword()" class="btn btn-primary">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="mb-3">
                     <label for="PhoneNumber" class="form-label">Телефон</label>
@@ -110,7 +205,23 @@
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
         }
+
+        .input-group-text {
+            cursor: pointer;
+        }
     </style>
+}
+
+@functions {
+    public SelectList GetRoleSelectList()
+    {
+        var roles = Enum.GetValues(typeof(RoleEnum))
+                       .Cast<RoleEnum>()
+                       .Where(r => r != RoleEnum.Неизвестен)
+                       .ToList();
+
+        return new SelectList(roles, "Выберите роль...");
+    }
 }
 
 @section Scripts {
@@ -208,6 +319,99 @@
             toastContainer.appendChild(toast);
 
             setTimeout(() => toast.remove(), 5000);
+        }
+
+        function sendNewCode() {
+            $.post('/User/SendConfirmationCode', { userId: @APIClient.User.Id }, function () {
+                alert('Проверьте вашу электронную почту');
+            });
+        }
+
+        function confirmEmail() {
+            var code = $('#confirmCode').val().trim();
+
+            if (!code) {
+                alert("Введите код подтверждения");
+                return;
+            }
+
+            $.get('/User/ConfirmEmail', {
+                userId: @APIClient.User.Id,
+                code: code
+            }, function (response) {
+                if (response && response.success) {
+                    alert(response.message || "Email успешно подтверждён");
+                    location.href = '/User/UserProfileEdit?id=@APIClient.User.Id';
+                } else {
+                    alert(response?.message || "Неверный код подтверждения");
+                }
+            }).fail(function (xhr) {
+                alert(xhr.responseJSON?.message || "Ошибка сервера");
+            });
+        }
+
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function () {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            });
+        });
+
+        function resetPassword() {
+            const newPass = $('#newPassword').val().trim();
+            const newPassConfirm = $('#newPasswordConfirmation').val().trim();
+
+            if (!newPass || !newPassConfirm) {
+                showAlert('Введите пароль и подтверждение', 'danger');
+                return;
+            }
+
+            if (newPass !== newPassConfirm) {
+                showAlert('Пароли не совпадают', 'danger');
+                return;
+            }
+
+            if (!@Json.Serialize(APIClient.User?.IsEmailConfirmed ?? false)) {
+                showAlert('Сначала подтвердите электронную почту', 'warning');
+                return;
+            }
+
+            $.post('/User/ResetPassword', { newPass: newPass })
+                .done(function (response) {
+                    if (response?.success) {
+                        showAlert(response.message || 'Пароль успешно изменен', 'success');
+                        $('#resetPasswordModal').modal('hide');
+                        if (response.redirectUrl) {
+                            setTimeout(() => location.href = response.redirectUrl, 1500);
+                        }
+                    } else {
+                        showAlert(response?.message || 'Ошибка при изменении пароля', 'danger');
+                    }
+                })
+                .fail(function (xhr) {
+                    showAlert(xhr.responseJSON?.message || 'Ошибка сервера', 'danger');
+                });
+        }
+
+        function showAlert(message, type) {
+            const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+
+            $('#resetPasswordModal .modal-body').prepend(alertHtml);
+
+            setTimeout(() => $('.alert').alert('close'), 5000);
         }
     </script>
 }

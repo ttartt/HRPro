@@ -18,8 +18,8 @@
         </div>
 
         <div class="col-md-6">
-            <label for="VacancyId" class="form-label">Вакансия <span class="text-danger">*</span></label>
-            <select id="VacancyId" name="VacancyId" class="form-select" required>
+            <label for="VacancyId" class="form-label">Вакансия</label>
+            <select id="VacancyId" name="VacancyId" class="form-select">
                 <option value="" selected>Выбрать вакансию</option>
                 @foreach (var item in ViewBag.Vacancies)
                 {
@@ -29,8 +29,8 @@
         </div>
 
         <div class="col-md-6">
-            <label for="ResumeId" class="form-label">Резюме <span class="text-danger">*</span></label>
-            <select id="ResumeId" name="ResumeId" class="form-select" required>
+            <label for="ResumeId" class="form-label">Резюме</label>
+            <select id="ResumeId" name="ResumeId" class="form-select">
                 <option value="" selected>Выбрать резюме</option>
                 @foreach (var item in ViewBag.Resumes)
                 {
@@ -59,13 +59,13 @@
         </div>
 
         <div class="col-md-6">
-            <label for="Place" class="form-label">Место проведения <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="Place" name="Place" value="@Model?.Place" placeholder="Введите место проведения">
+            <label for="Place" class="form-label">Место проведения</label>
+            <input type="text" class="form-control" id="Place" name="Place" value="@Model?.Place" placeholder="Введите место проведения" required>
         </div>
 
         <div class="col-md-6">
-            <label for="Comment" class="form-label">Комментарий <span class="text-danger">*</span></label>
-            <textarea class="form-control" id="Comment" name="Comment" rows="3" placeholder="Введите комментарий">@Model?.Comment</textarea>
+            <label for="Comment" class="form-label">Комментарий</label>
+            <textarea class="form-control" id="Comment" name="Comment" rows="3" placeholder="Введите комментарий" required>@Model?.Comment</textarea>
         </div>
 
         <div class="col-md-6">
@@ -73,11 +73,11 @@
             <button type="button" class="btn btn-secondary" onclick="window.history.back();">Назад</button>
         </div>
 
-        @* <div class="col-md-6">
+        <div class="col-md-6">
             <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#inviteParticipantsModal">
                 Пригласить участников
             </button>
-        </div> *@
+        </div>
     </form>
 </div>
 

@@ -1,4 +1,5 @@
-﻿using HRProContracts.BindingModels;
+﻿using HRProBusinessLogic.MailWorker;
+using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.ViewModels;
@@ -20,11 +21,16 @@ namespace HRProRestApi.Controllers
         private readonly ILogger _logger;
         private readonly IUserLogic _logic;
         private readonly IConfiguration _config;
-        public UserController(IUserLogic logic, ILogger<UserController> logger, IConfiguration config)
+        private readonly IMessageInfoLogic _mailLogic;
+        private readonly AbstractMailWorker _mailWorker;
+        private static Dictionary<int, string> _confirmationCodes = new Dictionary<int, string>();
+        public UserController(IUserLogic logic, ILogger<UserController> logger, IConfiguration config, IMessageInfoLogic mailLogic, AbstractMailWorker mailWorker)
         {
             _logger = logger;
             _logic = logic;
             _config = config;
+            _mailLogic = mailLogic;
+            _mailWorker = mailWorker;
         }
         [AllowAnonymous]
         [HttpPost]
@@ -57,6 +63,100 @@ namespace HRProRestApi.Controllers
                 return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
+
+        [HttpGet]
+        public UserViewModel Check(string login)
+        {
+            try
+            {
+                return _logic.ReadElement(new UserSearchModel
+                {
+                    Email = login
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения пользователя");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ConfirmEmail(int userId, string code)
+        {
+            try
+            {
+                if (_confirmationCodes.TryGetValue(userId, out var savedCode))
+                {
+                    bool isValid = savedCode == code;
+                    if (isValid)
+                    {
+                        _confirmationCodes.Remove(userId); 
+                    }
+
+                    return Json(new
+                    {
+                        success = isValid,
+                        message = isValid ? "Email успешно подтверждён" : "Неверный код подтверждения"
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Код подтверждения не найден или устарел"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка подтверждения Email");
+                return Json(new
+                {
+                    success = false,
+                    message = "Ошибка сервера при подтверждении email"
+                });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SendConfirmationCode(UserViewModel model)
+        {
+            try
+            {
+                var code = Guid.NewGuid().ToString("N")[..6].ToUpper();
+                var userId = model.Id;
+                _confirmationCodes[userId] = code;
+
+                _mailWorker.MailSendAsync(new MailSendInfoBindingModel
+                {
+                    MailAddress = model.Email,
+                    Subject = "Код подтверждения",
+                    Text = $"Ваш код подтверждения: {code}"
+                });
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при отправке кода");
+                return StatusCode(500);
+            }
+        }
+
+        /*[HttpPost]
+        public IActionResult SendToMail(MailSendInfoBindingModel model)
+        {
+            try
+            {
+                _mailWorker.MailSendAsync(model);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка отправки email");
+                return StatusCode(500);
+            }
+        }*/
 
         private string GenerateJwtToken(UserViewModel user)
         {
@@ -157,6 +257,23 @@ namespace HRProRestApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка удаления профиля пользователя");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        public List<MessageInfoViewModel>? GetMessages(int clientId)
+        {
+            try
+            {
+                return _mailLogic.ReadList(new MessageInfoSearchModel
+                {
+                    UserId = clientId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения писем пользователя");
                 throw;
             }
         }

@@ -14,10 +14,12 @@ namespace HRProRestApi.Controllers
     {
         private readonly ILogger _logger;
         private readonly IVacancyLogic _logic;
-        public VacancyController(IVacancyLogic logic, ILogger<VacancyController> logger)
+        private readonly IResumeLogic _resumeLogic;
+        public VacancyController(IVacancyLogic logic, ILogger<VacancyController> logger, IResumeLogic resumeLogic)
         {
             _logger = logger;
             _logic = logic;
+            _resumeLogic = resumeLogic;
         }
 
         [HttpGet]
@@ -33,28 +35,6 @@ namespace HRProRestApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка получения вакансии");
-                throw;
-            }
-        }
-
-        [HttpGet]
-        public List<VacancyViewModel>? Search(string? tags)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(tags))
-                {
-                    return _logic.ReadList(new VacancySearchModel
-                    {
-                        Tags = tags,
-                        Status = HRProDataModels.Enums.VacancyStatusEnum.Открыта
-                    });
-                }
-                return new List<VacancyViewModel>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка получения вакансий");
                 throw;
             }
         }
@@ -79,6 +59,28 @@ namespace HRProRestApi.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        public List<ResumeViewModel>? Resumes(int? vacancyId)
+        {
+            try
+            {
+                if (vacancyId.HasValue)
+                {
+                    return _resumeLogic.ReadList(new ResumeSearchModel
+                    {
+                        VacancyId = vacancyId
+                    });
+                }
+                else return new List<ResumeViewModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения резюме на вакансию");
+                throw;
+            }
+        }
+
 
         [HttpPost]
         public void Create(VacancyBindingModel model)

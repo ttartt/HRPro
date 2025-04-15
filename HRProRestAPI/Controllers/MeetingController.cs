@@ -140,7 +140,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка создания собеседования");
+                _logger.LogError(ex, "Ошибка добавления участника собеседования");
                 throw;
             }
         }
@@ -182,7 +182,7 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка удаления собеседования");
+                _logger.LogError(ex, "Ошибка удаления участника собеседования");
                 throw;
             }
         }

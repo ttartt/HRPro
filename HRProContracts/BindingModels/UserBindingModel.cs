@@ -25,6 +25,6 @@ namespace HRProContracts.BindingModels
 
         public int Id { get; set; }
 
-        public string? City { get; set; }
+        public bool IsEmailConfirmed { get; set; }
     }
 }

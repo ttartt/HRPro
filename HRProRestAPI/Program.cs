@@ -1,6 +1,8 @@
 using HRProBusinessLogic.BusinessLogic;
+using HRProBusinessLogic.MailWorker;
 using HRProBusinessLogic.OfficePackage;
 using HRProBusinessLogic.OfficePackage.Implements;
+using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.StoragesContracts;
 using HRproDatabaseImplement.Implements;
@@ -21,14 +23,11 @@ builder.Services.AddTransient<IVacancyStorage, VacancyStorage>();
 builder.Services.AddTransient<IResumeStorage, ResumeStorage>();
 builder.Services.AddTransient<IMeetingStorage, MeetingStorage>();
 builder.Services.AddTransient<IMeetingParticipantStorage, MeetingParticipantStorage>();
-builder.Services.AddTransient<IRequirementStorage, RequirementStorage>();
-builder.Services.AddTransient<IResponsibilityStorage, ResponsibilityStorage>();
-builder.Services.AddTransient<IVacancyRequirementStorage, VacancyRequirementStorage>();
-builder.Services.AddTransient<IVacancyResponsibilityStorage, VacancyResponsibilityStorage>();
 builder.Services.AddTransient<IDocumentStorage, DocumentStorage>();
 builder.Services.AddTransient<ITemplateStorage, TemplateStorage>();
 builder.Services.AddTransient<ITagStorage, TagStorage>();
 builder.Services.AddTransient<IDocumentTagStorage, DocumentTagStorage>();
+builder.Services.AddTransient<IMessageInfoStorage, MessageInfoStorage>();
 
 builder.Services.AddTransient<IUserLogic, UserLogic>();
 builder.Services.AddTransient<ICompanyLogic, CompanyLogic>();
@@ -36,15 +35,13 @@ builder.Services.AddTransient<IVacancyLogic, VacancyLogic>();
 builder.Services.AddTransient<IResumeLogic, ResumeLogic>();
 builder.Services.AddTransient<IMeetingLogic, MeetingLogic>();
 builder.Services.AddTransient<IMeetingParticipantLogic, MeetingParticipantLogic>();
-builder.Services.AddTransient<IRequirementLogic, RequirementLogic>();
-builder.Services.AddTransient<IResponsibilityLogic, ResponsibilityLogic>();
-builder.Services.AddTransient<IVacancyRequirementLogic, VacancyRequirementLogic>();
-builder.Services.AddTransient<IVacancyResponsibilityLogic, VacancyResponsibilityLogic>();
-builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
 builder.Services.AddTransient<ITemplateLogic, TemplateLogic>();
 builder.Services.AddTransient<ITagLogic, TagLogic>();
 builder.Services.AddTransient<IDocumentTagLogic, DocumentTagLogic>();
+builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
+builder.Services.AddTransient<IMessageInfoLogic, MessageInfoLogic>();
 
+builder.Services.AddSingleton<AbstractMailWorker, MailKitWorker>();
 builder.Services.AddTransient<AbstractSaveToPdf, SaveToPdf>();
 
 builder.Services.AddAuthentication(options =>
@@ -81,6 +78,18 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+var mailSender = app.Services.GetService<AbstractMailWorker>();
+
+mailSender?.MailConfig(new MailConfigBindingModel
+{
+    MailLogin = builder.Configuration?.GetSection("MailLogin")?.Value?.ToString() ?? string.Empty,
+    MailPassword = builder.Configuration?.GetSection("MailPassword")?.Value?.ToString() ?? string.Empty,
+    SmtpClientHost = builder.Configuration?.GetSection("SmtpClientHost")?.Value?.ToString() ?? string.Empty,
+    SmtpClientPort = Convert.ToInt32(builder.Configuration?.GetSection("SmtpClientPort")?.Value?.ToString()),
+    PopHost = builder.Configuration?.GetSection("PopHost")?.Value?.ToString() ?? string.Empty,
+    PopPort = Convert.ToInt32(builder.Configuration?.GetSection("PopPort")?.Value?.ToString())
+});
+
 using (var scope = app.Services.CreateScope())
 {
     var userLogic = scope.ServiceProvider.GetRequiredService<IUserLogic>();
@@ -91,7 +100,7 @@ using (var scope = app.Services.CreateScope())
 
     if (existingAdmin == null)
     {
-        userLogic.Create(new HRProContracts.BindingModels.UserBindingModel
+        userLogic.Create(new UserBindingModel
         {
             Surname = "Admin",
             Name = "Admin",
@@ -99,7 +108,7 @@ using (var scope = app.Services.CreateScope())
             Password = "Admin123!",
             Role = HRProDataModels.Enums.RoleEnum.Администратор,
             PhoneNumber = "9999999999",
-            City = "AdminCity"
+            IsEmailConfirmed = true
         });
         Console.WriteLine("Администратор создан");
     }

@@ -9,8 +9,8 @@
     <h1>Резюме</h1>
     <div class="row mb-3">
         <div class="col-md-4">
-            <label for="search" class="form-label">Поиск по названию</label>
-            <input type="text" id="search" class="form-control" placeholder="Введите название..." oninput="filterResumes()">
+            <label for="search" class="form-label">Поиск</label>
+            <input type="text" id="search" class="form-control" placeholder="Введите текст..." oninput="filterResumes()">
         </div>
         <div class="col-md-4">
             <label for="sortDate" class="form-label">Сортировка по дате</label>
@@ -29,11 +29,11 @@
     <table class="table table-striped" id="resumesTable">
         <thead>
             <tr>
+                <th></th>
                 <th>Название</th>
                 <th>Зарплата</th>
                 <th>Кандидат</th>
                 <th>Город</th>
-                <th>Дата добавления</th>
                 <th>Действия</th>
             </tr>
         </thead>
@@ -42,17 +42,45 @@
             {
                 var cityName = cities?.FirstOrDefault(c => c.Code == resume.City)?.Name ?? "Неизвестен";
                 <tr>
+                    <td class="text-nowrap">
+                            @{
+                                var icons = "";
+                                if (resume.CandidateInfo.Contains("Женщина"))
+                                {
+                                    icons += "<i class=\"bi bi-gender-female text-pink me-1\" title=\"Женщина\"></i>";
+                                }
+                                else if (resume.CandidateInfo.Contains("Мужчина"))
+                                {
+                                    icons += "<i class=\"bi bi-gender-male text-primary me-1\" title=\"Мужчина\"></i>";
+                                }
+
+                                if (resume.CandidateInfo.Contains("без опыта работы"))
+                                {
+                                    icons += "<i class=\"bi bi-exclamation-triangle-fill text-warning me-1\" title=\"Без опыта работы\"></i>";
+                                }
+                                else if (resume.CandidateInfo.Contains("стаж"))
+                                {
+                                    icons += "<i class=\"bi bi-briefcase-fill text-success me-1\" title=\"Опыт работы\"></i>";
+                                }
+
+                                if (resume.CandidateInfo.Contains("высшее образование"))
+                                {
+                                    icons += "<i class=\"bi bi-mortarboard-fill text-info me-1\" title=\"Высшее образование\"></i>";
+                                }
+                                else if (resume.CandidateInfo.Contains("среднее образование"))
+                                {
+                                    icons += "<i class=\"bi bi-book-half text-secondary me-1\" title=\"Среднее образование\"></i>";
+                                }
+                            }
+                            @Html.Raw(icons)
+                    </td>
+
                     <td>@resume.Title</td>
                     <td>@resume.Salary</td>
                     <td>@resume.CandidateInfo</td>
                     <td>@cityName</td>
-                    <td>@resume.CreatedAt.ToUniversalTime().ToString("dd.MM.yyyy HH:mm")</td>
                     <td>
                         <div class="d-flex justify-content-center gap-2">
-                            <a asp-action="ResumeDetails" asp-controller="Resume" asp-route-id="@resume.Id"
-                               class="btn btn-info btn-sm" title="Подробнее">
-                                <i class="bi bi-eye"></i>
-                            </a>
 
                             @if (!string.IsNullOrEmpty(resume.Url))
                             {
@@ -195,6 +223,32 @@
             }
         });
     });
+
+    function getCandidateIcons(candidateInfo) {
+        let icons = '';
+
+        if (!candidateInfo) return icons;
+
+        if (candidateInfo.includes('Женщина')) {
+            icons += '<i class="bi bi-gender-female text-pink me-1" title="Женщина"></i>';
+        } else if (candidateInfo.includes('Мужчина')) {
+            icons += '<i class="bi bi-gender-male text-primary me-1" title="Мужчина"></i>';
+        }
+
+        if (candidateInfo.includes('без опыта работы')) {
+            icons += '<i class="bi bi-exclamation-triangle-fill text-warning me-1" title="Без опыта работы"></i>';
+        } else if (candidateInfo.includes('стаж')) {
+            icons += '<i class="bi bi-briefcase-fill text-success me-1" title="Опыт работы"></i>';
+        }
+
+        if (candidateInfo.includes('высшее образование')) {
+            icons += '<i class="bi bi-mortarboard-fill text-info me-1" title="Высшее образование"></i>';
+        } else if (candidateInfo.includes('среднее образование')) {
+            icons += '<i class="bi bi-book-half text-secondary me-1" title="Среднее образование"></i>';
+        }
+
+        return icons || '<span class="text-muted">—</span>';
+    }
     
 
     function sortResumes() {
@@ -229,17 +283,13 @@
             const cityName = citiesMap[resume.city] || 'Неизвестен';
             const row = `
                     <tr>
+            <td class="text-nowrap">${getCandidateIcons(resume.candidateInfo)}</td>
                         <td>${resume.title ?? 'Нет данных'}</td>
                         <td>${resume.salary ?? 'Нет данных'}</td>
                         <td>${resume.candidateInfo ?? 'Нет данных'}</td>
-                        <td>${cityName}</td>
-                            <td>${formatDateTime(resume.createdAt)}</td>
+                        <td>${cityName}</td>                           
                             <td>
                         <div class="d-flex justify-content-center gap-2">
-                            <a href="/Resume/ResumeDetails/${resume.id}"
-                               class="btn btn-info btn-sm" title="Подробнее">
-                                <i class="bi bi-eye"></i>
-                            </a>
 
                             ${resume.url
                     ? `<a href="${resume.url}"
@@ -364,15 +414,33 @@
         pagination.appendChild(li);
     }
 
-    function filterResumes() {
-        const searchInput = document.getElementById('search').value.toLowerCase();
-        const table = document.getElementById('resumesTable');
-        const rows = table.querySelectorAll('tbody tr');
+    function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
 
-        rows.forEach(row => {
-            const titleCell = row.children[0].textContent.toLowerCase();
-            row.style.display = titleCell.includes(searchInput) ? '' : 'none';
-        });
+    let originalResumes = @Html.Raw(Json.Serialize(Model));
+
+    function filterResumes() {
+        document.getElementById('search').addEventListener('input', debounce(filterResumes));
+        const searchInput = document.getElementById('search').value.toLowerCase();
+
+        if (searchInput === '') {
+            allResumes = [...originalResumes];
+        } else {
+            allResumes = originalResumes.filter(resume => {
+                return (resume.title && resume.title.toLowerCase().includes(searchInput)) ||
+                    (resume.candidateInfo && resume.candidateInfo.toLowerCase().includes(searchInput)) ||
+                    (resume.salary && resume.salary.toString().toLowerCase().includes(searchInput));
+            });
+        }
+
+        currentPage = 1;
+        updateTable();
+        setupPagination();
     }
 
     function showToast(message, type = "success") {
@@ -404,6 +472,19 @@
 </script>
 
 <style>
+    .text-pink {
+        color: #e83e8c;
+    }
+
+    .bi {
+        margin-right: 0.3rem;
+    }
+
+    [title] {
+        position: relative;
+        cursor: help;
+    }
+
     .table-hover tbody tr:hover {
         background-color: #f0f4f7;
         cursor: pointer;

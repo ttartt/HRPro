@@ -1,10 +1,12 @@
-﻿using DocumentFormat.OpenXml.EMMA;
+﻿using CsQuery.ExtensionMethods;
+using DocumentFormat.OpenXml.EMMA;
 using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
 
 namespace HRProClientApp.Controllers
 {
@@ -89,32 +91,38 @@ namespace HRProClientApp.Controllers
         {
             string redirectUrl = $"/Meeting/Meetings/{APIClient.User?.Id}";
             try
-            { 
-                if (model.VacancyId <= 0 || model.VacancyId == null)
+            {
+                if (model.Id == 0)
                 {
-                    throw new ArgumentException("Вакансия не выбрана");
-                }
-                if (model.ResumeId <= 0 || model.ResumeId == null)
-                {
-                    throw new ArgumentException("Резюме не выбрано");
-                }
+                    var existingMeetings = APIClient.GetRequest<List<MeetingViewModel>>($"api/meeting/list?userId={APIClient.User?.Id}&companyId={APIClient.Company?.Id}");
+                    var duplicate = existingMeetings?.FirstOrDefault(v =>
+                        v.Date == model.Date &&
+                        v.TimeFrom == model.TimeFrom &&
+                        v.TimeTo == model.TimeTo);
 
+                    if (duplicate != null)
+                    {
+                        throw new InvalidOperationException("Такая встреча уже существует");
+                    }
+                }
                 if (string.IsNullOrEmpty(model.Topic))
                 {
                     throw new ArgumentException("Тема встречи не может быть пустой");
                 }
+                if (string.IsNullOrEmpty(model.Comment))
+                {
+                    throw new ArgumentException("Комментарий не может быть пустым");
+                }
+                if (string.IsNullOrEmpty(model.Place))
+                {
+                    throw new ArgumentException("Место встречи не может быть пустым");
+                }
 
                 if (model.TimeFrom >= model.TimeTo)
                 {
-                    throw new ArgumentException("Время начала должно быть меньше времени окончания");
+                    throw new ArgumentException("Время начала должно быть раньше времени окончания");
                 }
 
-                
-
-                if (string.IsNullOrEmpty(model.Place))
-                {
-                    throw new ArgumentException("Место проведения встречи не может быть пустым");
-                }
                 if (model.Id != 0)
                 {
                     APIClient.PostRequest("api/meeting/update", model);
@@ -122,18 +130,25 @@ namespace HRProClientApp.Controllers
                 else
                 {
                     model.CompanyId = APIClient.Company?.Id;
-                    APIClient.PostRequest("api/meeting/create", model);
+                    model.TimeFrom = model.TimeFrom.ToUniversalTime();
+                    model.TimeTo = model.TimeTo.ToUniversalTime();                    
 
                     var calendarEvent = new GoogleCalendarEventModel
                     {
                         Title = model.Topic,
                         Description = model.Comment,
-                        StartDateTime = model.Date.Date.Add(model.TimeFrom.TimeOfDay),
-                        EndDateTime = model.Date.Date.Add(model.TimeTo.TimeOfDay),
+                        StartDateTime = model.Date.Date.Add(model.TimeFrom.TimeOfDay).ToLocalTime(),
+                        EndDateTime = model.Date.Date.Add(model.TimeTo.TimeOfDay).ToLocalTime(),
                         Location = model.Place
                     };
 
-                    await AddToGoogleCalendar(calendarEvent);
+                    var googleResponse = await AddToGoogleCalendar(calendarEvent);
+                    var responseJson = JsonSerializer.Deserialize<Dictionary<string, object>>(googleResponse.ToJSON()); // - переделать
+                    if (responseJson.TryGetValue("eventId", out var eventId))
+                    {
+                        model.GoogleEventId = eventId.ToString();
+                    }
+                    APIClient.PostRequest("api/meeting/create", model);
 
                     APIClient.User?.Meetings.Add(new MeetingViewModel
                     {
@@ -146,6 +161,7 @@ namespace HRProClientApp.Controllers
                         Topic = model.Topic,
                         VacancyId = model.VacancyId,
                         Comment = model.Comment,
+                        GoogleEventId = model.GoogleEventId,
                         CompanyId = model.CompanyId
                     });
                 }
@@ -170,23 +186,66 @@ namespace HRProClientApp.Controllers
                     return Json(new { success = false, message = "Необходима авторизация через Google" });
                 }
 
+                if (model.StartDateTime >= model.EndDateTime)
+                {
+                    return Json(new { success = false, message = "Дата окончания должна быть позже даты начала" });
+                }
+
                 var meeting = new
                 {
                     AccessToken = googleToken,
                     Title = model.Title,
                     Description = model.Description,
-                    StartDateTime = model.StartDateTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    EndDateTime = model.EndDateTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    StartDateTime = model.StartDateTime, 
+                    EndDateTime = model.EndDateTime, 
                     Location = model.Location
                 };
 
                 var response = await APIClient.PostRequestAsync("api/calendar/AddToGoogleCalendar", meeting);
 
+                return Json(new
+                {
+                    success = true,
+                    eventId = response // PostRequestAsync теперь возвращает ID напрямую
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при добавлении в Google Календарь");
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message.StartsWith("HTTP Error") ?
+                             "Ошибка при создании события в календаре" :
+                             ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteFromGoogleCalendar(string eventId)
+        {
+            try
+            {
+                var googleToken = APIClient.User?.GoogleToken;
+
+                if (string.IsNullOrEmpty(googleToken))
+                {
+                    return Json(new { success = false, message = "Необходима авторизация через Google" });
+                }
+
+                var requestData = new
+                {
+                    AccessToken = googleToken
+                };
+
+                var response = await APIClient.PostRequestAsync($"api/calendar/DeleteFromGoogleCalendar/{eventId}", requestData);
+
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при добавлении в Яндекс.Календарь");
+                _logger.LogError(ex, "Ошибка при удалении из Google Календаря");
                 return Json(new { success = false, message = ex.Message });
             }
         }
@@ -200,16 +259,20 @@ namespace HRProClientApp.Controllers
             public string Location { get; set; }
         }
 
-        [HttpPost]
-        public void Delete(UserBindingModel model)
+        public async Task<IActionResult> Delete(int id)
         {
             if (APIClient.User == null)
             {
                 throw new Exception("Доступно только авторизованным пользователям");
             }
+            if (APIClient.Company == null)
+            {
+                throw new Exception("Компания не определена");
+            }
 
-            APIClient.PostRequest($"api/user/delete", model);
-            Response.Redirect("/Home/Enter");
+            APIClient.PostRequest($"api/meeting/delete", new MeetingBindingModel { Id = id });
+            await DeleteFromGoogleCalendar(id.ToString());
+            return Redirect($"~/Meeting/Meetings?={APIClient.User?.Id}&companyId={APIClient.Company?.Id}");
         }
     }
 }

@@ -60,60 +60,6 @@ namespace HRProDatabaseImplement.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Requirements",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Requirements", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Responsibilities",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Responsibilities", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VacancyRequirements",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    VacancyId = table.Column<int>(type: "integer", nullable: false),
-                    RequirementId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VacancyRequirements", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VacancyResponsibilities",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    VacancyId = table.Column<int>(type: "integer", nullable: false),
-                    ResponsibilityId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VacancyResponsibilities", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Templates",
                 columns: table => new
                 {
@@ -149,7 +95,7 @@ namespace HRProDatabaseImplement.Migrations
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    City = table.Column<string>(type: "text", nullable: true)
+                    IsEmailConfirmed = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -245,6 +191,27 @@ namespace HRProDatabaseImplement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    MessageId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: true),
+                    SenderName = table.Column<string>(type: "text", nullable: false),
+                    DateDelivery = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Subject = table.Column<string>(type: "text", nullable: false),
+                    Body = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.MessageId);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Resumes",
                 columns: table => new
                 {
@@ -293,7 +260,8 @@ namespace HRProDatabaseImplement.Migrations
                     VacancyId = table.Column<int>(type: "integer", nullable: true),
                     CompanyId = table.Column<int>(type: "integer", nullable: true),
                     Place = table.Column<string>(type: "text", nullable: true),
-                    Comment = table.Column<string>(type: "text", nullable: true)
+                    Comment = table.Column<string>(type: "text", nullable: true),
+                    GoogleEventId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -346,6 +314,11 @@ namespace HRProDatabaseImplement.Migrations
                 column: "VacancyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_UserId",
+                table: "Messages",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Resumes_CompanyId",
                 table: "Resumes",
                 column: "CompanyId");
@@ -392,25 +365,16 @@ namespace HRProDatabaseImplement.Migrations
                 name: "Meetings");
 
             migrationBuilder.DropTable(
-                name: "Requirements");
-
-            migrationBuilder.DropTable(
-                name: "Responsibilities");
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Tags");
 
             migrationBuilder.DropTable(
-                name: "VacancyRequirements");
-
-            migrationBuilder.DropTable(
-                name: "VacancyResponsibilities");
+                name: "Resumes");
 
             migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "Resumes");
 
             migrationBuilder.DropTable(
                 name: "Templates");

@@ -22,7 +22,7 @@
                 @if (Model.Any())
                 {
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
+                        <table class="table table-striped table-hover align-middle" id="vacanciesTable">
                             <thead class="table-light">
                                 <tr>
                                     <th>Название вакансии</th>
@@ -76,7 +76,174 @@
             }
         </div>
     </div>
+    <nav aria-label="Page navigation" id="paginationContainer">
+        <ul class="pagination justify-content-center" id="pagination">
+        </ul>
+    </nav>
 </div>
+
+<script>
+    const itemsPerPage = 10;
+    let currentPage = 1;
+    let allVacancies = @Html.Raw(Json.Serialize(Model)) || [];
+
+    function getJobTypeName(value) {
+        const jobTypes = {
+            0: 'Офис',
+            1: 'Удаленно',
+            2: 'Гибрид',
+            3: 'Фриланс',
+            4: 'Подработка',
+            5: 'Сменная',
+            6: 'Контракт',
+            7: 'Проектная',
+            8: 'Сезонная',
+            9: 'Волонтерская'
+        };
+        return jobTypes[value] || value;
+    }
+
+    function getStatusName(value) {
+        const statuses = {
+            0: 'Архив',
+            1: 'Открыта',
+            2: 'Закрыта'
+        };
+        return statuses[value] || value;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('vacanciesTable')) {
+            updateTable();
+            setupPagination();
+        }
+    });
+
+    function updateTable() {
+        const tableBody = document.querySelector("#vacanciesTable tbody");
+        if (!tableBody) return;
+
+        tableBody.innerHTML = "";
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedVacancies = allVacancies.slice(startIndex, endIndex);
+
+        paginatedVacancies.forEach(vacancy => {
+            const row = `
+                        <tr>
+                    <td>${vacancy.jobTitle || vacancy.JobTitle || 'Нет данных'}</td>
+                        <td>${getJobTypeName(vacancy.jobType || vacancy.JobType)}</td>
+                    <td>${vacancy.salary || vacancy.Salary || 'Нет данных'}</td>
+                        <td>${getStatusName(vacancy.status || vacancy.Status)}</td>
+                    <td>${vacancy.tags || vacancy.Tags || 'Нет данных'}</td>
+                    <td>
+                        <div class="d-flex justify-content-center">
+                            <a href="/Vacancy/VacancyDetails/${vacancy.id || vacancy.Id}"
+                               class="btn btn-info btn-sm me-2" title="Просмотр">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="/Vacancy/EditVacancy/${vacancy.id || vacancy.Id}"
+                               class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="/Vacancy/Delete/${vacancy.id || vacancy.Id}"
+                               class="btn btn-danger btn-sm" title="Удалить"
+                               onclick="return confirm('Вы уверены, что хотите удалить вакансию?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function setupPagination() {
+        const pagination = document.getElementById('pagination');
+        if (!pagination) return;
+
+        const pageCount = Math.ceil(allVacancies.length / itemsPerPage);
+        pagination.innerHTML = "";
+
+        if (pageCount <= 1) {
+            const container = document.getElementById('paginationContainer');
+            if (container) container.classList.add('d-none');
+            return;
+        }
+
+        const container = document.getElementById('paginationContainer');
+        if (container) container.classList.remove('d-none');
+
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Назад"><span aria-hidden="true">&laquo;</span></a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        for (let i = 1; i <= pageCount; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = i;
+                updateTable();
+                setupPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            pagination.appendChild(li);
+        }
+
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Вперед"><span aria-hidden="true">&raquo;</span></a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+                currentPage++;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(nextLi);
+    }
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+            `;
+
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
+</script>
 
 <style>
     .table-hover tbody tr:hover {

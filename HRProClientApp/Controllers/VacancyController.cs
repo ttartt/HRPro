@@ -2,6 +2,7 @@
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace HRProClientApp.Controllers
@@ -72,7 +73,7 @@ namespace HRProClientApp.Controllers
         }        
 
         [HttpGet]
-        public IActionResult VacancyDetails(int? id)
+        public async Task<ActionResult> VacancyDetails(int? id)
         {
             if (APIClient.User == null)
             {
@@ -82,7 +83,12 @@ namespace HRProClientApp.Controllers
             if (id.HasValue)
             {
                 vacancy = APIClient.GetRequest<VacancyViewModel?>($"api/vacancy/details?id={id}");
-                
+                ViewBag.Resumes = APIClient.GetRequest<List<ResumeViewModel>?>($"api/vacancy/resumes?vacancyId={id}");
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cities.json");
+                var json = await System.IO.File.ReadAllTextAsync(filePath);
+                var cities = JsonConvert.DeserializeObject<List<CityViewModel>>(json);
+                ViewBag.Cities = cities;
+
                 return View(vacancy);
             }
             return View();
@@ -106,8 +112,6 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("/Home/Enter");
             }
-            ViewBag.Requirements = APIClient.GetRequest<List<RequirementViewModel>>("api/requirement/list");
-            ViewBag.Responsibilities = APIClient.GetRequest<List<ResponsibilityViewModel>>("api/responsibility/list");
             if (!id.HasValue)
             {
                 return View(new VacancyViewModel());

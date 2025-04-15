@@ -1,0 +1,435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="HRProBusinessLogic.BusinessLogic.CompanyLogic" BaseTypeListCollapsed="true">
+    <Position X="3.75" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAAAAAAAAAAAAAAAQAIAEAAEABAAAAAAAAARg=</HashCode>
+      <FileName>BusinessLogic\CompanyLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.DocumentLogic" BaseTypeListCollapsed="true">
+    <Position X="6" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAAAAAAAQACAAAAAAAIAEAgEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\DocumentLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.DocumentTagLogic" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAJAEAAEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\DocumentTagLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.MeetingLogic" BaseTypeListCollapsed="true">
+    <Position X="10.5" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAIAAAAAAAAAAAAAAAAAAAIAEAAEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\MeetingLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.MeetingParticipantLogic" BaseTypeListCollapsed="true">
+    <Position X="3.75" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAIAEAAEABAQAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\MeetingParticipantLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.ReportLogic" BaseTypeListCollapsed="true">
+    <Position X="10.5" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EIAAAAAAAAAAAAAAABCAAAQAAAAAEAAAACAAAAAAAAA=</HashCode>
+      <FileName>BusinessLogic\ReportLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.ResumeLogic" BaseTypeListCollapsed="true">
+    <Position X="3.75" Y="7" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAAAAAAAAAAAAAAAQAIAEAAEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\ResumeLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.TagLogic" BaseTypeListCollapsed="true">
+    <Position X="6" Y="6.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAABAAAAAAAAAIAEAAEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\TagLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.TemplateLogic" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAARAAAAAAAAAIAEAAEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\TemplateLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.UserLogic" BaseTypeListCollapsed="true">
+    <Position X="10.5" Y="6.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAAAAAAAAAAAAAAAQAoAEAAEABAAAAAIAAARA=</HashCode>
+      <FileName>BusinessLogic\UserLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.BusinessLogic.VacancyLogic" BaseTypeListCollapsed="true">
+    <Position X="1.5" Y="6.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAAAAAAAAAAAAAAAQAIAEAgEABAAAAAAAAARA=</HashCode>
+      <FileName>BusinessLogic\VacancyLogic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProBusinessLogic.OfficePackage.HelperModels.PdfInfo">
+    <Position X="6" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAABAAAAAEAAhEAAA=</HashCode>
+      <FileName>OfficePackage\HelperModels\PdfInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProBusinessLogic.OfficePackage.HelperModels.PdfParagraph">
+    <Position X="8.25" Y="6.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIABAAACAAAAAA=</HashCode>
+      <FileName>OfficePackage\HelperModels\PdfParagraph.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProBusinessLogic.OfficePackage.Implements.SaveToPdf">
+    <Position X="1.5" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAEAABAAEAAAAAAAAAAAAAAAAAAAAAAgQAIAAAAAAQ=</HashCode>
+      <FileName>OfficePackage\Implements\SaveToPdf.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProBusinessLogic.OfficePackage.AbstractSaveToPdf">
+    <Position X="1.5" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAAAAAAQAAAAAAAAAAgQAAAAAAAAQ=</HashCode>
+      <FileName>OfficePackage\AbstractSaveToPdf.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProContracts.BindingModels.ApiResponse&lt;T&gt;">
+    <Position X="16.75" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.CompanyBindingModel" BaseTypeListCollapsed="true">
+    <Position X="10.25" Y="13.25" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.DocumentBindingModel" BaseTypeListCollapsed="true">
+    <Position X="12.5" Y="15.75" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.DocumentTagBindingModel" BaseTypeListCollapsed="true">
+    <Position X="20.5" Y="13.25" Width="2.25" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.GoogleTokenResponse">
+    <Position X="12.5" Y="13.25" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.LoginRequest">
+    <Position X="18.5" Y="17.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.LoginResponse">
+    <Position X="16.75" Y="15.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.MailConfigBindingModel">
+    <Position X="10.25" Y="18.75" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.MailSendInfoBindingModel">
+    <Position X="20.5" Y="15.5" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.MeetingBindingModel" BaseTypeListCollapsed="true">
+    <Position X="12.5" Y="18.75" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.MeetingParticipantBindingModel" BaseTypeListCollapsed="true">
+    <Position X="20.25" Y="17.5" Width="2.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.ReportBindingModel">
+    <Position X="14.75" Y="13.25" Width="1.75" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.ResumeBindingModel" BaseTypeListCollapsed="true">
+    <Position X="18.5" Y="13.25" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.TagBindingModel" BaseTypeListCollapsed="true">
+    <Position X="16.75" Y="17.5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.TemplateBindingModel" BaseTypeListCollapsed="true">
+    <Position X="10.25" Y="16.25" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.UserBindingModel" BaseTypeListCollapsed="true">
+    <Position X="14.75" Y="15.75" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.BindingModels.VacancyBindingModel" BaseTypeListCollapsed="true">
+    <Position X="14.75" Y="19.5" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.CompanySearchModel">
+    <Position X="23.75" Y="7.25" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.DocumentSearchModel">
+    <Position X="23.75" Y="5" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.DocumentTagSearchModel">
+    <Position X="26" Y="5" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.MeetingParticipantSearchModel">
+    <Position X="28.5" Y="5" Width="2.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.MeetingSearchModel">
+    <Position X="21.75" Y="5" Width="1.75" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.ResumeSearchModel">
+    <Position X="25.5" Y="9.25" Width="1.75" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.TagSearchModel">
+    <Position X="26" Y="7" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.TemplateSearchModel">
+    <Position X="27.75" Y="7" Width="2.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.UserSearchModel">
+    <Position X="23.75" Y="9.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.SearchModels.VacancySearchModel">
+    <Position X="21.75" Y="7.75" Width="1.75" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.CityViewModel">
+    <Position X="40" Y="5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.CompanyViewModel" BaseTypeListCollapsed="true">
+    <Position X="38" Y="2.5" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.DocumentTagViewModel" BaseTypeListCollapsed="true">
+    <Position X="35.75" Y="3.75" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.DocumentViewModel" BaseTypeListCollapsed="true">
+    <Position X="43.75" Y="2.5" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.MeetingParticipantViewModel" BaseTypeListCollapsed="true">
+    <Position X="41.75" Y="7" Width="2.25" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.MeetingViewModel" BaseTypeListCollapsed="true">
+    <Position X="44.25" Y="6.25" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.ReportResumeViewModel">
+    <Position X="35.75" Y="2.5" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.ResumeViewModel" BaseTypeListCollapsed="true">
+    <Position X="41.75" Y="2.5" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.TagViewModel" BaseTypeListCollapsed="true">
+    <Position X="40" Y="2.5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.TemplateViewModel" BaseTypeListCollapsed="true">
+    <Position X="38" Y="5.75" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.UserViewModel" BaseTypeListCollapsed="true">
+    <Position X="40" Y="7" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.VacancyStatisticsViewModel">
+    <Position X="41.75" Y="9" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.VacancyViewModel" BaseTypeListCollapsed="true">
+    <Position X="35.75" Y="6.25" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.ICompanyLogic">
+    <Position X="7.25" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IDocumentLogic">
+    <Position X="3.75" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IDocumentTagLogic">
+    <Position X="1.5" Y="13.25" Width="2" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IMeetingLogic">
+    <Position X="1.5" Y="17.25" Width="1.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IMeetingParticipantLogic">
+    <Position X="3.25" Y="15.25" Width="2" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IReportLogic">
+    <Position X="5.5" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IResumeLogic">
+    <Position X="7.25" Y="15.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.ITagLogic">
+    <Position X="1.5" Y="15.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.ITemplateLogic">
+    <Position X="3.5" Y="17.25" Width="1.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IUserLogic">
+    <Position X="5.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.BusinessLogicsContracts.IVacancyLogic">
+    <Position X="5.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.ICompanyStorage">
+    <Position X="36" Y="15.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IDocumentStorage">
+    <Position X="39.5" Y="15.5" Width="1.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IDocumentTagStorage">
+    <Position X="38.5" Y="13.25" Width="1.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IMeetingParticipantStorage">
+    <Position X="32.5" Y="13.25" Width="2.25" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IMeetingStorage">
+    <Position X="35" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IResumeStorage">
+    <Position X="32.5" Y="15.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.ITagStorage">
+    <Position X="37.75" Y="15.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.ITemplateStorage">
+    <Position X="36.75" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IUserStorage">
+    <Position X="40.5" Y="13.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProContracts.StoragesContracts.IVacancyStorage">
+    <Position X="34.25" Y="15.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.ICompanyModel">
+    <Position X="56.25" Y="12.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IDocumentModel">
+    <Position X="56.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IDocumentTagModel">
+    <Position X="56" Y="8.5" Width="1.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IMeetingModel">
+    <Position X="58" Y="8.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IMeetingParticipantModel">
+    <Position X="52.25" Y="11.5" Width="2" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IResumeModel">
+    <Position X="58" Y="11.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.ITagModel">
+    <Position X="54.75" Y="13" Width="1.25" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.ITemplateModel">
+    <Position X="54.25" Y="8.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IUserModel">
+    <Position X="52.75" Y="8.25" Width="1.25" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IVacancyModel">
+    <Position X="54.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HRProDataModels.IId">
+    <Position X="52.25" Y="13.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Enum Name="HRProBusinessLogic.OfficePackage.HelperEnums.PdfParagraphAlignmentType">
+    <Position X="1.5" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACACAAAAIAAA=</HashCode>
+      <FileName>OfficePackage\HelperEnums\PdfParagraphAlignmentType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

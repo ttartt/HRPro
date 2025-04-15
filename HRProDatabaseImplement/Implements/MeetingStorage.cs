@@ -27,6 +27,13 @@ namespace HRProDatabaseImplement.Implements
                 .Select(x => x.GetViewModel)
                 .ToList();
             }
+            if (!string.IsNullOrEmpty(model.GoogleEventId))
+            {
+                return context.Meetings
+                .Where(x => x.GoogleEventId.Equals(model.GoogleEventId))
+                .Select(x => x.GetViewModel)
+                .ToList();
+            }
             if (model.CompanyId.HasValue)
             {
                 return context.Meetings
@@ -42,6 +49,18 @@ namespace HRProDatabaseImplement.Implements
         public MeetingViewModel? GetElement(MeetingSearchModel model)
         {
             using var context = new HRproDatabase();
+            if (model.Date.HasValue && model.TimeFrom.HasValue && model.TimeTo.HasValue)
+            {
+                var utcDate = model.Date.Value.ToUniversalTime();
+                var utcTimeFrom = model.TimeFrom.Value.ToUniversalTime();
+                var utcTimeTo = model.TimeTo.Value.ToUniversalTime();
+
+                return context.Meetings
+                    .FirstOrDefault(x => x.Date == utcDate &&
+                                        x.TimeFrom == utcTimeFrom &&
+                                        x.TimeTo == utcTimeTo)
+                    ?.GetViewModel;
+            }
             if (model.Id.HasValue)
             {
                 return context.Meetings

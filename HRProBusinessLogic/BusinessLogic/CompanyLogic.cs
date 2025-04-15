@@ -64,8 +64,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 Id = v.Id,
                 CompanyId = v.CompanyId,
                 JobTitle = v.JobTitle,
-                Requirements = v.Requirements,
-                Responsibilities = v.Responsibilities,
                 JobType = v.JobType,
                 Salary = v.Salary,
                 Description = v.Description,

@@ -26,7 +26,7 @@ namespace HRProContracts.ViewModels
         public List<DocumentViewModel> Documents { get; set; } = new();
         public List<MeetingViewModel> Meetings { get; set; } = new();
 
-        public string? City { get; set; }
+        public bool IsEmailConfirmed { get; set; }
 
         public string? GoogleToken { get; set; }
 

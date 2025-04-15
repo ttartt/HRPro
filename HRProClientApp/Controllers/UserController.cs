@@ -1,10 +1,13 @@
-﻿using HRProClientApp.Models;
+﻿using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Spreadsheet;
+using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace HRProClientApp.Controllers
@@ -127,7 +130,7 @@ namespace HRProClientApp.Controllers
                 }
                 else
                 {
-                    var existingUser = APIClient.GetRequest<UserViewModel?>($"api/user/login?login={model.Email}&password={model.Password}");
+                    var existingUser = APIClient.GetRequest<UserViewModel?>($"api/user/check?login={model.Email}");
                     if (existingUser != null)
                     {
                         throw new Exception("Такой пользователь уже существует");
@@ -155,7 +158,7 @@ namespace HRProClientApp.Controllers
                             CompanyId = APIClient.Company.Id,
                             Email = model.Email,
                             Password = model.Password,
-                            Role = HRProDataModels.Enums.RoleEnum.Сотрудник,
+                            Role = model.Role,
                             PhoneNumber = model.PhoneNumber,
                             DateOfBirth = model.DateOfBirth
                         });
@@ -165,10 +168,11 @@ namespace HRProClientApp.Controllers
 
                 return Json(new { success = true, redirectUrl });
             }
+            
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
-            }
+            }            
         }
 
         public IActionResult DeleteEmployee(int id)
@@ -185,6 +189,165 @@ namespace HRProClientApp.Controllers
 
             string redirectUrl = $"/Company/CompanyProfile?id={APIClient.Company?.Id}";
             return Redirect(redirectUrl);
+        }
+
+        /*private void SendEmail(string email, string code)
+        {
+            APIClient.PostRequest("api/user/SendToMail", new MailSendInfoBindingModel
+            {
+                MailAddress = email,
+                Subject = "Подтверждение электронной почты",
+                Text = $"Ваш код подтверждения: {code}"
+            });
+        }*/
+        [HttpGet]
+        public IActionResult ConfirmEmail(int userId, string code)
+        {
+            try
+            {
+                if (APIClient.User == null)
+                    return Json(new { success = false, message = "Требуется авторизация" });
+
+                if (string.IsNullOrEmpty(code))
+                    return Json(new { success = false, message = "Введите код" });
+
+                var validationResult = APIClient.GetRequest<dynamic>($"api/user/ConfirmEmail?userId={userId}&code={code}");
+
+                if (validationResult?.success != true)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = validationResult?.message ?? "Неверный код подтверждения"
+                    });
+                }
+
+                var user = APIClient.GetRequest<UserViewModel>($"api/user/profile?id={userId}");
+
+                try
+                {
+                    APIClient.PostRequest("api/user/update", new UserBindingModel
+                    {
+                        Id = user.Id,
+                        Surname = user.Surname,
+                        Name = user.Name,
+                        LastName = user.LastName,
+                        CompanyId = user.CompanyId,
+                        Email = user.Email,
+                        Password = user.Password,
+                        Role = user.Role,
+                        PhoneNumber = user.PhoneNumber,
+                        DateOfBirth = user.DateOfBirth,
+                        IsEmailConfirmed = true
+                    });
+
+                    APIClient.User.IsEmailConfirmed = true;
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Email успешно подтверждён",
+                        redirectUrl = $"/User/UserProfileEdit?id={userId}"
+                    });
+                }
+                catch (Exception updateEx)
+                {
+                    _logger.LogError(updateEx, "Ошибка обновления пользователя");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Ошибка при обновлении данных пользователя"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка подтверждения email");
+                return Json(new
+                {
+                    success = false,
+                    message = "Ошибка подтверждения: " + ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ResetPassword(string newPass)
+        {
+            try
+            {
+                if (APIClient.User == null)
+                    return Json(new { success = false, message = "Требуется авторизация" });
+
+                if (string.IsNullOrEmpty(newPass))
+                    return Json(new { success = false, message = "Введите пароль" });
+
+                if (!Regex.IsMatch(newPass, @"^^((\w+\d+\W+)|(\w+\W+\d+)|(\d+\w+\W+)|(\d+\W+\w+)|(\W+\w+\d+)|(\W+\d+\w+))[\w\d\W]*$", RegexOptions.IgnoreCase))
+                {
+                    throw new ArgumentException("Неправильно введенный пароль");
+                }
+
+                var user = APIClient.GetRequest<UserViewModel>($"api/user/profile?id={APIClient.User.Id}");
+
+                try
+                {
+                    APIClient.PostRequest("api/user/update", new UserBindingModel
+                    {
+                        Id = user.Id,
+                        Surname = user.Surname,
+                        Name = user.Name,
+                        LastName = user.LastName,
+                        CompanyId = user.CompanyId,
+                        Email = user.Email,
+                        Password = newPass,
+                        Role = user.Role,
+                        PhoneNumber = user.PhoneNumber,
+                        DateOfBirth = user.DateOfBirth,
+                        IsEmailConfirmed = user.IsEmailConfirmed
+                    });
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Пароль успешно изменен",
+                        redirectUrl = $"/User/UserProfileEdit?id={APIClient.User.Id}"
+                    });
+                }
+                catch (Exception updateEx)
+                {
+                    _logger.LogError(updateEx, "Ошибка обновления пользователя");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Ошибка при обновлении данных пользователя"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка подтверждения email");
+                return Json(new
+                {
+                    success = false,
+                    message = "Ошибка подтверждения: " + ex.Message
+                });
+            }
+        }
+
+        public IActionResult SendConfirmationCode(int userId)
+        {
+            try
+            {
+                if (APIClient.User == null) return Redirect("/Home/Enter");
+                var reciever = APIClient.GetRequest<UserViewModel>($"api/user/profile?id={userId}");
+
+                APIClient.PostRequest("api/user/SendConfirmationCode", reciever);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка отправки кода");
+                return Json(new { success = false, message = "Ошибка отправки" });
+            }
         }
 
         [HttpGet]

@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="HRProContracts.ViewModels.CityViewModel">
+    <Position X="7" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAgAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ViewModels\CityViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProContracts.ViewModels.CompanyViewModel" BaseTypeListCollapsed="true">
+    <Position X="9" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>RAACAAAAAAAggAAAAAAAEAQACAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>ViewModels\CompanyViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.DocumentTagViewModel" BaseTypeListCollapsed="true">
+    <Position X="13" Y="5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAE=</HashCode>
+      <FileName>ViewModels\DocumentTagViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.DocumentViewModel" BaseTypeListCollapsed="true">
+    <Position X="11" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACQAAEAAIAAAACACAAAQQAAAAAAEBAAAAAAAEAAAA=</HashCode>
+      <FileName>ViewModels\DocumentViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.MeetingParticipantViewModel" BaseTypeListCollapsed="true">
+    <Position X="5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>ViewModels\MeetingParticipantViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.MeetingViewModel" BaseTypeListCollapsed="true">
+    <Position X="5" Y="4.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>BAASAAAFAAIAAAAAAAAAAAAAAAAAAAABAGAABCAAAAA=</HashCode>
+      <FileName>ViewModels\MeetingViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.ResumeViewModel" BaseTypeListCollapsed="true">
+    <Position X="11" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>EAACACANAAIgAEAIACAAAAAAAAAAAAAACAAgBAAAQAA=</HashCode>
+      <FileName>ViewModels\ResumeViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.TagViewModel" BaseTypeListCollapsed="true">
+    <Position X="5" Y="2.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAQAAAAAAAABAAQAAAAAACAA=</HashCode>
+      <FileName>ViewModels\TagViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.TemplateViewModel" BaseTypeListCollapsed="true">
+    <Position X="9" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAIAAAAAAAAAAAQAAAAAAEAAAQBAAAAAAAA=</HashCode>
+      <FileName>ViewModels\TemplateViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.UserViewModel" BaseTypeListCollapsed="true">
+    <Position X="13" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAIAAACIAAAAIEACAQAQABAAQAAACAAAAIAAAAAg=</HashCode>
+      <FileName>ViewModels\UserViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="HRProContracts.ViewModels.VacancyStatisticsViewModel">
+    <Position X="8.5" Y="6" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAABAAEAAA=</HashCode>
+      <FileName>ViewModels\VacancyStatisticsViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProContracts.ViewModels.VacancyViewModel" BaseTypeListCollapsed="true">
+    <Position X="7" Y="2.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>CAACQCAEAAIgAAAAACAAAAAAAAAAAEAAAAAEAAAIAAA=</HashCode>
+      <FileName>ViewModels\VacancyViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

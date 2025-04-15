@@ -86,7 +86,7 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult CollectResume(string? cityName)
+        public IActionResult CollectResume(string? cityName, string? tags, int? vacancyId)
         {
             string redirectUrl = "/Resume/Resumes";
             try
@@ -98,7 +98,7 @@ namespace HRProClientApp.Controllers
                     throw new Exception("Компания не найдена");
 
                 var apiResponse = APIClient.GetRequest<ApiResponse<List<ResumeViewModel>>>(
-                    $"api/parser/parse?cityName={cityName}");
+                    $"api/parser/parse?cityName={cityName}&tags={tags}");
 
                 if (apiResponse == null)
                     return Json(new { success = false, message = "Не получен ответ от API" });
@@ -109,6 +109,7 @@ namespace HRProClientApp.Controllers
                 foreach (var resume in apiResponse.Data)
                 {
                     resume.CompanyId = APIClient.Company.Id;
+                    resume.VacancyId = vacancyId ?? null;
                     APIClient.PostRequest("api/resume/create", resume);
                 }
 

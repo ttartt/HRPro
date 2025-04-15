@@ -27,6 +27,16 @@ namespace HRProClientApp.Controllers
         {
             return View();
         }
+/*
+        private void SendEmail(string email)
+        {
+            APIClient.PostRequest("api/user/SendToMail", new MailSendInfoBindingModel
+            {
+                MailAddress = email,
+                Subject = "Подтверждение почты",
+                Text = "232323"
+            });
+        }*/
 
         [HttpPost]
         public async Task<IActionResult> Enter(string login, string password)
@@ -56,6 +66,8 @@ namespace HRProClientApp.Controllers
                     APIClient.Company = await APIClient.GetRequestAsync<CompanyViewModel>(
                         $"api/company/profile?id={response.User.CompanyId}");
                 }
+
+                //SendEmail(login);
 
                 return Json(new { success = true, redirectUrl });
             }
@@ -159,7 +171,7 @@ namespace HRProClientApp.Controllers
                 APIClient.PostRequest("api/user/update", APIClient.User);
 
                 TempData["GoogleAuthSuccess"] = "Google Календарь успешно подключен!";
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Meetings", "Meeting");
             }
             catch (Exception ex)
             {

@@ -27,13 +27,11 @@ namespace HRProRestApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Parse([FromQuery] string? cityName)
+        public async Task<IActionResult> Parse([FromQuery] string? cityName, string? tags)
         {
             try
             {
-                string url = cityName != null
-                    ? $"https://www.avito.ru/{cityName}/rezume"
-                    : "https://www.avito.ru/ulyanovsk/rezume";
+                string url = $"https://www.avito.ru/{Uri.EscapeDataString(cityName ?? "ulyanovsk")}/rezume?q={Uri.EscapeDataString(tags ?? "")}";
 
                 var response = await _httpClient.GetStringAsync(url);
                 var doc = new HtmlDocument();
@@ -57,7 +55,7 @@ namespace HRProRestApi.Controllers
                 {
                     try
                     {
-                        var resume = ParseResumeNode(node, cityName ?? "Неизвестен");
+                        var resume = ParseResumeNode(node, cityName ?? "Неизвестен", tags ?? "");
 
                         if (resume != null && !string.IsNullOrEmpty(resume.Title))
                         {
@@ -92,7 +90,7 @@ namespace HRProRestApi.Controllers
             }
         }
 
-        private ResumeBindingModel? ParseResumeNode(HtmlNode node, string city)
+        private ResumeBindingModel? ParseResumeNode(HtmlNode node, string city, string? tags)
         {
             try
             {

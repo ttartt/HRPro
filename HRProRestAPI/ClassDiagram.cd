@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="HRProRestAPI.Controllers.CalendarController">
+    <Position X="12.25" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAABQAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\CalendarController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestAPI.Controllers.CalendarEventDto">
+    <Position X="12.25" Y="6.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAgEEAAAAIAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\CalendarController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestAPI.Controllers.DocumentController">
+    <Position X="6.25" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAABAAAAAAAAAAAAIAEBAEAAAAAAIAAgACI=</HashCode>
+      <FileName>Controllers\DocumentController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestAPI.Controllers.MeetingController">
+    <Position X="4.25" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAgAAAAAABAAAAAAAAAAAAIAEAAEAAASAAIAAAAgI=</HashCode>
+      <FileName>Controllers\MeetingController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestAPI.Controllers.TagController">
+    <Position X="4.25" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAABAAAAAAAAAAAAIAEAAEAAAAAAIAAAAAA=</HashCode>
+      <FileName>Controllers\TagController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestAPI.Controllers.TemplateController">
+    <Position X="10.25" Y="6.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAQAAAAAABAAAAAAAAAAAAIAEAAEAAAAAAIAAgAAI=</HashCode>
+      <FileName>Controllers\TemplateController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestApi.Controllers.CompanyController">
+    <Position X="6.25" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAACAAAAAAAAAAAAAAAIAEAAEAAABAAIABAAAA=</HashCode>
+      <FileName>Controllers\CompanyController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestApi.Controllers.ParserController">
+    <Position X="10.25" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAARAAAAAAIAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Controllers\ParserController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestApi.Controllers.ReportController">
+    <Position X="10.25" Y="10.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>Controllers\ReportController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestApi.Controllers.ResumeController">
+    <Position X="8.25" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAgAAAABAAAAAAAAAAAAIAEAAEAAAAAAIAAAAAI=</HashCode>
+      <FileName>Controllers\ResumeController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestApi.Controllers.UserController">
+    <Position X="8.25" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQIAAAAAAAAAAAAAAAAAAAAIAEBAQAAABAQIAAACAI=</HashCode>
+      <FileName>Controllers\UserController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProRestApi.Controllers.VacancyController">
+    <Position X="12.25" Y="8.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAABAAAAAAAAAABAIAEAAEAAAAAEIAAAAAI=</HashCode>
+      <FileName>Controllers\VacancyController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

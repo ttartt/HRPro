@@ -41,6 +41,9 @@ namespace HRProDatabaseImplement.Models
         [DataMember]
         public string? Comment { get; set; }
 
+        [DataMember]
+        public string? GoogleEventId { get; set; }
+
         public int Id { get; set; }
 
         public virtual Vacancy Vacancy { get; set; }
@@ -58,13 +61,14 @@ namespace HRProDatabaseImplement.Models
                 Id = model.Id,
                 ResumeId = model.ResumeId,
                 Topic = model.Topic,
-                Date = model.Date.ToUniversalTime().AddHours(4),
-                TimeFrom = model.TimeFrom.ToUniversalTime().AddHours(4),
-                TimeTo = model.TimeTo.ToUniversalTime().AddHours(4),
+                Date = model.Date.ToUniversalTime(),
+                TimeFrom = model.TimeFrom.ToUniversalTime(),
+                TimeTo = model.TimeTo.ToUniversalTime(),
                 VacancyId = model.VacancyId,
                 Place = model.Place,
                 Comment = model.Comment,
-                CompanyId = model.CompanyId
+                CompanyId = model.CompanyId,
+                GoogleEventId = model.GoogleEventId
             };
         }
 
@@ -81,7 +85,8 @@ namespace HRProDatabaseImplement.Models
                 VacancyId = model.VacancyId,
                 Place = model.Place,
                 Comment = model.Comment,
-                CompanyId = model.CompanyId
+                CompanyId = model.CompanyId,
+                GoogleEventId = model.GoogleEventId
             };
         }
 
@@ -98,6 +103,7 @@ namespace HRProDatabaseImplement.Models
             VacancyId = model.VacancyId;
             Place = model.Place;
             Comment = model.Comment;
+            GoogleEventId = model.GoogleEventId;
         }
 
         public MeetingViewModel GetViewModel => new()
@@ -111,7 +117,8 @@ namespace HRProDatabaseImplement.Models
             VacancyId = VacancyId,
             Place = Place,
             Comment = Comment,
-            CompanyId = CompanyId
+            CompanyId = CompanyId,
+            GoogleEventId = GoogleEventId
         };
     }
 }

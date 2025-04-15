@@ -24,7 +24,7 @@ namespace HRProBusinessLogic.BusinessLogic
             _vacancyStorage = vacancyStorage;
         }
 
-        private string EncryptPassword(string password)
+        private static string EncryptPassword(string password)
         {
             byte[] hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(hashedBytes);
@@ -84,7 +84,8 @@ namespace HRProBusinessLogic.BusinessLogic
                 CompanyId = element.CompanyId,
                 PhoneNumber = element.PhoneNumber,
                 Role = element.Role,
-                DateOfBirth = element.DateOfBirth
+                DateOfBirth = element.DateOfBirth,
+                IsEmailConfirmed = element.IsEmailConfirmed
             };
             _logger.LogInformation("ReadElement: User found. Id: {Id}", element.Id);
             return userViewModel;
