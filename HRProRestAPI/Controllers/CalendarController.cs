@@ -81,14 +81,19 @@ namespace HRProRestAPI.Controllers
 
                 return Ok(new
                 {
-                    message = "Событие успешно добавлено",
-                    eventId = googleEvent.Id
+                    success = true,
+                    eventId = googleEvent.Id,
+                    message = "Событие успешно добавлено"
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка в AddToGoogleCalendar");
-                return StatusCode(500, new { message = "Внутренняя ошибка сервера" });
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Внутренняя ошибка сервера"
+                });
             }
         }
 

@@ -130,5 +130,15 @@ namespace HRProClientApp
 
             throw new Exception($"Ошибка POST-запроса ({response.StatusCode}): {result}");
         }
+
+        public static async Task<HttpResponseMessage> PostRequestWithFullResponseAsync(string requestUrl, object model)
+        {
+            var json = JsonConvert.SerializeObject(model);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            ApplyAuthorizationHeader();
+
+            return await _client.PostAsync(requestUrl, data);
+        }
     }
 }

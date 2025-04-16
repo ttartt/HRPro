@@ -72,23 +72,26 @@ namespace HRProBusinessLogic.BusinessLogic
             {
                 hashedPassword = EncryptPassword(model.Password);
             }
-
-            var userViewModel = new UserViewModel
+            if (hashedPassword == element.Password)
             {
-                Id = element.Id,
-                Surname = element.Surname,
-                Name = element.Name,
-                LastName = element.LastName,
-                Email = element.Email,
-                Password = hashedPassword,
-                CompanyId = element.CompanyId,
-                PhoneNumber = element.PhoneNumber,
-                Role = element.Role,
-                DateOfBirth = element.DateOfBirth,
-                IsEmailConfirmed = element.IsEmailConfirmed
-            };
-            _logger.LogInformation("ReadElement: User found. Id: {Id}", element.Id);
-            return userViewModel;
+                var userViewModel = new UserViewModel
+                {
+                    Id = element.Id,
+                    Surname = element.Surname,
+                    Name = element.Name,
+                    LastName = element.LastName,
+                    Email = element.Email,
+                    Password = hashedPassword,
+                    CompanyId = element.CompanyId,
+                    PhoneNumber = element.PhoneNumber,
+                    Role = element.Role,
+                    DateOfBirth = element.DateOfBirth,
+                    IsEmailConfirmed = element.IsEmailConfirmed
+                };
+                _logger.LogInformation("ReadElement: User found. Id: {Id}", element.Id);
+                return userViewModel;
+            }
+            return null;
         }
 
         public List<UserViewModel>? ReadList(UserSearchModel? model)

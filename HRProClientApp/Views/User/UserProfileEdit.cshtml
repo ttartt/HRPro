@@ -62,7 +62,7 @@
                     <div class="invalid-feedback">Пожалуйста, укажите корректный email</div>
                 </div>
 
-                @if (!APIClient.User.IsEmailConfirmed)
+                @if (!APIClient.User.IsEmailConfirmed && APIClient.User.Role != RoleEnum.Администратор)
                 {
                     <button type="button" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#confirmEmailModal"
                             title="Подтвердить Email" onclick="sendNewCode()">
@@ -117,11 +117,13 @@
                         <div class="invalid-feedback">Пароль не соответствует требованиям</div>
                     </div>
                 }
-
-                <button type="button" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
-                        title="Изменить пароль">
-                    <i class="bi bi-key"></i> Изменить пароль
-                </button>
+                @if (Model?.Id > 0 && APIClient.User.Role != RoleEnum.Администратор)
+                {
+                    <button type="button" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                            title="Изменить пароль">
+                        <i class="bi bi-key"></i> Изменить пароль
+                    </button>
+                }
 
                 <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">

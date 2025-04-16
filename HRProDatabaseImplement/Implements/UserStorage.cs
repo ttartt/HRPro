@@ -26,20 +26,13 @@ namespace HRproDatabaseImplement.Implements
         public UserViewModel? GetElement(UserSearchModel model)
         {
             using var context = new HRproDatabase();
-            if (!string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password))
+            if (!string.IsNullOrEmpty(model.Email))
             {
                 return context.Users
                 .Include(x => x.Company)
-                .FirstOrDefault(x => !string.IsNullOrEmpty(model.Email) && x.Email == model.Email && !string.IsNullOrEmpty(model.Password) && x.Password == model.Password)?
+                .FirstOrDefault(x => x.Email == model.Email)?
                 .GetViewModel;
-            }
-            else if (!string.IsNullOrEmpty(model.Email))
-            {
-                return context.Users
-                .Include(x => x.Company)
-                .FirstOrDefault(x => (!string.IsNullOrEmpty(model.Email) && x.Email == model.Email))?
-                .GetViewModel;
-            }            
+            }                     
             else
             {
                 return context.Users
