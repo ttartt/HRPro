@@ -10,6 +10,7 @@ using HRProDatabaseImplement.Implements;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -67,7 +68,13 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
-
+/*builder.Services.AddHttpClient("AvitoClient")
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        Proxy = new WebProxy(new Uri("http://proxy-service.com:8000")),
+        UseProxy = true,
+        AllowAutoRedirect = true,
+    });*/
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

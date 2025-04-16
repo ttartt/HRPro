@@ -86,7 +86,7 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult CollectResume(string? cityName, string? tags, int? vacancyId)
+        public IActionResult CollectResume(string? cityName)
         {
             string redirectUrl = "/Resume/Resumes";
             try
@@ -96,9 +96,8 @@ namespace HRProClientApp.Controllers
 
                 if (APIClient.Company == null)
                     throw new Exception("Компания не найдена");
-
                 var apiResponse = APIClient.GetRequest<ApiResponse<List<ResumeViewModel>>>(
-                    $"api/parser/parse?cityName={cityName}&tags={tags}");
+                $"api/parser/parse?cityName={cityName}");
 
                 if (apiResponse == null)
                     return Json(new { success = false, message = "Не получен ответ от API" });
@@ -109,7 +108,6 @@ namespace HRProClientApp.Controllers
                 foreach (var resume in apiResponse.Data)
                 {
                     resume.CompanyId = APIClient.Company.Id;
-                    resume.VacancyId = vacancyId ?? null;
                     APIClient.PostRequest("api/resume/create", resume);
                 }
 
@@ -120,8 +118,8 @@ namespace HRProClientApp.Controllers
                         ? $"Успешно собрано {apiResponse.Data.Count} резюме"
                         : "Новые резюме не найдены",
                     redirectUrl,
-                    resumes = apiResponse.Data 
-                });
+                    resumes = apiResponse.Data
+                });  
             }
             catch (Exception ex)
             {
@@ -224,18 +222,19 @@ namespace HRProClientApp.Controllers
         }
 
         public IActionResult Delete(int id)
-        {
-            APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
-            return Redirect($"~/Resume/Resumes");
-        }
-
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error(string errorMessage, string returnUrl)
-        {
-            ViewBag.ErrorMessage = errorMessage ?? "Произошла непредвиденная ошибка."; 
-            ViewBag.ReturnUrl = returnUrl; 
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        {           
+            var resume = APIClient.GetRequest<ResumeViewModel?>($"api/resume/details?id={id}");
+            var vacancyId = resume.VacancyId;
+            if (vacancyId.HasValue)
+            {
+                APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
+                return Redirect($"~/Vacancy/VacancyDetails/{vacancyId}");
+            }
+            else
+            {
+                APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
+                return Redirect($"~/Resume/Resumes");
+            }            
         }
     }
 }

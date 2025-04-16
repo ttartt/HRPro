@@ -1,4 +1,5 @@
-﻿using HRProClientApp.Models;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using HRProClientApp.Models;
 using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,50 @@ namespace HRProClientApp.Controllers
             }
 
             return PhysicalFile(reportFilePath, "application/pdf", $"Статистика_по_вакансии_{vacancy.JobTitle}.pdf");
-        }        
+        }
+
+        [HttpGet]
+        public IActionResult CollectResume(string? cityName, int? vacancyId, string? tags)
+        {
+            string redirectUrl = $"/Vacancy/VacancyDetails/{vacancyId}";
+            try
+            {
+                if (APIClient.User == null)
+                    throw new Exception("Доступно только авторизованным пользователям");
+
+                if (APIClient.Company == null)
+                    throw new Exception("Компания не найдена");
+                
+                var apiResponse = APIClient.GetRequest<ApiResponse<List<ResumeViewModel>>>(
+                $"api/parser/parseForVacancy?cityName={cityName}&tags={tags}");
+
+                if (apiResponse == null)
+                    return Json(new { success = false, message = "Не получен ответ от API" });
+
+                if (!apiResponse.Success)
+                    return Json(new { success = false, message = apiResponse.Message ?? "Ошибка API" });
+
+                foreach (var resume in apiResponse.Data)
+                {
+                    resume.CompanyId = APIClient.Company.Id;
+                    resume.VacancyId = vacancyId;
+                    APIClient.PostRequest("api/resume/create", resume);
+                }
+                return Json(new
+                {
+                    success = true,
+                    message = apiResponse.Data?.Count > 0
+                        ? $"Успешно собрано {apiResponse.Data.Count} резюме"
+                        : "Новые резюме не найдены",
+                    redirectUrl,
+                    resumes = apiResponse.Data
+                });   
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
         [HttpGet]
         public async Task<ActionResult> VacancyDetails(int? id)
