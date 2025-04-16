@@ -29,11 +29,6 @@ namespace HRProRestAPI.Controllers
             {
                 var calendarId = "c3145d64626c4d8e1abec2bd290fc205b4b49aee6eb533b052947a0adf7343ef@group.calendar.google.com";
 
-                if (eventDto.StartDateTime >= eventDto.EndDateTime)
-                {
-                    return BadRequest(new { message = "Дата окончания должна быть позже даты начала" });
-                }
-
                 var request = new HttpRequestMessage(
                     HttpMethod.Post,
                     $"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events");
@@ -98,25 +93,43 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteFromGoogleCalendar(string eventId, [FromBody] CalendarEventDto eventDto)
+        public async Task<IActionResult> DeleteEvent([FromBody] DeleteEventRequest request)
         {
-            var calendarId = "c3145d64626c4d8e1abec2bd290fc205b4b49aee6eb533b052947a0adf7343ef@group.calendar.google.com";
-
-            var request = new HttpRequestMessage(HttpMethod.Delete,
-                $"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{eventId}");
-
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", eventDto.AccessToken);
-
-            var response = await _httpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var error = await response.Content.ReadAsStringAsync();
-                _logger.LogError($"Ошибка удаления события: {error}");
-                return BadRequest(new { message = "Не удалось удалить событие из Google Календаря", error });
-            }
+                if (string.IsNullOrEmpty(request.EventId))
+                    return BadRequest(new { Success = false, Message = "Не указан ID события" });
 
-            return Ok(new { message = "Событие успешно удалено" });
+                if (!string.IsNullOrEmpty(request.GoogleAccessToken))
+                {
+                    var calendarId = "c3145d64626c4d8e1abec2bd290fc205b4b49aee6eb533b052947a0adf7343ef@group.calendar.google.com";
+                    var url = $"https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events/{request.EventId}";
+
+                    var googleRequest = new HttpRequestMessage(HttpMethod.Delete, url);
+                    googleRequest.Headers.Authorization =
+                        new AuthenticationHeaderValue("Bearer", request.GoogleAccessToken);
+
+                    var googleResponse = await _httpClient.SendAsync(googleRequest);
+
+                    if (!googleResponse.IsSuccessStatusCode)
+                    {
+                        var error = await googleResponse.Content.ReadAsStringAsync();
+                        _logger.LogError($"Ошибка Google API: {error}");
+                    }
+                }
+
+                return Ok(new { Success = true, Message = "Событие удалено" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при удалении события");
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = "Внутренняя ошибка сервера",
+                    Details = ex.Message
+                });
+            }
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using HRProContracts.BindingModels;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -251,31 +252,45 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> DeleteFromGoogleCalendar(string eventId)
+        [HttpPost("DeleteMeeting")]
+        public async Task<IActionResult> DeleteMeeting(int meetingId)
         {
             try
             {
-                var googleToken = APIClient.User?.GoogleToken;
+                var meeting = APIClient.GetRequest<MeetingViewModel>($"api/meeting/details?id={meetingId}");
+                if (meeting == null) throw new Exception("Встреча не найдена");
 
-                if (string.IsNullOrEmpty(googleToken))
+                if (!string.IsNullOrEmpty(meeting.GoogleEventId))
                 {
-                    return Json(new { success = false, message = "Необходима авторизация через Google" });
+                    try
+                    {
+                        await APIClient.PostRequestAsync(
+                            "api/calendar/DeleteEvent",
+                            new DeleteEventRequest
+                            {
+                                EventId = meeting.GoogleEventId,
+                                GoogleAccessToken = APIClient.User?.GoogleToken,
+                                MeetingId = meetingId
+                            });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Ошибка при удалении из Google Calendar: {ex.Message}");
+                    }
                 }
 
-                var requestData = new
+                APIClient.PostRequest("api/meeting/delete", new MeetingBindingModel { Id = meetingId });
+
+                return RedirectToAction("Meetings", new
                 {
-                    AccessToken = googleToken
-                };
-
-                var response = await APIClient.PostRequestAsync($"api/calendar/DeleteFromGoogleCalendar/{eventId}", requestData);
-
-                return Json(new { success = true });
+                    userId = APIClient.User?.Id,
+                    companyId = APIClient.Company?.Id
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при удалении из Google Календаря");
-                return Json(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Ошибка при удалении встречи");
+                return BadRequest(ex.Message);
             }
         }
 
@@ -298,9 +313,9 @@ namespace HRProClientApp.Controllers
             {
                 throw new Exception("Компания не определена");
             }
-
+            await DeleteMeeting(id);
             APIClient.PostRequest($"api/meeting/delete", new MeetingBindingModel { Id = id });
-            await DeleteFromGoogleCalendar(id.ToString());
+            
             return Redirect($"~/Meeting/Meetings?={APIClient.User?.Id}&companyId={APIClient.Company?.Id}");
         }
     }
