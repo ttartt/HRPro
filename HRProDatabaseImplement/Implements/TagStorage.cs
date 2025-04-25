@@ -33,13 +33,25 @@ namespace HRProDatabaseImplement.Implements
         }
         public TagViewModel? GetElement(TagSearchModel model)
         {
-            if (string.IsNullOrEmpty(model.TagName) && !model.Id.HasValue)
+            using var context = new HRproDatabase();
+            if (!model.Id.HasValue)
             {
                 return null;
             }
-            using var context = new HRproDatabase();
+            if (model.TemplateId.HasValue && !string.IsNullOrEmpty(model.TagName))
+            {
+                return context.Tags
+               .FirstOrDefault(x => x.TagName == model.TagName && x.TemplateId == model.TemplateId)
+               ?.GetViewModel;
+            }            
+            if (model.TemplateId.HasValue)
+            {
+                return context.Tags
+               .FirstOrDefault(x => x.TemplateId == model.TemplateId)
+               ?.GetViewModel;
+            }
             return context.Tags
-                .FirstOrDefault(x => (!string.IsNullOrEmpty(model.TagName) && x.TagName == model.TagName) || (model.Id.HasValue && x.Id == model.Id))
+                .FirstOrDefault(x => x.Id == model.Id)
                 ?.GetViewModel;
         }
         public int? Insert(TagBindingModel model)

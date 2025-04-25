@@ -118,11 +118,12 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpPost]
-        public void Create(MeetingBindingModel model)
+        public IActionResult Create(MeetingBindingModel model)
         {
             try
             {
-                _logic.Create(model);
+                int? id = _logic.Create(model);
+                return Ok(new MeetingBindingModel { Id = (int)id });
             }
             catch (Exception ex)
             {

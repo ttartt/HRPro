@@ -9,7 +9,7 @@ namespace HRProContracts.StoragesContracts
         List<MeetingViewModel> GetFullList();
         List<MeetingViewModel> GetFilteredList(MeetingSearchModel model);
         MeetingViewModel? GetElement(MeetingSearchModel model);
-        MeetingViewModel? Insert(MeetingBindingModel model);
+        int? Insert(MeetingBindingModel model);
         MeetingViewModel? Update(MeetingBindingModel model);
         MeetingViewModel? Delete(MeetingBindingModel model);
     }

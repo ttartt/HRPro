@@ -1,4 +1,5 @@
 ﻿using HRProDataModels.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HRProContracts.BindingModels
 {
@@ -25,5 +26,7 @@ namespace HRProContracts.BindingModels
         public int Id { get; set; }
 
         public string? GoogleEventId { get; set; }
+        [HiddenInput]
+        public string SelectedParticipantIds { get; set; } = string.Empty;
     }
 }

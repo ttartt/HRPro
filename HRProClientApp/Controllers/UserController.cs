@@ -160,7 +160,8 @@ namespace HRProClientApp.Controllers
                             Password = model.Password,
                             Role = model.Role,
                             PhoneNumber = model.PhoneNumber,
-                            DateOfBirth = model.DateOfBirth
+                            DateOfBirth = model.DateOfBirth,
+                            IsEmailConfirmed = model.IsEmailConfirmed
                         });
                     }
                     redirectUrl = $"/Company/CompanyProfile/{model.CompanyId}";

@@ -112,7 +112,7 @@ namespace HRProBusinessLogic.BusinessLogic
                 throw new ArgumentException("Некорректный идентификатор шаблона", nameof(model.TemplateId));
             }
 
-            var existingTag = _tagStorage.GetElement(new TagSearchModel { TagName = model.TagName });
+            var existingTag = _tagStorage.GetElement(new TagSearchModel { TagName = model.TagName, TemplateId = model.TemplateId });
             if (existingTag != null && existingTag.Id != model.Id)
             {
                 throw new InvalidOperationException("Тег с таким именем уже существует");

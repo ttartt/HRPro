@@ -21,15 +21,16 @@ namespace HRProBusinessLogic.BusinessLogic
             _logger = logger;
             _meetingStorage = meetingStorage;
         }
-        public bool Create(MeetingBindingModel model)
+        public int? Create(MeetingBindingModel model)
         {
             CheckModel(model);
-            if (_meetingStorage.Insert(model) == null)
+            var meetingId = _meetingStorage.Insert(model);
+            if (meetingId == null)
             {
                 _logger.LogWarning("Insert operation failed");
-                return false;
+                return 0;
             }
-            return true;
+            return meetingId;
         }
 
         public bool Delete(MeetingBindingModel model)

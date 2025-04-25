@@ -71,7 +71,7 @@ namespace HRProDatabaseImplement.Implements
                 .FirstOrDefault(x => x.Id == model.Id)
                 ?.GetViewModel;
         }
-        public MeetingViewModel? Insert(MeetingBindingModel model)
+        public int? Insert(MeetingBindingModel model)
         {
             var newMeeting = Meeting.Create(model);
             if (newMeeting == null)
@@ -81,7 +81,7 @@ namespace HRProDatabaseImplement.Implements
             using var context = new HRproDatabase();
             context.Meetings.Add(newMeeting);
             context.SaveChanges();
-            return newMeeting.GetViewModel;
+            return newMeeting.Id;
         }
         public MeetingViewModel? Update(MeetingBindingModel model)
         {
