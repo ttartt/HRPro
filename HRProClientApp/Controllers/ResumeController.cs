@@ -15,37 +15,7 @@ namespace HRProClientApp.Controllers
         public ResumeController(ILogger<ResumeController> logger)
         {
             _logger = logger;
-        }
-
-        [HttpGet]
-        public IActionResult GetReport(int id)
-        {
-            if (APIClient.User == null)
-            {
-                return Redirect("~Home/Enter");
-            }
-
-            var resume = APIClient.GetRequest<ResumeViewModel>($"/api/resume/details?id={id}");
-            if (resume == null)
-            {
-                return NotFound("Резюме не найдено.");
-            }
-
-            var reportFilePath = $"C:\\Users\\User\\source\\repos\\HRPro\\Резюме_{resume.CandidateInfo}.pdf";
-
-            APIClient.PostRequest("api/report/resume", new ReportBindingModel
-            {
-                ResumeId = resume.Id,
-                FileName = reportFilePath
-            });
-
-            if (!System.IO.File.Exists(reportFilePath))
-            {
-                return NotFound("Файл отчета не найден.");
-            }
-
-            return PhysicalFile(reportFilePath, "application/pdf", $"Резюме_{resume.CandidateInfo}.pdf");
-        }
+        }        
 
         [HttpGet]
         public async Task<IActionResult> Resumes()

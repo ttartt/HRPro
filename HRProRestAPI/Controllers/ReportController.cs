@@ -1,5 +1,6 @@
 ﻿using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
+using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +12,11 @@ namespace HRProRestApi.Controllers
     public class ReportController : Controller
     {
         private readonly IReportLogic _reportLogic;
-        public ReportController(IReportLogic reportLogic)
+        private readonly ILogger _logger;
+        public ReportController(IReportLogic reportLogic, ILogger<ReportController> logger)
         {
             _reportLogic = reportLogic;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -39,6 +42,22 @@ namespace HRProRestApi.Controllers
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        // новые методы
+        [HttpGet]
+        public SalaryStatisticsViewModel? GetSalaryStats()
+        {
+            try
+            {
+                var stats = _reportLogic.GetSalaryStatistics();
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения статистики по зарплатам вакансий");
+                throw;
             }
         }
     }

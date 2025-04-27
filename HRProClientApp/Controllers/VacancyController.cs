@@ -15,63 +15,7 @@ namespace HRProClientApp.Controllers
         public VacancyController(ILogger<VacancyController> logger)
         {
             _logger = logger;
-        }
-
-        [HttpGet]
-        public IActionResult VacancyStatistics(int id)
-        {
-            if (APIClient.User == null)
-            {
-                return Redirect("/Home/Enter");
-            }
-
-            var vacancy = APIClient.GetRequest<VacancyViewModel>($"/api/vacancy/details?id={id}");
-            if (vacancy == null)
-            {
-                return NotFound("Вакансия не найдена.");
-            }
-
-            var viewModel = new VacancyStatisticsViewModel
-            {
-                DateFrom = DateTime.UtcNow,
-                DateTo = DateTime.UtcNow,
-                VacancyId = vacancy.Id
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpGet]
-        public IActionResult GetStatistics(int id, DateTime dateFrom, DateTime dateTo)
-        {
-            if (APIClient.User == null)
-            {
-                return Redirect("/Home/Enter");
-            }
-
-            var vacancy = APIClient.GetRequest<VacancyViewModel>($"/api/vacancy/details?id={id}");
-            if (vacancy == null)
-            {
-                return NotFound("Вакансия не найдена.");
-            }
-
-            var reportFilePath = $"C:\\Users\\User\\source\\repos\\HRPro\\Статистика_по_вакансии_{vacancy.JobTitle}.pdf";
-
-            APIClient.PostRequest("api/report/statistics", new ReportBindingModel
-            {
-                VacancyId = vacancy.Id,
-                FileName = reportFilePath,
-                DateFrom = dateFrom,
-                DateTo = dateTo
-            });
-
-            if (!System.IO.File.Exists(reportFilePath))
-            {
-                return NotFound("Файл отчета не найден.");
-            }
-
-            return PhysicalFile(reportFilePath, "application/pdf", $"Статистика_по_вакансии_{vacancy.JobTitle}.pdf");
-        }
+        }        
 
         [HttpGet]
         public IActionResult CollectResume(string? cityName, int? vacancyId, string? tags)

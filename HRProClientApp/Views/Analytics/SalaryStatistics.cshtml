@@ -1,0 +1,269 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model HRProContracts.ViewModels.SalaryStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Статистика зарплат по вакансиям";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+
+    <div class="row">
+        <!-- Средние зарплаты по должностям -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Средние зарплаты по должностям</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AverageSalaryByPosition.Any())
+                    {
+                        <canvas id="avgSalaryChart" height="300"></canvas>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">Нет данных для отображения</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Вилки зарплат -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Вилки зарплат по должностям</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.SalaryRangesByPosition.Any())
+                    {
+                        <canvas id="salaryRangeChart" height="300"></canvas>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">Нет данных для отображения</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Детальная таблица -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Детальная статистика</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Должность</th>
+                            <th class="text-end">Мин. зарплата</th>
+                            <th class="text-end">Средняя зарплата</th>
+                            <th class="text-end">Макс. зарплата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.SalaryRangesByPosition)
+                        {
+                            <tr>
+                                <td>@item.Key</td>
+                                <td class="text-end">@(item.Value.Min > 0 ? item.Value.Min.ToString("N0") + " ₽" : "-")</td>
+                                <td class="text-end">@item.Value.Average.ToString("N0") ₽</td>
+                                <td class="text-end">@(item.Value.Max > 0 ? item.Value.Max.ToString("N0") + " ₽" : "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // График средних зарплат
+            const avgSalaryCtx = document.getElementById('avgSalaryChart');
+            if (avgSalaryCtx) {
+                const avgSalaryData = {
+                    labels: @Html.Raw(Json.Serialize(Model.AverageSalaryByPosition.Keys)),
+                    datasets: [{
+                        label: 'Средняя зарплата (₽)',
+                        data: @Html.Raw(Json.Serialize(Model.AverageSalaryByPosition.Values)),
+                        backgroundColor: 'rgba(58, 18, 227, 0.7)',
+                        borderColor: 'rgba(58, 18, 227, 1)',
+                        borderWidth: 1
+                    }]
+                };
+
+                new Chart(avgSalaryCtx, {
+                    type: 'bar',
+                    data: avgSalaryData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value.toLocaleString('ru-RU') + ' ₽';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.parsed.y.toLocaleString('ru-RU') + ' ₽';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // График вилок зарплат
+            const salaryRangeCtx = document.getElementById('salaryRangeChart');
+            if (salaryRangeCtx) {
+                const positions = @Html.Raw(Json.Serialize(Model.SalaryRangesByPosition.Keys));
+                const ranges = @Html.Raw(Json.Serialize(Model.SalaryRangesByPosition.Values));
+
+                const salaryRangeData = {
+                    labels: positions,
+                    datasets: [
+                        {
+                            label: 'Минимальная зарплата',
+                            data: ranges.map(r => r.min > 0 ? r.min : r.average),
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Средняя зарплата',
+                            data: ranges.map(r => r.average),
+                            backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Максимальная зарплата',
+                            data: ranges.map(r => r.max > 0 ? r.max : r.average),
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                };
+
+                new Chart(salaryRangeCtx, {
+                    type: 'bar',
+                    data: salaryRangeData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value.toLocaleString('ru-RU') + ' ₽';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toLocaleString('ru-RU') + ' ₽';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    .btn {
+        background-color: #3E12E3;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn:hover {
+            background-color: #2200A4;
+            transform: scale(1.05);
+        }
+
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+    .card-header {
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-bottom: none;
+    }
+
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .table th {
+            font-weight: 600;
+            white-space: nowrap;
+            background-color: #3E12E3;
+            color: white;
+            border: none;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(58, 18, 227, 0.05);
+    }
+
+    .alert {
+        border-radius: 8px;
+    }
+
+    .bg-primary {
+        background-color: #3E12E3 !important;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+</style>

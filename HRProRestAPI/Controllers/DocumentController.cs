@@ -39,6 +39,25 @@ namespace HRProRestAPI.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file, [FromForm] int documentId)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Файл не выбран");
+
+            var filePath = Path.Combine("Uploads/Documents", $"{documentId}_{file.FileName}");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Ok(new { message = "Файл загружен", path = filePath });
+        }
+
+
         [HttpGet]
         public List<DocumentViewModel>? Search(string? tags)
         {

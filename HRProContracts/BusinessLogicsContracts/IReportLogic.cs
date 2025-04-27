@@ -1,4 +1,5 @@
 ﻿using HRProContracts.BindingModels;
+using HRProContracts.ViewModels;
 
 namespace HRProContracts.BusinessLogicsContracts
 {
@@ -6,5 +7,6 @@ namespace HRProContracts.BusinessLogicsContracts
     {       
         void SaveResumeToPdf(ReportBindingModel model);
         void SaveResumesStatisticsToPdf(ReportBindingModel model);
+        public SalaryStatisticsViewModel GetSalaryStatistics();
     }
 }

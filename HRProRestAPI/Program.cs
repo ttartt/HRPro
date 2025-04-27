@@ -42,6 +42,7 @@ builder.Services.AddTransient<ITagLogic, TagLogic>();
 builder.Services.AddTransient<IDocumentTagLogic, DocumentTagLogic>();
 builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
 builder.Services.AddTransient<IMessageInfoLogic, MessageInfoLogic>();
+builder.Services.AddTransient<IReportLogic, ReportLogic>();
 
 builder.Services.AddSingleton<AbstractMailWorker, MailKitWorker>();
 builder.Services.AddTransient<AbstractSaveToPdf, SaveToPdf>();
@@ -68,13 +69,6 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
-/*builder.Services.AddHttpClient("AvitoClient")
-    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-    {
-        Proxy = new WebProxy(new Uri("http://proxy-service.com:8000")),
-        UseProxy = true,
-        AllowAutoRedirect = true,
-    });*/
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
