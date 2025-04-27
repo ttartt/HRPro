@@ -186,43 +186,51 @@ namespace HRProBusinessLogic.BusinessLogic
             return null;
         }
 
-        /* public VacancyStatusStatisticsViewModel GetVacancyStatusStatistics()
-         {
-             var vacancies = _vacancyStorage.GetFullList();
+        public VacancyStatusStatisticsViewModel GetVacancyStatusStatistics()
+        {
+            var vacancies = _vacancyStorage.GetFullList();
 
-             return new VacancyStatusStatisticsViewModel
-             {
-                 StatusCounts = vacancies
-                     .GroupBy(v => v.Status)
-                     .ToDictionary(g => g.Key, g => g.Count()),
+            return new VacancyStatusStatisticsViewModel
+            {
+                StatusCounts = vacancies
+                    .GroupBy(v => v.Status.ToString()) 
+                    .OrderBy(g => g.Key) 
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Count()),
 
-                 TotalVacancies = vacancies.Count
-             };
-         }
+                TotalVacancies = vacancies.Count,
+                StatusPercentages = vacancies
+                    .GroupBy(v => v.Status.ToString())
+                    .ToDictionary(
+                        g => g.Key,
+                        g => Math.Round((double)g.Count() / vacancies.Count * 100, 1))
+            };
+        }
 
-         public DocumentStatisticsViewModel GetDocumentStatistics(ReportBindingModel model)
-         {
-             // Здесь нужен доступ к хранилищу документов
-             // Предполагаем наличие IDocumentStorage
-             var documents = _documentStorage.GetFilteredList(new DocumentSearchModel
-             {
-                 DateFrom = model.DateFrom,
-                 DateTo = model.DateTo
-             });
+        /*public DocumentStatisticsViewModel GetDocumentStatistics(ReportBindingModel model)
+        {
+            // Здесь нужен доступ к хранилищу документов
+            // Предполагаем наличие IDocumentStorage
+            var documents = _documentStorage.GetFilteredList(new DocumentSearchModel
+            {
+                DateFrom = model.DateFrom,
+                DateTo = model.DateTo
+            });
 
-             return new DocumentStatisticsViewModel
-             {
-                 TotalDocuments = documents.Count,
-                 DocumentsByType = documents
-                     .GroupBy(d => d.Type)
-                     .ToDictionary(g => g.Key, g => g.Count()),
+            return new DocumentStatisticsViewModel
+            {
+                TotalDocuments = documents.Count,
+                DocumentsByType = documents
+                    .GroupBy(d => d.Type)
+                    .ToDictionary(g => g.Key, g => g.Count()),
 
-                 // Дополнительная статистика по дням/неделям
-                 DailyCounts = documents
-                     .GroupBy(d => d.CreatedAt.Date)
-                     .OrderBy(g => g.Key)
-                     .ToDictionary(g => g.Key, g => g.Count())
-             };
-         }*/
+                // Дополнительная статистика по дням/неделям
+                DailyCounts = documents
+                    .GroupBy(d => d.CreatedAt.Date)
+                    .OrderBy(g => g.Key)
+                    .ToDictionary(g => g.Key, g => g.Count())
+            };
+        }*/
     }
 }

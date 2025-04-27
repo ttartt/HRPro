@@ -8,5 +8,6 @@ namespace HRProContracts.BusinessLogicsContracts
         void SaveResumeToPdf(ReportBindingModel model);
         void SaveResumesStatisticsToPdf(ReportBindingModel model);
         public SalaryStatisticsViewModel GetSalaryStatistics();
+        public VacancyStatusStatisticsViewModel GetVacancyStatusStatistics();
     }
 }

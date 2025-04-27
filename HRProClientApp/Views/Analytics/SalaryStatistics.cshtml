@@ -194,6 +194,29 @@
 }
 
 <style>
+    /* Основные стили */
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+        }
+
+    .card-header {
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-bottom: none;
+        background-color: #2200A4;
+    }
+
     .btn {
         background-color: #3E12E3;
         color: white;
@@ -209,25 +232,19 @@
             transform: scale(1.05);
         }
 
-    .card {
-        border-radius: 10px;
-        overflow: hidden;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    .bg-primary {
+        background-color: #3E12E3 !important;
     }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-        }
-
-    .card-header {
-        font-weight: 600;
-        padding: 1rem 1.5rem;
-        border-bottom: none;
+    .bg-success {
+        background-color: #28a745 !important;
     }
 
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    /* Таблица */
     .table {
         border-collapse: separate;
         border-spacing: 0;
@@ -251,19 +268,27 @@
         background-color: rgba(58, 18, 227, 0.05);
     }
 
-    .alert {
+    /* Графики */
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    /* Иконки */
+    .bi {
+        font-size: 1.1rem;
+    }
+
+    /* Бейджи */
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.75em;
         border-radius: 8px;
     }
 
-    .bg-primary {
-        background-color: #3E12E3 !important;
-    }
-
-    .bg-success {
-        background-color: #28a745 !important;
-    }
-
-    .bg-secondary {
-        background-color: #6c757d !important;
+    /* Алерты */
+    .alert {
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
     }
 </style>

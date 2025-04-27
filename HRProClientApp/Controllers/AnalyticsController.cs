@@ -1,4 +1,5 @@
-﻿using HRProContracts.BindingModels;
+﻿using HRProClientApp.Models;
+using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -103,6 +104,13 @@ namespace HRProClientApp.Controllers
         public IActionResult SalaryStatistics()
         {
             var model = APIClient.GetRequest<SalaryStatisticsViewModel>("api/report/GetSalaryStats");
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult VacancyStatusStatistics()
+        {
+            var model = APIClient.GetRequest<VacancyStatusStatisticsViewModel>("api/report/GetVacancyStatusStats");
             return View(model);
         }
     }

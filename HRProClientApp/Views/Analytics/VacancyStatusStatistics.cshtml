@@ -1,0 +1,301 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model HRProContracts.ViewModels.VacancyStatusStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Статистика статусов вакансий";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <div class="badge bg-primary px-3 py-2">
+            <i class="bi bi-briefcase me-2"></i>
+            <span>Всего вакансий: @Model.TotalVacancies</span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Круговая диаграмма -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="bi bi-pie-chart me-2"></i>
+                    <h5 class="mb-0">Распределение по статусам</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.StatusCounts.Any())
+                    {
+                        <canvas id="statusPieChart" height="300"></canvas>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Нет данных для отображения
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Столбчатая диаграмма -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    <h5 class="mb-0">Количество по статусам</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.StatusCounts.Any())
+                    {
+                        <canvas id="statusBarChart" height="300"></canvas>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Нет данных для отображения
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица статистики -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-table me-2"></i>
+            <h5 class="mb-0">Детальная статистика</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4"><i class="bi bi-tag me-2"></i>Статус</th>
+                            <th class="text-end"><i class="bi bi-list-ol me-2"></i>Количество</th>
+                            <th class="text-end pe-4"><i class="bi bi-percent me-2"></i>Доля</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.StatusCounts)
+                        {
+                            <tr>
+                                <td class="ps-4">@item.Key</td>
+                                <td class="text-end">@item.Value</td>
+                                <td class="text-end pe-4">
+                                    <span class="badge bg-light text-dark">
+                                        @Model.StatusPercentages[item.Key]%
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Цветовая схема
+            const colors = [
+                'rgba(58, 18, 227, 0.8)',   // Primary
+                'rgba(103, 58, 183, 0.8)',  // Purple
+                'rgba(156, 39, 176, 0.8)',  // Deep Purple
+                'rgba(233, 30, 99, 0.8)',   // Pink
+                'rgba(63, 81, 181, 0.8)',   // Indigo
+                'rgba(33, 150, 243, 0.8)'   // Blue
+            ];
+
+            // Получаем данные из модели
+            const statusLabels = @Html.Raw(Json.Serialize(Model.StatusCounts.Keys));
+            const statusValues = @Html.Raw(Json.Serialize(Model.StatusCounts.Values));
+            const statusPercentages = @Html.Raw(Json.Serialize(Model.StatusPercentages.Values));
+
+            // Круговая диаграмма
+            const pieCtx = document.getElementById('statusPieChart');
+            if (pieCtx) {
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusValues,
+                            backgroundColor: colors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.label}: ${context.raw} (${statusPercentages[context.dataIndex]}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Столбчатая диаграмма
+            const barCtx = document.getElementById('statusBarChart');
+            if (barCtx) {
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            label: 'Количество вакансий',
+                            data: statusValues,
+                            backgroundColor: colors[0],
+                            borderColor: colors[0],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                },
+                                grid: {
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    /* Основные стили */
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+        }
+
+    .card-header {
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-bottom: none;
+        background-color: #2200A4;
+    }
+
+    .btn {
+        background-color: #3E12E3;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+        background-color: #2200A4;
+        transform: scale(1.05);
+    }
+
+    .bg-primary {
+        background-color: #3E12E3 !important;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    /* Таблица */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table th {
+        font-weight: 600;
+        white-space: nowrap;
+        background-color: #3E12E3;
+        color: white;
+        border: none;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(58, 18, 227, 0.05);
+    }
+
+    /* Графики */
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    /* Иконки */
+    .bi {
+        font-size: 1.1rem;
+    }
+
+    /* Бейджи */
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.75em;
+        border-radius: 8px;
+    }
+
+    /* Алерты */
+    .alert {
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+    }
+</style>

@@ -60,5 +60,20 @@ namespace HRProRestApi.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        public VacancyStatusStatisticsViewModel GetVacancyStatusStats()
+        {
+            try
+            {
+                var result = _reportLogic.GetVacancyStatusStatistics();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения статистики по статусам вакансий");
+                throw;
+            }
+        }
     }
 }
