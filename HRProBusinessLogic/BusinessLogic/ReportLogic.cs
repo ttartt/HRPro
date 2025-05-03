@@ -85,7 +85,7 @@ namespace HRProBusinessLogic.BusinessLogic
                     v.JobTitle,
                     SalaryRange = ParseSalaryRange(v.Salary)
                 })
-                .Where(x => x.SalaryRange.From.HasValue || x.SalaryRange.To.HasValue) // Изменили условие
+                .Where(x => x.SalaryRange.From.HasValue || x.SalaryRange.To.HasValue)
                 .ToList();
 
             return new SalaryStatisticsViewModel
@@ -94,20 +94,20 @@ namespace HRProBusinessLogic.BusinessLogic
                     .GroupBy(v => v.JobTitle)
                     .ToDictionary(
                         g => g.Key,
-                        g => CalculateAverageSalary(g.Select(x => x.SalaryRange))), // Новый метод расчета
+                        g => CalculateAverageSalary(g.Select(x => x.SalaryRange))),
 
                 SalaryRangesByPosition = vacanciesWithSalary
                     .GroupBy(v => v.JobTitle)
                     .ToDictionary(
                         g => g.Key,
-                        g => CalculateSalaryRange(g.Select(x => x.SalaryRange))) // Новый метод расчета
+                        g => CalculateSalaryRange(g.Select(x => x.SalaryRange))) 
             };
         }
 
         private decimal CalculateAverageSalary(IEnumerable<(decimal? From, decimal? To)> ranges)
         {
             var validSalaries = ranges
-                .Select(r => r.From ?? r.To ?? 0) // Берем From, если нет - To, если нет - 0 (но такие будут отфильтрованы)
+                .Select(r => r.From ?? r.To ?? 0) 
                 .Where(s => s > 0)
                 .ToList();
 
@@ -135,10 +135,8 @@ namespace HRProBusinessLogic.BusinessLogic
             if (string.IsNullOrWhiteSpace(salaryString))
                 return (null, null);
 
-            // Нормализация строки
             salaryString = salaryString.ToLower().Replace("руб.", "").Replace("рублей", "").Trim();
 
-            // 1. Вилка "от X до Y"
             var rangeMatch = Regex.Match(salaryString, @"от\s*([\d\s,]+)\s*до\s*([\d\s,]+)");
             if (rangeMatch.Success)
             {
@@ -146,21 +144,18 @@ namespace HRProBusinessLogic.BusinessLogic
                        ParseNumber(rangeMatch.Groups[2].Value));
             }
 
-            // 2. Только "от X"
             var fromMatch = Regex.Match(salaryString, @"от\s*([\d\s,]+)");
             if (fromMatch.Success)
             {
                 return (ParseNumber(fromMatch.Groups[1].Value), null);
             }
 
-            // 3. Только "до Y"
             var toMatch = Regex.Match(salaryString, @"до\s*([\d\s,]+)");
             if (toMatch.Success)
             {
                 return (null, ParseNumber(toMatch.Groups[1].Value));
             }
 
-            // 4. Просто число
             var simpleMatch = Regex.Match(salaryString, @"^([\d\s,]+)$");
             if (simpleMatch.Success)
             {
@@ -171,13 +166,11 @@ namespace HRProBusinessLogic.BusinessLogic
             return (null, null);
         }
 
-        // перевод зарплаты в формате "..." в числовой формат
         private decimal? ParseNumber(string numberStr)
         {
             if (string.IsNullOrWhiteSpace(numberStr))
                 return null;
 
-            // Удаляем все пробелы и заменяем запятые на точки (для дробных чисел)
             var cleaned = numberStr.Replace(" ", "").Replace(",", ".");
 
             if (decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
@@ -206,6 +199,81 @@ namespace HRProBusinessLogic.BusinessLogic
                         g => g.Key,
                         g => Math.Round((double)g.Count() / vacancies.Count * 100, 1))
             };
+        }
+
+        public ResumeStatisticsViewModel GetResumeStatistics()
+        {
+            var resumes = _resumeStorage.GetFullList();
+
+            var cityNames = new Dictionary<string, string>
+            {
+                {"ulyanovsk", "Ульяновск"},
+                {"samara", "Самара"},
+                {"moskva", "Москва"},
+                {"kazan", "Казань"},
+                {"sankt-peterburg", "Санкт-Петербург"},
+                {"novosibirsk", "Новосибирск"}
+            };
+
+            // Фильтруем резюме с указанной зарплатой и парсим ее
+            var resumesWithSalary = resumes
+                .Select(r => new {
+                    r.Title,
+                    City = cityNames.TryGetValue(r.City ?? "", out var name) ? name : r.City,
+                    ParsedSalary = ParseSalary(r.Salary)
+                })
+                .Where(x => x.ParsedSalary.HasValue)
+                .ToList();
+
+            return new ResumeStatisticsViewModel
+            {
+                // Средняя зарплата по городам (только для городов с 3+ резюме)
+                AverageSalaryByCity = resumesWithSalary
+                    .Where(r => !string.IsNullOrEmpty(r.City))
+                    .GroupBy(r => r.City)
+                    .Where(g => g.Count() >= 2) // Минимум 3 резюме для статистики
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Average(r => r.ParsedSalary.Value)),
+
+                // Сравнение зарплат по специализации (только для 3+ резюме)
+                SalaryByTitle = resumesWithSalary
+                    .GroupBy(r => r.Title)
+                    .Where(g => g.Count() >= 2) // Минимум 3 резюме для статистики
+                    .ToDictionary(
+                        g => g.Key,
+                        g => new SalaryStatsViewModel
+                        {
+                            Average = g.Average(r => r.ParsedSalary.Value),
+                            Count = g.Count(),
+                            Min = g.Min(r => r.ParsedSalary.Value),
+                            Max = g.Max(r => r.ParsedSalary.Value)
+                        }),
+
+                TotalResumes = resumes.Count,
+                ResumesWithSalary = resumesWithSalary.Count,
+                ResumesWithoutSalary = resumes.Count - resumesWithSalary.Count
+            };
+        }
+
+        private decimal? ParseSalary(string salaryString)
+        {
+            if (string.IsNullOrWhiteSpace(salaryString))
+                return null;
+
+            // Удаляем все нецифровые символы, включая пробелы (но сохраняем точку/запятую для десятичных)
+            var cleaned = Regex.Replace(salaryString, @"[^\d,.]", "");
+
+            // Заменяем запятую на точку для корректного парсинга
+            cleaned = cleaned.Replace(",", ".");
+
+            // Парсим число
+            if (decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
+            {                
+                return result;
+            }
+
+            return null;
         }
 
         /*public DocumentStatisticsViewModel GetDocumentStatistics(ReportBindingModel model)

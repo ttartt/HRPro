@@ -1,0 +1,443 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model HRProContracts.ViewModels.ResumeStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Статистика по резюме";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+        <div class="badge bg-primary px-3 py-2">
+            <i class="bi bi-file-earmark-person me-2"></i>
+            <span>Всего резюме: @Model.TotalResumes (с зарплатой: @Model.ResumesWithSalary)</span>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Количество городов</label>
+                    <select id="cityLimit" class="form-select">
+                        <option value="10" selected>Топ 10</option>
+                        <option value="20">Топ 20</option>
+                        <option value="50">Топ 50</option>
+                        <option value="0">Все</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Количество специализаций</label>
+                    <select id="titleLimit" class="form-select">
+                        <option value="10" selected>Топ 10</option>
+                        <option value="20">Топ 20</option>
+                        <option value="50">Топ 50</option>
+                        <option value="0">Все</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Средняя зарплата по городам -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="bi bi-geo-alt me-2"></i>
+                        <h5 class="mb-0 d-inline">Средняя зарплата по городам</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="citySalaryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сравнение зарплат по специализации -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="bi bi-people me-2"></i>
+                        <h5 class="mb-0 d-inline">Зарплаты по специализациям</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="titleSalaryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблицы с пагинацией -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Топ городов по зарплатам</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="cityTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4"><i class="bi bi-geo-alt me-2"></i>Город</th>
+                                    <th class="text-end"><i class="bi bi-currency-ruble me-2"></i>Средняя зарплата</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between p-3">
+                        <div class="dataTables_info">Показано <span id="cityStart">1</span>-<span id="cityEnd">10</span> из <span id="cityTotal">0</span></div>
+                        <div class="dataTables_paginate">
+                            <button class="btn btn-sm btn-outline-primary me-2" id="cityPrev" disabled>Назад</button>
+                            <button class="btn btn-sm btn-outline-primary" id="cityNext" disabled>Вперед</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Топ специализаций</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="titleTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4"><i class="bi bi-person-badge me-2"></i>Специализация</th>
+                                    <th class="text-end"><i class="bi bi-currency-ruble me-2"></i>Средняя</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between p-3">
+                        <div class="dataTables_info">Показано <span id="titleStart">1</span>-<span id="titleEnd">10</span> из <span id="titleTotal">0</span></div>
+                        <div class="dataTables_paginate">
+                            <button class="btn btn-sm btn-outline-primary me-2" id="titlePrev" disabled>Назад</button>
+                            <button class="btn btn-sm btn-outline-primary" id="titleNext" disabled>Вперед</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Получаем данные из модели
+            const allCities = @Html.Raw(Json.Serialize(Model.AverageSalaryByCity.OrderByDescending(x => x.Value).Select(x => new { Key = x.Key, Value = x.Value })));
+            const allTitles = @Html.Raw(Json.Serialize(Model.SalaryByTitle.OrderByDescending(x => x.Value.Average).Select(x => new { Key = x.Key, Value = x.Value.Average })));
+
+            // Настройки пагинации
+            const pageSize = 10;
+            let currentCityPage = 1;
+            let currentTitlePage = 1;
+
+            // Функции для работы с таблицами
+            function updateCityTable() {
+                const start = (currentCityPage - 1) * pageSize;
+                const end = Math.min(start + pageSize, allCities.length);
+                const pageData = allCities.slice(start, end);
+
+                const tbody = document.querySelector('#cityTable tbody');
+                tbody.innerHTML = '';
+
+                pageData.forEach(item => {
+                    const row = document.createElement('tr');
+                    const formattedValue = (typeof item.value === 'number')
+                        ? item.value.toLocaleString()
+                        : '—';
+                    row.innerHTML = `
+                                <td class="ps-4">${item.key}</td>
+                                                <td class="text-end">${formattedValue} ₽</td>
+                            `;
+                    tbody.appendChild(row);
+                });
+
+                console.log(pageData);
+
+                document.getElementById('cityStart').textContent = start + 1;
+                document.getElementById('cityEnd').textContent = end;
+                document.getElementById('cityTotal').textContent = allCities.length;
+
+                document.getElementById('cityPrev').disabled = currentCityPage === 1;
+                document.getElementById('cityNext').disabled = end >= allCities.length;
+            }
+
+            function updateTitleTable() {
+                const start = (currentTitlePage - 1) * pageSize;
+                const end = Math.min(start + pageSize, allTitles.length);
+                const pageData = allTitles.slice(start, end);
+
+                const tbody = document.querySelector('#titleTable tbody');
+                tbody.innerHTML = '';
+
+                pageData.forEach(item => {
+                    const row = document.createElement('tr');
+                    const formattedValue = (typeof item.value === 'number')
+                        ? item.value.toLocaleString()
+                        : '—';
+
+                    row.innerHTML = `
+                <td class="ps-4">${item.key}</td>
+                <td class="text-end">${formattedValue} ₽</td>
+            `;
+                    tbody.appendChild(row);
+                });
+
+                console.log(pageData);
+
+                document.getElementById('titleStart').textContent = start + 1;
+                document.getElementById('titleEnd').textContent = end;
+                document.getElementById('titleTotal').textContent = allTitles.length;
+
+                document.getElementById('titlePrev').disabled = currentTitlePage === 1;
+                document.getElementById('titleNext').disabled = end >= allTitles.length;
+            }
+
+            // Инициализация графиков
+            function initCharts(cityLimit = 10, titleLimit = 10) {
+                const cityData = allCities.slice(0, cityLimit === 0 ? allCities.length : cityLimit);
+                const titleData = allTitles.slice(0, titleLimit === 0 ? allTitles.length : titleLimit);
+
+                updateChart('citySalaryChart', cityData.map(x => x.key), cityData.map(x => x.value), 'Средняя зарплата');
+                updateChart('titleSalaryChart', titleData.map(x => x.key), titleData.map(x => x.value), 'Средняя зарплата');
+            }
+
+            function updateChart(chartId, labels, data, label) {
+                const ctx = document.getElementById(chartId);
+                if (!ctx) return;
+
+                if (ctx.chart) {
+                    ctx.chart.data.labels = labels;
+                    ctx.chart.data.datasets[0].data = data;
+                    ctx.chart.update();
+                    return;
+                }
+
+                ctx.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            backgroundColor: 'rgba(58, 18, 227, 0.7)',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                                return value.toLocaleString() ?? '—' + ' ₽';
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                                return context.parsed.y.toLocaleString?.() ?? '—' + ' ₽';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Инициализация
+            updateCityTable();
+            updateTitleTable();
+            initCharts();
+
+            // Обработчики событий
+            document.getElementById('cityPrev').addEventListener('click', () => {
+                if (currentCityPage > 1) {
+                    currentCityPage--;
+                    updateCityTable();
+                }
+            });
+
+            document.getElementById('cityNext').addEventListener('click', () => {
+                if (currentCityPage * pageSize < allCities.length) {
+                    currentCityPage++;
+                    updateCityTable();
+                }
+            });
+
+            document.getElementById('titlePrev').addEventListener('click', () => {
+                if (currentTitlePage > 1) {
+                    currentTitlePage--;
+                    updateTitleTable();
+                }
+            });
+
+            document.getElementById('titleNext').addEventListener('click', () => {
+                if (currentTitlePage * pageSize < allTitles.length) {
+                    currentTitlePage++;
+                    updateTitleTable();
+                }
+            });
+
+            document.getElementById('cityLimit').addEventListener('change', (e) => {
+                initCharts(parseInt(e.target.value), parseInt(document.getElementById('titleLimit').value));
+            });
+
+            document.getElementById('titleLimit').addEventListener('change', (e) => {
+                initCharts(parseInt(document.getElementById('cityLimit').value), parseInt(e.target.value));
+            });
+        });
+    </script>
+
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .dataTables_info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .form-select {
+            max-width: 200px;
+        }
+
+        /* Основные стили */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+            }
+
+        .card-header {
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+            background-color: #f7f7f7;
+            color: #353535;
+        }
+
+        .btn {
+            background-color: #3E12E3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+            .btn:hover {
+                background-color: #2200A4;
+                transform: scale(1.05);
+            }
+
+        .bg-primary {
+            background-color: #3E12E3 !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-secondary {
+            background-color: #6c757d !important;
+        }
+
+        /* Таблица */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+            .table th {
+                font-weight: 600;
+                white-space: nowrap;
+                background-color: #f7f7f7;
+                color: #353535;
+                border: none;
+            }
+
+            .table td, .table th {
+                vertical-align: middle;
+                padding: 0.75rem 1rem;
+                border: 1px solid #dee2e6;
+            }
+
+        /* Графики */
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Иконки */
+        .bi {
+            font-size: 1.1rem;
+        }
+
+        /* Бейджи */
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+            border-radius: 8px;
+        }
+
+        /* Алерты */
+        .alert {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+        }
+    </style>
+}

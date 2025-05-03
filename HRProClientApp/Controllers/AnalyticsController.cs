@@ -113,5 +113,12 @@ namespace HRProClientApp.Controllers
             var model = APIClient.GetRequest<VacancyStatusStatisticsViewModel>("api/report/GetVacancyStatusStats");
             return View(model);
         }
+
+        [HttpGet]
+        public IActionResult ResumeStatistics()
+        {
+            var model = APIClient.GetRequest<ResumeStatisticsViewModel>("api/report/GetResumeStats");
+            return View(model);
+        }
     }
 }

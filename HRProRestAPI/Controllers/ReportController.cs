@@ -75,5 +75,20 @@ namespace HRProRestApi.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        public ResumeStatisticsViewModel GetResumeStats()
+        {
+            try
+            {
+                var result = _reportLogic.GetResumeStatistics();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения статистики по резюме");
+                throw;
+            }
+        }
     }
 }
