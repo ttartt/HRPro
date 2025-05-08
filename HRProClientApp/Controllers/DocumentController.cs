@@ -2,6 +2,7 @@
 using HRProContracts.ViewModels;
 using HRProDataModels.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using TemplateEngine.Docx;
 
@@ -80,6 +81,35 @@ namespace HRProClientApp.Controllers
             return Json(tags ?? new List<TagViewModel>());
         }
 
+        public async Task<IActionResult> Download(int id)
+        {
+            try
+            {
+                var document = APIClient.GetRequest<DocumentViewModel>($"api/document/details?id={id}");
+                if (document == null)
+                {
+                    throw new Exception("Документ не найден");
+                }
+
+                var response = await APIClient.GetRequestWithFullResponseAsync($"api/document/download?id={id}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(await response.Content.ReadAsStringAsync());
+                }
+
+                var fileStream = await response.Content.ReadAsStreamAsync();
+
+                var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+                return File(fileStream, contentType, document.Name + ".docx");
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> DocumentEdit(DocumentBindingModel model)
@@ -87,82 +117,65 @@ namespace HRProClientApp.Controllers
             string redirectUrl = $"/Document/Documents?userId={APIClient.User?.Id}";
             try
             {
-                if (APIClient.User == null)
-                {
-                    throw new Exception("Доступно только авторизованным пользователям");
-                }
-
-                if (APIClient.Company == null)
-                {
-                    throw new Exception("Компания не найдена");
-                }
-
-                if (string.IsNullOrEmpty(model.Name))
-                {
-                    throw new ArgumentException("Название документа не может быть пустым");
-                }
-
-                if (!Enum.IsDefined(typeof(DocumentStatusEnum), model.Status))
-                {
-                    throw new ArgumentException("Некорректный статус документа");
-                }
-
-                if (model.TemplateId <= 0 || model.TemplateId == null)
-                {
-                    throw new ArgumentException("Не выбран шаблон документа.");
-                }
+                if (APIClient.User == null) throw new Exception("Доступно только авторизованным пользователям");
+                if (APIClient.Company == null) throw new Exception("Компания не найдена");
+                if (string.IsNullOrEmpty(model.Name)) throw new ArgumentException("Название документа не может быть пустым");
+                if (!Enum.IsDefined(typeof(DocumentStatusEnum), model.Status)) throw new ArgumentException("Некорректный статус документа");
+                if (model.TemplateId <= 0) throw new ArgumentException("Не выбран шаблон документа");
 
                 if (model.Id == 0)
                 {
                     var existingDocuments = APIClient.GetRequest<List<DocumentViewModel>>($"api/document/list?companyId={model.CompanyId}&userId={APIClient.User.Id}");
-                    var duplicate = existingDocuments?.FirstOrDefault(v =>
-                        v.Name.Equals(model.Name, StringComparison.OrdinalIgnoreCase));
-
-                    if (duplicate != null)
-                    {
+                    if (existingDocuments?.Any(v => v.Name.Equals(model.Name, StringComparison.OrdinalIgnoreCase)) == true)
                         throw new InvalidOperationException("Такой документ уже существует");
-                    }
                 }
 
                 var template = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={model.TemplateId}");
-
-                var templatePath = $"{template.FilePath}";
-                var outputFolder = "GeneratedDocuments";
-                var outputPath = $"{outputFolder}/{model.Name}_{DateTime.Now:yyyy-MM-dd}.docx";
-
-                var contentToFill = new Content();
                 var tags = APIClient.GetRequest<List<TagViewModel>?>($"api/template/tags?templateId={template.Id}");
 
-                foreach (var tag in tags)
+                using (var templateResponse = await APIClient.GetRequestWithFullResponseAsync($"api/template/File?id={model.TemplateId}"))
+                using (var templateStream = await templateResponse.Content.ReadAsStreamAsync())
+                using (var outputStream = new MemoryStream())
                 {
-                    var tagValue = Request.Form[$"Tags[{tag.Id}]"];
-                    if (!string.IsNullOrEmpty(tagValue))
+                    templateStream.CopyTo(outputStream);
+                    outputStream.Position = 0;
+
+                    using (var docProcessor = new TemplateProcessor(outputStream).SetRemoveContentControls(true))
                     {
-                        contentToFill.Append(new FieldContent(tag.TagName, tagValue));
-                    }
-                }
-
-                System.IO.Directory.CreateDirectory(outputFolder);
-                System.IO.File.Copy(templatePath, outputPath, true);
-
-                using (var outputDoc = new TemplateProcessor(outputPath).SetRemoveContentControls(true))
-                {
-                    var content = new Content();
-
-                    foreach (var tag in tags)
-                    {
-                        var value = Request.Form[$"Tags[{tag.Id}]"];
-                        if (!string.IsNullOrEmpty(value))
+                        var content = new Content();
+                        foreach (var tag in tags)
                         {
-                            content.Fields.Add(new FieldContent(tag.TagName, value));
+                            var value = Request.Form[$"Tags[{tag.Id}]"];
+                            if (!string.IsNullOrEmpty(value))
+                                content.Fields.Add(new FieldContent(tag.TagName, value));
                         }
+                        docProcessor.FillContent(content);
+                        docProcessor.SaveChanges();
                     }
 
-                    outputDoc.FillContent(content);
-                    outputDoc.SaveChanges();
-                }
+                    outputStream.Position = 0;
+                    var formFields = new Dictionary<string, string>
+                    {
+                        { "documentId", model.Id.ToString() },
+                        { "templateId", model.TemplateId.ToString() }
+                    };
 
-                var createdDocumentId = 0;
+                    var uploadResponse = await APIClient.PostFileWithFullResponseAsync(
+                        "api/document/SaveDocument",
+                        outputStream,
+                        $"{model.Name}.docx",
+                        formFields);
+
+                    if (!uploadResponse.IsSuccessStatusCode)
+                    {
+                        throw new Exception(await uploadResponse.Content.ReadAsStringAsync());
+                    }
+
+                    var uploadResult = JsonConvert.DeserializeObject<dynamic>(await uploadResponse.Content.ReadAsStringAsync());
+                    model.FilePath = "Uploads\\Documents\\" + uploadResult.fileName;
+                }                
+
+                int createdDocumentId;
                 if (model.Id != 0)
                 {
                     APIClient.PostRequest("api/document/update", model);
@@ -173,6 +186,11 @@ namespace HRProClientApp.Controllers
                     model.CompanyId = APIClient.Company.Id;
                     model.CreatorId = APIClient.User.Id;
                     createdDocumentId = await APIClient.PostRequestAsync("api/document/create", model);
+                }
+
+                if (createdDocumentId <= 0)
+                {
+                    throw new Exception("Сервер вернул недопустимый ID документа");
                 }
 
                 foreach (var tag in tags)
@@ -190,18 +208,21 @@ namespace HRProClientApp.Controllers
                     }
                 }
 
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = Path.GetFullPath(outputFolder),
-                    UseShellExecute = true
-                });
-                
                 return Json(new { success = true, redirectUrl });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        private async Task<Stream> GetTemplateStream(int templateId)
+        {
+            var response = await APIClient.GetRequestWithFullResponseAsync($"api/template/file?id={templateId}");
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Ошибка получения шаблона");
+
+            return await response.Content.ReadAsStreamAsync();
         }
 
         public IActionResult Delete(int id)

@@ -32,7 +32,6 @@
             <tr>
                 <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">Название</th>
                 <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">Тип</th>
-                <th style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">Путь к файлу</th>
                 <th style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">Теги</th>
                 <th>Действия</th>
             </tr>
@@ -43,7 +42,6 @@
                 <tr>
                     <td>@template.Name</td>
                     <td>@template.Type</td>
-                    <td>@template.FilePath</td>
                     <td>
                         @if (!template.Tags.Any())
                         {
@@ -57,10 +55,28 @@
                             }
                         }
                     </td>
-                    <td>
-                        <a asp-action="Delete" asp-controller="Template" asp-route-id="@template.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить шаблон?');">
-                            <i class="bi bi-trash"></i>
-                        </a>
+                    <td class="align-middle">
+                        <div class="d-flex justify-content-start gap-2">
+                            <a asp-action="Download" asp-controller="Template" asp-route-id="@template.Id"
+                               class="btn btn-outline-primary btn-sm"
+                               title="Скачать"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top">
+                                <i class="bi bi-download"></i>
+                            </a>
+
+                            <form asp-action="Delete" asp-controller="Template" asp-route-id="@template.Id"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('Вы уверены, что хотите удалить шаблон?');">
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        title="Удалить"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
                     </td>
                 </tr>
             }

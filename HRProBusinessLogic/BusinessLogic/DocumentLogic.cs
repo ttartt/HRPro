@@ -76,7 +76,7 @@ namespace HRProBusinessLogic.BusinessLogic
             {
                 var companyName = _companyStorage.GetElement(new CompanySearchModel { Id = item.CompanyId }).Name;
                 var creatorName = _userStorage.GetElement(new UserSearchModel { Id = item.CreatorId }).Name;
-                var templateName = _templateStorage.GetElement(new TemplateSearchModel { Id = item.TemplateId }).Name;
+                var template = _templateStorage.GetElement(new TemplateSearchModel { Id = item.TemplateId });
                 var viewModel = new DocumentViewModel
                 {
                     CompanyId = item.CompanyId,
@@ -88,7 +88,8 @@ namespace HRProBusinessLogic.BusinessLogic
                     Name = item.Name,
                     Status = item.Status,
                     TemplateId = item.TemplateId,
-                    TemplateName = templateName
+                    TemplateName = template == null ? "Шаблон удалён" : template.Name,
+                    FilePath = item.FilePath
                 };
                 result.Add(viewModel);
             }

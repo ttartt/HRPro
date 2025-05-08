@@ -1,4 +1,5 @@
-﻿using HRProContracts.ViewModels;
+﻿using HRProContracts.BindingModels;
+using HRProContracts.ViewModels;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net.Http.Headers;
@@ -102,15 +103,48 @@ namespace HRProClientApp
             {
                 throw new Exception($"HTTP Error {response.StatusCode}: {responseJson}");
             }
-
-            dynamic responseObject = JsonConvert.DeserializeObject(responseJson);
             try
             {
-                return (int)responseObject.id;
+                dynamic responseObject = JsonConvert.DeserializeObject(responseJson);
+                return (int)(responseObject?.Id ?? responseObject?.id);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ошибка при разборе ID из ответа: {responseJson}, Ошибка: {ex.Message}");
+                throw new Exception($"Ошибка при разборе ID из ответа: {responseJson}. Ошибка: {ex.Message}");
+            }
+        }
+
+        public static async Task<FileUploadResponse> PostFileAsync(string requestUrl, IFormFile? file, string fileName)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("Файл не выбран или пустой");
+
+            using (var multipartFormContent = new MultipartFormDataContent())
+            {
+                using (var fileStream = file.OpenReadStream())
+                {
+                    var fileStreamContent = new StreamContent(fileStream);
+                    fileStreamContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+
+                    var extension = Path.GetExtension(file.FileName);
+                    var safeFileName = string.IsNullOrEmpty(extension)
+                        ? fileName
+                        : $"{Path.GetFileNameWithoutExtension(fileName)}{extension}";
+
+                    multipartFormContent.Add(fileStreamContent, name: "file", fileName: safeFileName);
+
+                    ApplyAuthorizationHeader();
+
+                    var response = await _client.PostAsync(requestUrl, multipartFormContent);
+                    var responseJson = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new Exception($"HTTP Error {response.StatusCode}: {responseJson}");
+                    }
+
+                    return JsonConvert.DeserializeObject<FileUploadResponse>(responseJson);
+                }
             }
         }
 
@@ -140,6 +174,36 @@ namespace HRProClientApp
             ApplyAuthorizationHeader();
 
             return await _client.PostAsync(requestUrl, data);
+        }
+
+        public static async Task<HttpResponseMessage> PostFileWithFullResponseAsync(
+            string requestUrl,
+            Stream fileStream,
+            string fileName,
+            Dictionary<string, string> formFields = null)
+        {
+            var formData = new MultipartFormDataContent();
+
+            var fileContent = new StreamContent(fileStream);
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
+            formData.Add(fileContent, "file", fileName);
+
+            if (formFields != null)
+            {
+                foreach (var field in formFields)
+                {
+                    formData.Add(new StringContent(field.Value), field.Key);
+                }
+            }
+
+            ApplyAuthorizationHeader();
+            return await _client.PostAsync(requestUrl, formData);
+        }
+
+        public static async Task<HttpResponseMessage> GetRequestWithFullResponseAsync(string requestUrl)
+        {
+            ApplyAuthorizationHeader();
+            return await _client.GetAsync(requestUrl);
         }
     }
 }

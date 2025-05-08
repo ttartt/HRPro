@@ -23,4 +23,9 @@
     <ProjectReference Include="..\HRproDatabaseImplement\HRproDatabaseImplement.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Uploads\Templates\" />
+    <Folder Include="Uploads\Documents\" />
+  </ItemGroup>
+
 </Project>

@@ -1,9 +1,7 @@
-﻿using DocumentFormat.OpenXml.EMMA;
-using HRProClientApp.Models;
-using HRProContracts.BindingModels;
+﻿using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Newtonsoft.Json;
 using System.IO.Compression;
 using System.Xml;
 
@@ -12,10 +10,12 @@ namespace HRProClientApp.Controllers
     public class TemplateController : Controller
     {
         private readonly ILogger<TemplateController> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public TemplateController(ILogger<TemplateController> logger)
+        public TemplateController(ILogger<TemplateController> logger, IWebHostEnvironment env)
         {
             _logger = logger;
+            _env = env;
         }
 
         [HttpGet]
@@ -42,16 +42,14 @@ namespace HRProClientApp.Controllers
                 if (file == null || file.Length == 0)
                     throw new ArgumentException("Файл не выбран");
 
-                var templatesDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates");
-                if (!Directory.Exists(templatesDir))
-                    Directory.CreateDirectory(templatesDir);
-
-                var filePath = Path.Combine(templatesDir, file.FileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                var extension = Path.GetExtension(file.FileName);
+                if (string.IsNullOrEmpty(extension) || !extension.Equals(".docx"))
                 {
-                    await file.CopyToAsync(stream);
-                } 
+                    throw new ArgumentException("Файл должен иметь расширение .docx");
+                }
+
+                var uploadResult = await APIClient.PostFileAsync("api/template/upload", file, name);
+                var filePath = uploadResult.RelativePath;
 
                 var model = new TemplateBindingModel()
                 {
@@ -61,7 +59,7 @@ namespace HRProClientApp.Controllers
                     CompanyId = APIClient.Company?.Id
                 };
 
-            
+
                 if (APIClient.User == null)
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
@@ -80,12 +78,24 @@ namespace HRProClientApp.Controllers
 
                     if (duplicate != null)
                     {
-                        throw new InvalidOperationException("Такой шаблон докуента уже существует");
+                        throw new InvalidOperationException("Такой шаблон документа уже существует");
                     }
                 }
-                var templateId = await APIClient.PostRequestAsync("api/template/create", model);
-                DebugXmlStructure(filePath);
-                var tags = ExtractTags(filePath);
+                var templateId = await APIClient.PostRequestAsync("api/template/create", model);              
+
+                var response = await APIClient.PostRequestWithFullResponseAsync(
+                "api/template/AnalyzeDocx",
+                new { FileName = uploadResult.FileName });
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Ошибка анализа файла: {responseJson}");
+                }
+
+                var tags = JsonConvert.DeserializeObject<List<string>>(responseJson);
+
                 var templateViewModel = APIClient.GetRequest<TemplateViewModel?>($"api/template/details?id={templateId}");
                 foreach (var tag in tags)
                 {
@@ -104,102 +114,40 @@ namespace HRProClientApp.Controllers
                 }
 
                 return Json(new { success = true, redirectUrl });
-            }            
+            }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
         }
 
-        private static void DebugXmlStructure(string filePath)
+        public async Task<IActionResult> Download(int id)
         {
-            using (var archive = ZipFile.OpenRead(filePath))
+            try
             {
-                var entry = archive.GetEntry("word/document.xml");
-                if (entry != null)
+                var template = APIClient.GetRequest<TemplateViewModel>($"api/template/details?id={id}");
+                if (template == null)
                 {
-                    using var stream = entry.Open();
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.Load(stream);
-
-                    var allNodes = xmlDoc.SelectNodes("//*");
-                    foreach (XmlNode node in allNodes)
-                    {
-                        if (node.Name.StartsWith("w:"))
-                        {
-                            Console.WriteLine($"Найден узел: {node.Name} | Значение: {node.InnerText}");
-                        }
-                    }
+                    throw new Exception("Шаблон не найден");
                 }
+
+                var response = await APIClient.GetRequestWithFullResponseAsync($"api/template/download?id={id}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(await response.Content.ReadAsStringAsync());
+                }
+
+                var fileStream = await response.Content.ReadAsStreamAsync();
+
+                var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+                return File(fileStream, contentType, template.Name + ".docx");
             }
-        }
-
-
-        private static List<string> ExtractTags(string filePath)
-        {
-            var tags = new List<string>();
-
-            using (var archive = ZipFile.OpenRead(filePath))
+            catch (Exception ex)
             {
-                var entry = archive.GetEntry("word/document.xml");
-                if (entry != null)
-                {
-                    using var stream = entry.Open();
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.Load(stream);
-
-                    var namespaceManager = new XmlNamespaceManager(xmlDoc.NameTable);
-                    namespaceManager.AddNamespace("w", "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-
-                    var bookmarkNodes = xmlDoc.SelectNodes("//w:bookmarkStart", namespaceManager);
-                    if (bookmarkNodes != null)
-                    {
-                        foreach (XmlNode node in bookmarkNodes)
-                        {
-                            var nameAttr = node.Attributes?["w:name"];
-                            if (nameAttr != null && !nameAttr.Value.StartsWith("_"))
-                            {
-                                tags.Add(nameAttr.Value);
-                            }
-                        }
-                    }
-
-                    var sdtNodes = xmlDoc.SelectNodes("//w:sdt/w:sdtPr/w:tag", namespaceManager);
-                    if (sdtNodes != null)
-                    {
-                        foreach (XmlNode node in sdtNodes)
-                        {
-                            var nameAttr = node.Attributes?["w:val"];
-                            if (nameAttr != null && !nameAttr.Value.StartsWith("_"))
-                            {
-                                tags.Add(nameAttr.Value);
-                            }
-                        }
-                    }
-
-                    var instrTextNodes = xmlDoc.SelectNodes("//w:instrText", namespaceManager);
-                    if (instrTextNodes != null)
-                    {
-                        foreach (XmlNode node in instrTextNodes)
-                        {
-                            if (!string.IsNullOrWhiteSpace(node.InnerText) && node.InnerText.Contains("MERGEFIELD"))
-                            {
-                                var parts = node.InnerText.Split(' ');
-                                if (parts.Length > 1)
-                                {
-                                    var tagName = parts[1].Trim();
-                                    if (!tagName.StartsWith("_")) 
-                                    {
-                                        tags.Add(tagName);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                return Json(new { success = false, message = ex.Message });
             }
-            Console.WriteLine($"Найдено {tags.Count} тегов: {string.Join(", ", tags)}");
-            return tags;
         }
 
         public IActionResult Delete(int id)
@@ -210,8 +158,8 @@ namespace HRProClientApp.Controllers
             }
 
             APIClient.PostRequest($"api/template/delete", new TemplateBindingModel { Id = id });
-            APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
+            APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
             return Redirect($"~/Template/Templates");
         }
 

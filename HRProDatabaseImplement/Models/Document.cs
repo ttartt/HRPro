@@ -22,6 +22,9 @@ namespace HRProDatabaseImplement.Models
         public string Name { get; set; } = string.Empty;
         [Required]
         [DataMember]
+        public string FilePath { get; set; } = string.Empty;
+        [Required]
+        [DataMember]
         public DocumentStatusEnum Status { get; set; }
         [Required]
         [DataMember]
@@ -48,7 +51,8 @@ namespace HRProDatabaseImplement.Models
                 Name = model.Name,
                 Status = model.Status,
                 CreatedAt = model.CreatedAt,
-                TemplateId = model.TemplateId
+                TemplateId = model.TemplateId,
+                FilePath = model.FilePath
             };
         }
 
@@ -62,7 +66,8 @@ namespace HRProDatabaseImplement.Models
                 Name = model.Name,
                 Status = model.Status,
                 CreatedAt = model.CreatedAt,
-                TemplateId = model.TemplateId
+                TemplateId = model.TemplateId,
+                FilePath = model.FilePath
             };
         }
 
@@ -86,7 +91,8 @@ namespace HRProDatabaseImplement.Models
             Name = Name,
             Status = Status,
             CreatedAt = CreatedAt,
-            TemplateId = TemplateId
+            TemplateId = TemplateId,
+            FilePath = FilePath
         };
     }
 }

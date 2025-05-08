@@ -22,14 +22,14 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult UserProfile(int? id)
+        public IActionResult UserProfile()
         {
             if (APIClient.User == null)
             {
                 return Redirect("/Home/Enter");
             }
 
-            var model = APIClient.GetRequest<UserViewModel>($"api/user/profile?id={id}"); 
+            var model = APIClient.GetRequest<UserViewModel>($"api/user/profile?id={APIClient.User.Id}"); 
 
             if (model == null)
             {

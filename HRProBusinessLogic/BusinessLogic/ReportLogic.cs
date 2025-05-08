@@ -215,7 +215,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 {"novosibirsk", "Новосибирск"}
             };
 
-            // Фильтруем резюме с указанной зарплатой и парсим ее
             var resumesWithSalary = resumes
                 .Select(r => new {
                     r.Title,
@@ -227,19 +226,17 @@ namespace HRProBusinessLogic.BusinessLogic
 
             return new ResumeStatisticsViewModel
             {
-                // Средняя зарплата по городам (только для городов с 3+ резюме)
                 AverageSalaryByCity = resumesWithSalary
                     .Where(r => !string.IsNullOrEmpty(r.City))
                     .GroupBy(r => r.City)
-                    .Where(g => g.Count() >= 2) // Минимум 3 резюме для статистики
+                    .Where(g => g.Count() >= 2) 
                     .ToDictionary(
                         g => g.Key,
                         g => g.Average(r => r.ParsedSalary.Value)),
 
-                // Сравнение зарплат по специализации (только для 3+ резюме)
                 SalaryByTitle = resumesWithSalary
                     .GroupBy(r => r.Title)
-                    .Where(g => g.Count() >= 2) // Минимум 3 резюме для статистики
+                    .Where(g => g.Count() >= 2) 
                     .ToDictionary(
                         g => g.Key,
                         g => new SalaryStatsViewModel
@@ -261,13 +258,10 @@ namespace HRProBusinessLogic.BusinessLogic
             if (string.IsNullOrWhiteSpace(salaryString))
                 return null;
 
-            // Удаляем все нецифровые символы, включая пробелы (но сохраняем точку/запятую для десятичных)
             var cleaned = Regex.Replace(salaryString, @"[^\d,.]", "");
 
-            // Заменяем запятую на точку для корректного парсинга
             cleaned = cleaned.Replace(",", ".");
 
-            // Парсим число
             if (decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {                
                 return result;
@@ -275,30 +269,5 @@ namespace HRProBusinessLogic.BusinessLogic
 
             return null;
         }
-
-        /*public DocumentStatisticsViewModel GetDocumentStatistics(ReportBindingModel model)
-        {
-            // Здесь нужен доступ к хранилищу документов
-            // Предполагаем наличие IDocumentStorage
-            var documents = _documentStorage.GetFilteredList(new DocumentSearchModel
-            {
-                DateFrom = model.DateFrom,
-                DateTo = model.DateTo
-            });
-
-            return new DocumentStatisticsViewModel
-            {
-                TotalDocuments = documents.Count,
-                DocumentsByType = documents
-                    .GroupBy(d => d.Type)
-                    .ToDictionary(g => g.Key, g => g.Count()),
-
-                // Дополнительная статистика по дням/неделям
-                DailyCounts = documents
-                    .GroupBy(d => d.CreatedAt.Date)
-                    .OrderBy(g => g.Key)
-                    .ToDictionary(g => g.Key, g => g.Count())
-            };
-        }*/
     }
 }

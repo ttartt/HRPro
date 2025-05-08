@@ -131,6 +131,75 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> SaveDocument([FromForm] DocumentUploadModel model)
+        {
+            try
+            {
+                if (model.File == null || model.File.Length == 0)
+                    return BadRequest("Файл не предоставлен");
+
+                var documentsFolder = Path.Combine("Uploads", "Documents");
+                Directory.CreateDirectory(documentsFolder);
+
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.File.FileName)}";
+                var filePath = Path.Combine(documentsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.File.CopyToAsync(stream);
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    filePath = filePath,
+                    fileName = fileName
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Download(int id)
+        {
+            try
+            {
+                var document = _logic.ReadElement(new DocumentSearchModel { Id = id });
+                if (document == null)
+                {
+                    return NotFound("Документ не найден");
+                }
+
+                var filePath = document.FilePath;
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return NotFound("Файл документа не найден");
+                }
+
+                var fileStream = System.IO.File.OpenRead(filePath);
+
+                var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+                return File(fileStream, contentType, Path.GetFileName(document.Name));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка при скачивании файла: {ex.Message}");
+            }
+        }
+
+        public class DocumentUploadModel
+        {
+            public IFormFile File { get; set; }
+            public int DocumentId { get; set; }
+            public int TemplateId { get; set; }
+        }
+
+        [HttpPost]
         public void CreateTag(DocumentTagBindingModel model)
         {
             try
@@ -159,16 +228,35 @@ namespace HRProRestAPI.Controllers
         }
 
         [HttpPost]
-        public void Delete(DocumentBindingModel model)
+        public IActionResult Delete(DocumentBindingModel model)
         {
             try
             {
+                var document = _logic.ReadElement(new DocumentSearchModel { Id = model.Id });
+                if (document == null)
+                {
+                    return NotFound("Документ не найден");
+                }
+
                 _logic.Delete(model);
+
+                var filePath = document.FilePath;
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                    _logger.LogInformation($"Файл документа удален: {filePath}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Файл документа не найден: {filePath}");
+                }
+
+                return Ok();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка удаления документа");
-                throw;
+                return StatusCode(500, $"Ошибка удаления документа: {ex.Message}");
             }
         }
     }
