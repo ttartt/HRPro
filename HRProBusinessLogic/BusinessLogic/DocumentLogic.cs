@@ -3,7 +3,6 @@ using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.StoragesContracts;
 using HRProContracts.ViewModels;
-using HRProDataModels.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace HRProBusinessLogic.BusinessLogic
@@ -80,13 +79,12 @@ namespace HRProBusinessLogic.BusinessLogic
                 var viewModel = new DocumentViewModel
                 {
                     CompanyId = item.CompanyId,
-                    CompanyName = companyName,
-                    CreatorName = creatorName,
+                    CompanyName = companyName == null ? "Компания удалена" : companyName,
+                    CreatorName = creatorName == null ? "Создатель удалён" : creatorName,
                     CreatedAt = item.CreatedAt,
                     CreatorId = item.CreatorId,
                     Id = item.Id,
                     Name = item.Name,
-                    Status = item.Status,
                     TemplateId = item.TemplateId,
                     TemplateName = template == null ? "Шаблон удалён" : template.Name,
                     FilePath = item.FilePath
@@ -133,11 +131,6 @@ namespace HRProBusinessLogic.BusinessLogic
             if (string.IsNullOrEmpty(model.Name))
             {
                 throw new ArgumentNullException("Название документа не может быть пустым", nameof(model.Name));
-            }
-
-            if (!Enum.IsDefined(typeof(DocumentStatusEnum), model.Status))
-            {
-                throw new ArgumentException("Некорректный статус документа", nameof(model.Status));
             }
 
             if (model.CreatedAt == default)

@@ -9,17 +9,7 @@
         <div class="col-md-4">
             <label for="search" class="form-label">Поиск по названию</label>
             <input type="text" id="search" class="form-control" placeholder="Введите название документа..." oninput="filterDocuments()">
-        </div>
-        <div class="col-md-4">
-            <label for="statusFilter" class="form-label">Статус документа</label>
-            <select id="statusFilter" class="form-select" onchange="filterDocuments()">
-                <option value="">Все</option>
-                @foreach (DocumentStatusEnum status in Enum.GetValues(typeof(DocumentStatusEnum)))
-                {
-                    <option value="@status">@status</option>
-                }
-            </select>
-        </div>
+        </div>        
     </div>
 
     <div class="row mb-4">
@@ -42,7 +32,6 @@
                 <th>Компания</th>
                 <th>Создатель</th>
                 <th>Шаблон</th>
-                <th>Статус</th>
                 <th>Дата создания</th>
                 <th>Действия</th>
             </tr>
@@ -55,7 +44,6 @@
                     <td>@document.CompanyName</td>
                     <td>@document.CreatorName</td>
                     <td>@document.TemplateName</td>
-                    <td>@document.Status</td>
                     <td>@document.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
                     <td class="align-middle">
                         <div class="d-flex justify-content-start gap-2">
@@ -94,7 +82,6 @@
 <script>
     function filterDocuments() {
         const searchInput = document.getElementById('search').value.toLowerCase();
-        const statusFilter = document.getElementById('statusFilter').value;
         const table = document.getElementById('documentsTable');
         const rows = table.querySelectorAll('tbody tr');
 
@@ -103,9 +90,8 @@
             const statusCell = row.children[4].textContent;
 
             const matchesSearch = nameCell.includes(searchInput);
-            const matchesStatus = !statusFilter || statusCell === statusFilter;
 
-            if (matchesSearch && matchesStatus) {
+            if (matchesSearch) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';

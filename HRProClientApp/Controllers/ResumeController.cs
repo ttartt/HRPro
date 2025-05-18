@@ -2,6 +2,7 @@
 using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.ViewModels;
+using HRProDataModels.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
@@ -15,27 +16,29 @@ namespace HRProClientApp.Controllers
         public ResumeController(ILogger<ResumeController> logger)
         {
             _logger = logger;
-        }        
+        }
 
         [HttpGet]
-        public async Task<IActionResult> Resumes()
+        public async Task<IActionResult> Resumes(ResumeSourceEnum? source = null)
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
+
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cities.json");
             var json = await System.IO.File.ReadAllTextAsync(filePath);
             var cities = JsonConvert.DeserializeObject<List<CityViewModel>>(json);
             ViewBag.Cities = cities;
 
-            var list = APIClient.GetRequest<List<ResumeViewModel>?>($"api/resume/list?companyId={APIClient.Company?.Id}");
-            if (list == null)
+            var apiUrl = $"api/resume/list?companyId={APIClient.Company?.Id}";
+            if (source.HasValue)
             {
-                return View();
+                apiUrl += $"&source={source.Value}";
             }
 
-            return View(list);
+            var list = APIClient.GetRequest<List<ResumeViewModel>?>(apiUrl);
+            return View(list ?? new List<ResumeViewModel>());
         }
 
         [HttpGet]
@@ -56,7 +59,7 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult CollectResume(string? cityName)
+        public IActionResult CollectFromAvito(string? cityName)
         {
             string redirectUrl = "/Resume/Resumes";
             try
@@ -78,6 +81,7 @@ namespace HRProClientApp.Controllers
                 foreach (var resume in apiResponse.Data)
                 {
                     resume.CompanyId = APIClient.Company.Id;
+                    resume.Source = HRProDataModels.Enums.ResumeSourceEnum.Avito;
                     APIClient.PostRequest("api/resume/create", resume);
                 }
 
@@ -90,6 +94,49 @@ namespace HRProClientApp.Controllers
                     redirectUrl,
                     resumes = apiResponse.Data
                 });  
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult CollectFromHh(string? cityName)
+        {
+            string redirectUrl = "/Resume/Resumes";
+            try
+            {
+                if (APIClient.User == null)
+                    throw new Exception("Доступно только авторизованным пользователям");
+
+                if (APIClient.Company == null)
+                    throw new Exception("Компания не найдена");
+                var apiResponse = APIClient.GetRequest<ApiResponse<List<ResumeViewModel>>>(
+                $"api/parser/ParseResumeFromHH?cityName={cityName}");
+
+                if (apiResponse == null)
+                    return Json(new { success = false, message = "Не получен ответ от API" });
+
+                if (!apiResponse.Success)
+                    return Json(new { success = false, message = apiResponse.Message ?? "Ошибка API" });
+
+                foreach (var resume in apiResponse.Data)
+                {
+                    resume.CompanyId = APIClient.Company.Id;
+                    resume.Source = HRProDataModels.Enums.ResumeSourceEnum.Avito;
+                    APIClient.PostRequest("api/resume/create", resume);
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = apiResponse.Data?.Count > 0
+                        ? $"Успешно собрано {apiResponse.Data.Count} резюме"
+                        : "Новые резюме не найдены",
+                    redirectUrl,
+                    resumes = apiResponse.Data
+                });
             }
             catch (Exception ex)
             {
@@ -132,42 +179,24 @@ namespace HRProClientApp.Controllers
                     throw new Exception("Доступно только авторизованным пользователям");
                 }            
                 if (model.Id != 0)
-                {
-                    if (isDraft)
-                    {
-                        model.Status = HRProDataModels.Enums.ResumeStatusEnum.Черновик;
-                    }
-                    else
-                    {
-                        model.Status = HRProDataModels.Enums.ResumeStatusEnum.Обрабатывается;
-                    }
+                {                    
                     APIClient.PostRequest("api/resume/update", model);
                 }
                 else
-                {
-                    if (isDraft)
-                    {
-                        model.Status = HRProDataModels.Enums.ResumeStatusEnum.Черновик;
-                    } 
-                    else
-                    {
-                        model.Status = HRProDataModels.Enums.ResumeStatusEnum.Обрабатывается;
-                    }
+                {                    
                     var vacancy = APIClient.GetRequest<VacancyViewModel>($"api/vacancy/details?id={model.VacancyId}");
                     var resume = APIClient.GetRequest<ResumeViewModel>($"api/resume/check?vacancyId={model.VacancyId}");
                     if (resume == null)
                     {
                         APIClient.PostRequest("api/resume/create", model);
-                        if (vacancy != null && model.Status != HRProDataModels.Enums.ResumeStatusEnum.Черновик)
+                        if (vacancy != null)
                         {
                             vacancy.Resumes.Add(new ResumeViewModel
                             {
                                 Id = model.Id,
-                                Description = model.Description,
-                                Education = model.Education,
-                                Experience = model.Experience,
-                                Skills = model.Skills,
-                                Status = model.Status,
+                                LastJobTitle = model.LastJobTitle,
+                                LastWorkPlace = model.LastWorkPlace,
+                                Age = model.Age,
                                 Title = model.Title,
                                 VacancyId = model.VacancyId,
                                 CompanyId = model.CompanyId

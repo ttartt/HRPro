@@ -82,14 +82,13 @@ namespace HRProBusinessLogic.BusinessLogic
                     Url = element.Url,
                     //VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = element.VacancyId }).JobTitle,
                     Title = element.Title,
-                    Experience = element.Experience,
-                    Education = element.Education,
-                    Description = element.Description,
-                    Skills = element.Skills,
-                    Status = element.Status,
+                    LastWorkPlace = element.LastWorkPlace,
+                    LastJobTitle = element.LastJobTitle,
+                    Age = element.Age,
                     CreatedAt = element.CreatedAt,
                     Salary = element.Salary,
-                    CandidateInfo = element.CandidateInfo
+                    CandidateInfo = element.CandidateInfo,
+                    Source = element.Source
                 };
                 result.Add(resumeViewModel);
             }
@@ -118,8 +117,7 @@ namespace HRProBusinessLogic.BusinessLogic
             var element = _resumeStorage.GetElement(new ResumeSearchModel
             {
                 Title = model.Title,
-                City = model.City,
-                Description = model.Description
+                City = model.City
             });
 
             if (element != null && element.Id != model.Id)

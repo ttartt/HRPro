@@ -46,14 +46,14 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("/Home/Enter");
             }
-            var model = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={companyId}");
 
-            if (model == null)
-            {
-                return Redirect("/Home/Index");
-            }
+            var users = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={companyId}")
+                       ?? new List<UserViewModel>();
 
-            return View(model);
+            var filteredUsers = users.Where(e => e.Role != HRProDataModels.Enums.RoleEnum.Администратор)
+                                   .ToList();
+
+            return View(filteredUsers);
         }
 
         [HttpGet]
@@ -85,7 +85,7 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult UserProfileEdit(UserBindingModel model)
+        public IActionResult UserProfileEdit(UserBindingModel model, string redirectUrl)
         {
             try
             {
@@ -118,15 +118,9 @@ namespace HRProClientApp.Controllers
                     throw new ArgumentException("Неправильно введенный email");
                 }
 
-                string redirectUrl = $"/User/UserProfile/{model.Id}";
-
                 if (model.Id != 0)
                 {
                     APIClient.PostRequest("api/user/update", model);
-                    if (model.Role == HRProDataModels.Enums.RoleEnum.Сотрудник)
-                    {
-                        redirectUrl = $"/Company/CompanyProfile/{model.CompanyId}";
-                    }
                 }
                 else
                 {
@@ -164,7 +158,6 @@ namespace HRProClientApp.Controllers
                             IsEmailConfirmed = model.IsEmailConfirmed
                         });
                     }
-                    redirectUrl = $"/Company/CompanyProfile/{model.CompanyId}";
                 }
 
                 return Json(new { success = true, redirectUrl });
@@ -363,21 +356,26 @@ namespace HRProClientApp.Controllers
             return RedirectToAction("Enter", "Home");
         }
 
-        [HttpPost]
-        public void Delete(UserBindingModel model)
+        public IActionResult Delete(int id)
         {
             try
             {
-                string redirectUrl = $"/User/UserProfile/{model.Id}";
                 if (APIClient.User == null)
                 {
-                    throw new Exception("Доступно только авторизованным пользователям");
+                    return Json(new { success = false, message = "Доступно только авторизованным пользователям" });
                 }
-                APIClient.PostRequest($"api/user/delete", model);                
+
+                if (APIClient.Company == null)
+                {
+                    return Json(new { success = false, message = "Компания не определена" });
+                }
+
+                APIClient.PostRequest($"api/user/delete", new UserBindingModel { Id = id });
+                return Json(new { success = true });
             }
-            catch 
+            catch (Exception ex)
             {
-                Response.Redirect("/Home/Enter");
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

@@ -9,19 +9,17 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <h1 class="mb-4 text-center">Вакансии</h1>
-            <div class="mb-4 text-end">
-                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-companyId="@APIClient.Company?.Id" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i> Добавить вакансию
-                </a>
-                <a asp-action="Meetings" asp-controller="Meeting" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i> Собеседования
-                </a>
+            <div class="mb-4 text-end">               
                 <a asp-action="SalaryStatistics" asp-controller="Analytics" class="btn btn-success">
                     <i class="bi bi-plus-circle me-2"></i> Статистика по зарплатам вакансий
                 </a>
                 <a asp-action="VacancyStatusStatistics" asp-controller="Analytics" class="btn btn-success">
                     <i class="bi bi-plus-circle me-2"></i> Статистика по статусам вакансий
                 </a>
+                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-companyId="@APIClient.Company?.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-2"></i> Добавить вакансию
+                </a>
+                <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
             </div>
             @if (Model != null)
             {
@@ -54,15 +52,15 @@
                                                    class="btn btn-info btn-sm me-2" title="Просмотр">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@vacancy.Id"
+                                                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@vacancy.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
                                                    class="btn btn-warning btn-sm me-2" title="Редактировать">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
-                                                <a asp-action="Delete" asp-controller="Vacancy" asp-route-id="@vacancy.Id"
-                                                   class="btn btn-danger btn-sm" title="Удалить"
-                                                   onclick="return confirm('Вы уверены, что хотите удалить вакансию?');">
+                                                <button class="btn btn-danger btn-sm"
+                                                        title="Удалить"
+                                                        onclick="deleteVacancy(@vacancy.Id)">
                                                     <i class="bi bi-trash"></i>
-                                                </a>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -125,6 +123,33 @@
         }
     });
 
+    function deleteVacancy(id) {
+        if (confirm('Вы уверены, что хотите удалить вакансию?')) {
+            fetch(`/Vacancy/Delete?id=${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        showToast(data.message || 'Ошибка при удалении', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showToast('Не удалось удалить вакансию', 'danger');
+                });
+        }
+    }
+
     function updateTable() {
         const tableBody = document.querySelector("#vacanciesTable tbody");
         if (!tableBody) return;
@@ -139,9 +164,9 @@
             const row = `
                         <tr>
                     <td>${vacancy.jobTitle || vacancy.JobTitle || 'Нет данных'}</td>
-                        <td>${getJobTypeName(vacancy.jobType || vacancy.JobType)}</td>
+                    <td>${getJobTypeName(vacancy.jobType ?? vacancy.JobType ?? '')}</td>
                     <td>${vacancy.salary || vacancy.Salary || 'Нет данных'}</td>
-                        <td>${getStatusName(vacancy.status || vacancy.Status)}</td>
+                    <td>${getStatusName(vacancy.status ?? vacancy.Status ?? '')}</td>
                     <td>${vacancy.tags || vacancy.Tags || 'Нет данных'}</td>
                     <td>
                         <div class="d-flex justify-content-center">
@@ -149,15 +174,15 @@
                                class="btn btn-info btn-sm me-2" title="Просмотр">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="/Vacancy/EditVacancy/${vacancy.id || vacancy.Id}"
+                                <a href="/Vacancy/EditVacancy/${vacancy.id || vacancy.Id}?redirectUrl=${encodeURIComponent(window.location.pathname + window.location.search)}"
                                class="btn btn-warning btn-sm me-2" title="Редактировать">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <a href="/Vacancy/Delete/${vacancy.id || vacancy.Id}"
-                               class="btn btn-danger btn-sm" title="Удалить"
-                               onclick="return confirm('Вы уверены, что хотите удалить вакансию?');">
+                            <button class="btn btn-danger btn-sm"
+                                    title="Удалить"
+                                    onclick="deleteVacancy(${vacancy.id || vacancy.Id})">
                                 <i class="bi bi-trash"></i>
-                            </a>
+                            </button>
                         </div>
                     </td>
                 </tr>

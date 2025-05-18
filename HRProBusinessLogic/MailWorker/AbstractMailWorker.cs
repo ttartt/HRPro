@@ -12,14 +12,12 @@ namespace HRProBusinessLogic.MailWorker
         protected int _smtpClientPort;
         protected string _popHost = string.Empty;
         protected int _popPort;
-        private readonly IMessageInfoLogic _messageInfoLogic;
         private readonly IUserLogic _clientLogic;
         private readonly ILogger _logger;
 
-        public AbstractMailWorker(ILogger<AbstractMailWorker> logger, IMessageInfoLogic messageInfoLogic, IUserLogic clientLogic)
+        public AbstractMailWorker(ILogger<AbstractMailWorker> logger, IUserLogic clientLogic)
         {
             _logger = logger;
-            _messageInfoLogic = messageInfoLogic;
             _clientLogic = clientLogic;
         }
 
@@ -55,35 +53,7 @@ namespace HRProBusinessLogic.MailWorker
 
             await SendMailAsync(info);
         }
-
-        public async void MailCheck()
-        {
-            if (string.IsNullOrEmpty(_mailLogin) || string.IsNullOrEmpty(_mailPassword))
-            {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(_popHost) || _popPort == 0)
-            {
-                return;
-            }
-
-            if (_messageInfoLogic == null)
-            {
-                return;
-            }
-
-            var list = await ReceiveMailAsync();
-            _logger.LogDebug("Check Mail: {Count} new mails", list.Count);
-
-            foreach (var mail in list)
-            {
-                mail.UserId = _clientLogic.ReadElement(new() { Email = mail.SenderName })?.Id;
-                _messageInfoLogic.Create(mail);
-            }
-        }
-
+        
         protected abstract Task SendMailAsync(MailSendInfoBindingModel info);
-        protected abstract Task<List<MessageInfoBindingModel>> ReceiveMailAsync();
     }
 }

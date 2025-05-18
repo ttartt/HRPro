@@ -29,7 +29,7 @@ namespace HRProBusinessLogic.OfficePackage
             {
                 CreateParagraph(new PdfParagraph
                 {
-                    Text = $"- Кандидат: {resume.CandidateInfo}, Дата создания: {resume.CreatedAt:dd.MM.yyyy}, Статус: {resume.Status}",
+                    Text = $"- Кандидат: {resume.CandidateInfo}, Дата создания: {resume.CreatedAt:dd.MM.yyyy}",
                     Style = "Normal",
                     ParagraphAlignment = PdfParagraphAlignmentType.Left
                 });
@@ -67,26 +67,12 @@ namespace HRProBusinessLogic.OfficePackage
                 Text = "Образование:",
                 Style = "Subtitle",
                 ParagraphAlignment = PdfParagraphAlignmentType.Left
-            });
-
-            CreateParagraph(new PdfParagraph
-            {
-                Text = info.Resume.Education ?? "Не указано",
-                Style = "Normal",
-                ParagraphAlignment = PdfParagraphAlignmentType.Left
-            });
+            });            
 
             CreateParagraph(new PdfParagraph
             {
                 Text = "Опыт работы:",
                 Style = "Subtitle",
-                ParagraphAlignment = PdfParagraphAlignmentType.Left
-            });
-
-            CreateParagraph(new PdfParagraph
-            {
-                Text = info.Resume.Experience ?? "Не указано",
-                Style = "Normal",
                 ParagraphAlignment = PdfParagraphAlignmentType.Left
             });
 
@@ -99,22 +85,8 @@ namespace HRProBusinessLogic.OfficePackage
 
             CreateParagraph(new PdfParagraph
             {
-                Text = info.Resume.Skills ?? "Не указано",
-                Style = "Normal",
-                ParagraphAlignment = PdfParagraphAlignmentType.Left
-            });
-
-            CreateParagraph(new PdfParagraph
-            {
                 Text = "Описание:",
                 Style = "Subtitle",
-                ParagraphAlignment = PdfParagraphAlignmentType.Left
-            });
-
-            CreateParagraph(new PdfParagraph
-            {
-                Text = info.Resume.Description ?? "Не указано",
-                Style = "Normal",
                 ParagraphAlignment = PdfParagraphAlignmentType.Left
             });
 

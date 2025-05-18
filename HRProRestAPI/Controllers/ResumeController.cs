@@ -2,6 +2,7 @@
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.ViewModels;
+using HRProDataModels.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,7 +39,7 @@ namespace HRProRestApi.Controllers
         }
 
         [HttpGet]
-        public List<ResumeViewModel>? List(int? companyId)
+        public List<ResumeViewModel>? List(int? companyId, ResumeSourceEnum? source)
         {
             try
             {
@@ -46,7 +47,8 @@ namespace HRProRestApi.Controllers
                 {
                     return _logic.ReadList(new ResumeSearchModel
                     {
-                        CompanyId = companyId
+                        CompanyId = companyId,
+                        Source = source
                     });
                 }
                 else return _logic.ReadList(null);

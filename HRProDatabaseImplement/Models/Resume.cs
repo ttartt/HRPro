@@ -21,16 +21,13 @@ namespace HRproDatabaseImplement.Models
         [DataMember]
         public string? Url { get; set; } = string.Empty;
         [DataMember]
-        public string? Experience { get; set; } = string.Empty;
+        public string? LastWorkPlace { get; set; } = string.Empty;
         [DataMember]
-        public string? Education { get; set; } = string.Empty;
+        public string? LastJobTitle { get; set; } = string.Empty;
         [DataMember]
-        public string? Description { get; set; }
+        public ResumeSourceEnum? Source { get; set; }
         [DataMember]
-        public string? Skills { get; set; } = string.Empty;
-        [Required]
-        [DataMember]
-        public ResumeStatusEnum Status { get; set; }
+        public string? Age { get; set; } = string.Empty;
         [Required]
         [DataMember]
         public DateTime CreatedAt { get; set; }
@@ -57,15 +54,14 @@ namespace HRproDatabaseImplement.Models
                 Url = model.Url,
                 Title = model.Title,
                 City = model.City,
-                Experience = model.Experience,
-                Education = model.Education,
-                Description = model.Description,
-                Skills = model.Skills,
-                Status = ResumeStatusEnum.Обрабатывается,
+                LastWorkPlace = model.LastWorkPlace,
+                LastJobTitle = model.LastJobTitle,
+                Age = model.Age,
                 CreatedAt = DateTime.Now.ToUniversalTime(),
                 Salary = model.Salary,
                 CandidateInfo = model.CandidateInfo,
-                CompanyId = model.CompanyId
+                CompanyId = model.CompanyId,
+                Source = model.Source
             };
         }
         public static Resume Create(ResumeViewModel model)
@@ -77,15 +73,14 @@ namespace HRproDatabaseImplement.Models
                 Url = model.Url,
                 Title = model.Title,
                 City = model.City,
-                Experience = model.Experience,
-                Education = model.Education,
-                Description = model.Description,
-                Skills = model.Skills,
-                Status = ResumeStatusEnum.Обрабатывается,
+                LastWorkPlace = model.LastWorkPlace,
+                LastJobTitle = model.LastJobTitle,
+                Age = model.Age,
                 CreatedAt = DateTime.Now.ToUniversalTime(),
                 Salary = model.Salary,
                 CandidateInfo = model.CandidateInfo,
-                CompanyId = model.CompanyId
+                CompanyId = model.CompanyId,
+                Source = model.Source
             };
         }
         public void Update(ResumeBindingModel model)
@@ -97,11 +92,9 @@ namespace HRproDatabaseImplement.Models
             Title = model.Title;
             City = model.City;
             Url = model.Url;
-            Experience = model.Experience;
-            Education = model.Education;
-            Description = model.Description;
-            Skills = model.Skills;
-            Status = model.Status;
+            LastWorkPlace = model.LastWorkPlace;
+            LastJobTitle = model.LastJobTitle;
+            Age = model.Age;
             Salary = model.Salary;
             CandidateInfo = model.CandidateInfo;
         }
@@ -112,15 +105,14 @@ namespace HRproDatabaseImplement.Models
             Url = Url,
             Title = Title,
             City = City,
-            Experience = Experience,
-            Education = Education,
-            Description = Description,
-            Skills = Skills,
-            Status = ResumeStatusEnum.Обрабатывается,
+            LastWorkPlace = LastWorkPlace,
+            LastJobTitle = LastJobTitle,
+            Age = Age,
             CreatedAt = DateTime.Now.ToUniversalTime(),
             Salary = Salary,
             CandidateInfo = CandidateInfo,
-            CompanyId = CompanyId
+            CompanyId = CompanyId,
+            Source = Source
         };
     }
 }

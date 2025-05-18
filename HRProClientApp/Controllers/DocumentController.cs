@@ -120,7 +120,6 @@ namespace HRProClientApp.Controllers
                 if (APIClient.User == null) throw new Exception("Доступно только авторизованным пользователям");
                 if (APIClient.Company == null) throw new Exception("Компания не найдена");
                 if (string.IsNullOrEmpty(model.Name)) throw new ArgumentException("Название документа не может быть пустым");
-                if (!Enum.IsDefined(typeof(DocumentStatusEnum), model.Status)) throw new ArgumentException("Некорректный статус документа");
                 if (model.TemplateId <= 0) throw new ArgumentException("Не выбран шаблон документа");
 
                 if (model.Id == 0)

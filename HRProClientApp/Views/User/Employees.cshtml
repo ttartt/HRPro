@@ -13,23 +13,25 @@
             <div class="mb-4 text-end">
                 @if (@isAdmin)
                 {
-                    <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@APIClient.Company.Id" class="btn btn-success">
+                    <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@APIClient.Company.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" class="btn btn-success">
                         <i class="bi bi-plus-circle"></i> Добавить сотрудника
                     </a>
                 }
+                <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
             </div>
             @if (Model != null)
             {
                 @if (Model.Any())
                 {
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
+                        <table class="table table-striped table-hover align-middle" id="employeesTable">
                             <thead class="table-light">
                                 <tr>
                                     <th>Фамилия</th>
                                     <th>Имя</th>
                                     <th>Эл. почта</th>
                                     <th>Номер телефона</th>
+                                    <th>Роль</th>
                                     <th>Действия</th>
                                 </tr>
                             </thead>
@@ -41,14 +43,18 @@
                                         <td>@employee.Name</td>
                                         <td>@employee.Email</td>
                                         <td>@employee.PhoneNumber</td>
+                                        <td>@employee.Role</td>
                                         <td class="d-flex justify-content-start">
-                                            <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                            <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" 
+                                            class="btn btn-warning btn-sm me-2" 
+                                            title="Редактировать">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-
-                                            <a asp-action="Delete" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить сотрудника?');">
+                                            <button class="btn btn-danger btn-sm"
+                                                    title="Удалить"
+                                                    onclick="deleteEmployee(@employee.Id)">
                                                 <i class="bi bi-trash"></i>
-                                            </a>
+                                            </button>
                                         </td>
                                     </tr>
                                 }
@@ -68,6 +74,177 @@
         </div>
     </div>
 </div>
+
+<script>
+    function deleteEmployee(id) {
+        if (confirm('Вы уверены, что хотите удалить сотрудника?')) {
+            fetch(`/User/Delete?id=${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        showToast(data.message || 'Ошибка при удалении', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showToast('Не удалось удалить сотрудника', 'danger');
+                });
+        }
+    }
+
+    function getRoleName(value) {
+        const roles = {
+            'undefined': 'Неизвестен',
+            0: 'Сотрудник',
+            1: 'Рекрутер',
+            2: 'Администратор'
+        };
+        return roles[value] || value;
+    }
+
+    function updateTable() {
+        const tableBody = document.querySelector("#employeesTable tbody");
+        if (!tableBody) return;
+
+        tableBody.innerHTML = "";
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedEmployees = allEmployees.slice(startIndex, endIndex);
+
+        paginatedEmployees.forEach(employee => {
+            const row = `
+                    <tr>
+                        <td>${employee.surname || employee.Surname || 'Нет данных'}</td>
+                        <td>${employee.name || employee.Name || 'Нет данных'}</td>
+                        <td>${employee.email || employee.Email || 'Нет данных'}</td>
+                        <td>${employee.phoneNumber || employee.PhoneNumber || 'Нет данных'}</td>
+                        <td>${getRoleName(employee.role ?? employee.Role ?? '')}</td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <a href="/User/UserProfileEdit/${employee.id || employee.Id}?redirectUrl=${encodeURIComponent(window.location.pathname + window.location.search)}"
+                                   class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button class="btn btn-danger btn-sm"
+                                        title="Удалить"
+                                        onclick="deleteEmployee(${employee.id || employee.Id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function setupPagination() {
+        const pagination = document.getElementById('pagination');
+        if (!pagination) return;
+
+        const pageCount = Math.ceil(allEmployees.length / itemsPerPage);
+        pagination.innerHTML = "";
+
+        if (pageCount <= 1) {
+            const container = document.getElementById('paginationContainer');
+            if (container) container.classList.add('d-none');
+            return;
+        }
+
+        const container = document.getElementById('paginationContainer');
+        if (container) container.classList.remove('d-none');
+
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Назад"><span aria-hidden="true">&laquo;</span></a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        for (let i = 1; i <= pageCount; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = i;
+                updateTable();
+                setupPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            pagination.appendChild(li);
+        }
+
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Вперед"><span aria-hidden="true">&raquo;</span></a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+                currentPage++;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(nextLi);
+    }
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+            `;
+
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    const itemsPerPage = 10;
+    let currentPage = 1;
+    let allEmployees = @Html.Raw(Json.Serialize(Model)) || [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('employeesTable')) {
+            updateTable();
+            setupPagination();
+        }
+    });
+</script>
 
 
 <style>

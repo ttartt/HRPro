@@ -14,11 +14,12 @@ namespace HRProContracts.SearchModels
 
         public string? City { get; set; }
 
-        public ResumeStatusEnum? Status { get; set; }
-
         public DateTime? CreatedAt { get; set; }
 
         public int? Id { get; set; }
+
         public int? CompanyId { get; set; }
+        
+        public ResumeSourceEnum? Source { get; set; }
     }
 }

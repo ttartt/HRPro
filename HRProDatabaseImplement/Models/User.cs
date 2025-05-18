@@ -88,8 +88,8 @@ namespace HRproDatabaseImplement.Models
             Name = model.Name;
             LastName = model.LastName;
             Email = model.Email;
+            Role = model.Role;
             PhoneNumber = model.PhoneNumber;
-            CompanyId = model.CompanyId;
             DateOfBirth = model.DateOfBirth.HasValue ? model.DateOfBirth.Value.ToUniversalTime().AddHours(4) : null;
             IsEmailConfirmed = model.IsEmailConfirmed;
         }

@@ -29,7 +29,6 @@ builder.Services.AddTransient<IDocumentStorage, DocumentStorage>();
 builder.Services.AddTransient<ITemplateStorage, TemplateStorage>();
 builder.Services.AddTransient<ITagStorage, TagStorage>();
 builder.Services.AddTransient<IDocumentTagStorage, DocumentTagStorage>();
-builder.Services.AddTransient<IMessageInfoStorage, MessageInfoStorage>();
 
 builder.Services.AddTransient<IUserLogic, UserLogic>();
 builder.Services.AddTransient<ICompanyLogic, CompanyLogic>();
@@ -41,7 +40,6 @@ builder.Services.AddTransient<ITemplateLogic, TemplateLogic>();
 builder.Services.AddTransient<ITagLogic, TagLogic>();
 builder.Services.AddTransient<IDocumentTagLogic, DocumentTagLogic>();
 builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
-builder.Services.AddTransient<IMessageInfoLogic, MessageInfoLogic>();
 builder.Services.AddTransient<IReportLogic, ReportLogic>();
 
 builder.Services.AddSingleton<AbstractMailWorker, MailKitWorker>();

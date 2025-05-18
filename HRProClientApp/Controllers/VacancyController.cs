@@ -42,6 +42,7 @@ namespace HRProClientApp.Controllers
                 {
                     resume.CompanyId = APIClient.Company.Id;
                     resume.VacancyId = vacancyId;
+                    resume.Source = HRProDataModels.Enums.ResumeSourceEnum.Avito;
                     APIClient.PostRequest("api/resume/create", resume);
                 }
                 return Json(new
@@ -111,9 +112,8 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditVacancy(VacancyBindingModel model)
+        public IActionResult EditVacancy(VacancyBindingModel model, string redirectUrl)
         {
-            string redirectUrl = $"/Company/CompanyProfile/{APIClient.Company.Id}";
             try
             {
                 if (APIClient.User == null)
@@ -197,51 +197,26 @@ namespace HRProClientApp.Controllers
 
         public IActionResult Delete(int id)
         {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
             try
             {
                 if (APIClient.User == null)
                 {
-                    return Redirect("/Home/Enter");
+                    return Json(new { success = false, message = "Доступно только авторизованным пользователям" });
                 }
+
                 if (APIClient.Company == null)
                 {
-                    throw new Exception("Компания не определена");
+                    return Json(new { success = false, message = "Компания не определена" });
                 }
 
                 APIClient.PostRequest($"api/vacancy/delete", new VacancyBindingModel { Id = id });
                 APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
 
-                return Redirect("~/Company/CompanyProfile");
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
-            }
-        }
-
-        public IActionResult SearchVacancies(string? tags)
-        {
-            string returnUrl = HttpContext.Request.Headers["Referer"].ToString();
-            try
-            {
-                if (APIClient.User == null)
-                {
-                    throw new Exception("Доступно только авторизованным пользователям");
-                }
-
-                if (string.IsNullOrEmpty(tags))
-                {
-                    ViewBag.Message = "Пожалуйста, введите поисковый запрос.";
-                    return View(new List<VacancyViewModel?>());
-                }
-
-                var results = APIClient.GetRequest<List<VacancyViewModel?>>($"api/vacancy/search?tags={tags}");
-                return View(results);
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Error", new { errorMessage = $"{ex.Message}", returnUrl });
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

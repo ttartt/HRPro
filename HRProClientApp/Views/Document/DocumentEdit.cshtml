@@ -18,12 +18,7 @@
             <label for="Name" class="form-label">Название документа <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="Name" name="Name" value="@Model?.Name" required placeholder="Введите название документа">
             <div class="invalid-feedback">Пожалуйста, введите название документа.</div>
-        </div>
-
-        <div class="col-md-6">
-            <label asp-for="Status" class="form-label">Статус документа</label>
-            <select asp-for="Status" class="form-select" asp-items="@GetStatusSelectList()"></select>
-        </div>
+        </div>        
 
         <div class="col-md-6">
             <label class="form-label">Выберите шаблон</label>
@@ -64,13 +59,6 @@
 
     </form>
 </div>
-
-@functions {
-    public SelectList GetStatusSelectList()
-    {
-        return new SelectList(Enum.GetValues(typeof(DocumentStatusEnum)).Cast<DocumentStatusEnum>());
-    }
-}
 
 <script>
     function updateTags() {

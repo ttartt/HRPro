@@ -12,7 +12,7 @@ namespace HRProBusinessLogic.MailWorker
 {
     public class MailKitWorker : AbstractMailWorker
     {
-        public MailKitWorker(ILogger<MailKitWorker> logger, IMessageInfoLogic messageInfoLogic, IUserLogic userLogic) : base(logger, messageInfoLogic, userLogic) { }
+        public MailKitWorker(ILogger<MailKitWorker> logger, IUserLogic userLogic) : base(logger, userLogic) { }
 
         protected override async Task SendMailAsync(MailSendInfoBindingModel info)
         {
@@ -39,42 +39,6 @@ namespace HRProBusinessLogic.MailWorker
             {
                 throw;
             }
-        }
-
-        protected override async Task<List<MessageInfoBindingModel>> ReceiveMailAsync()
-        {
-            var list = new List<MessageInfoBindingModel>();
-            using var client = new Pop3Client();
-            await Task.Run(() =>
-            {
-                try
-                {
-                    client.Connect(_popHost, _popPort, SecureSocketOptions.SslOnConnect);
-                    client.Authenticate(_mailLogin, _mailPassword);
-                    for (int i = 0; i < client.Count; i++)
-                    {
-                        var message = client.GetMessage(i);
-                        foreach (var mail in message.From.Mailboxes)
-                        {
-                            list.Add(new MessageInfoBindingModel
-                            {
-                                DateDelivery = message.Date.DateTime,
-                                MessageId = message.MessageId,
-                                SenderName = mail.Address,
-                                Subject = message.Subject,
-                                Body = message.TextBody
-                            });
-                        }
-                    }
-                }
-                catch (System.Security.Authentication.AuthenticationException)
-                { }
-                finally
-                {
-                    client.Disconnect(true);
-                }
-            });
-            return list;
-        }
+        }        
     }
 }

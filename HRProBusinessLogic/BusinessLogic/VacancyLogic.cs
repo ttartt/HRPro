@@ -67,11 +67,9 @@ namespace HRProBusinessLogic.BusinessLogic
                 VacancyId = r.VacancyId,
                 VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = r.VacancyId }).JobTitle,
                 Title = r.Title,
-                Experience = r.Experience,
-                Education = r.Education,
-                Description = r.Description,
-                Skills = r.Skills,
-                Status = r.Status,
+                LastWorkPlace = r.LastWorkPlace,
+                LastJobTitle = r.LastJobTitle,
+                Age = r.Age,
                 CreatedAt = r.CreatedAt
             }).ToList() ?? new List<ResumeViewModel>();
 

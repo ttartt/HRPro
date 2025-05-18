@@ -30,7 +30,7 @@
                             <a class="nav-link" asp-area="" asp-controller="User" asp-action="UserProfile" asp-route-id="@(APIClient.User?.Id)">Профиль</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Resume" asp-action="Resumes">Резюме</a>
+                            <a class="nav-link" asp-area="" asp-controller="Resume" asp-action="Resumes" asp-route-source=@HRProDataModels.Enums.ResumeSourceEnum.Avito>Резюме</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Document" asp-action="Documents">Мои документы</a>

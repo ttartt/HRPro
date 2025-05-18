@@ -34,7 +34,7 @@
                     </dl>
 
                     <div class="btn-group mt-4" role="group" aria-label="Действия">
-                        <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@Model?.Id"
+                        <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@Model?.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
                            class="btn btn-outline-primary px-4 py-2 me-2">
                             <i class="bi bi-pencil me-2"></i>Редактировать профиль
                         </a>

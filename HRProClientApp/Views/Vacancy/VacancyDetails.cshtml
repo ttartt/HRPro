@@ -10,32 +10,26 @@
 }
 
 <div class="container mt-5">
-    <div class="d-flex justify-content-between mb-4">
-        <div class="card-header">
-            <h2>@Model.JobTitle</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="card-header p-0">
+            <h2 class="m-0">@Model.JobTitle</h2>
         </div>
-        
-        <div class="row mb-3">
-                <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectModal">
-                    <i class="bi bi-download"></i> Собрать резюме на эту вакансию
-                </button>
+
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#collectModal">
+                <i class="bi bi-download"></i> Собрать резюме на эту вакансию
+            </button>
+            <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@Model.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
+               class="btn btn-warning btn-sm" title="Редактировать">
+                <i class="bi bi-pencil-square"></i>
+            </a>
+            <a asp-action="Delete" asp-controller="Vacancy" asp-route-id="@Model.Id"
+               class="btn btn-danger btn-sm" title="Удалить"
+               onclick="return confirm('Вы уверены, что хотите удалить вакансию?');">
+                <i class="bi bi-trash"></i>
+            </a>            
+            <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
         </div>
-       @*  <form asp-controller="Vacancy" asp-action="GetStatistics" method="get" class="row g-3 needs-validation" novalidate>
-            <input type="hidden" name="id" value="@Model.Id" />
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="dateFrom">Дата начала</label>
-                    <input type="date" class="form-control" id="dateFrom" name="dateFrom" required />
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="dateTo">Дата окончания</label>
-                    <input type="date" class="form-control" id="dateTo" name="dateTo" required />
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Скачать статистику</button>
-        </form> *@
     </div>
 
     <div class="card shadow-sm mb-4">

@@ -60,6 +60,29 @@ namespace HRProDatabaseImplement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ExternalVacancies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CompanyId = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Salary = table.Column<string>(type: "text", nullable: true),
+                    City = table.Column<string>(type: "text", nullable: true),
+                    Url = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExternalVacancies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExternalVacancies_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Templates",
                 columns: table => new
                 {
@@ -164,7 +187,6 @@ namespace HRProDatabaseImplement.Migrations
                     CompanyId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     FilePath = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     TemplateId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -192,27 +214,6 @@ namespace HRProDatabaseImplement.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Messages",
-                columns: table => new
-                {
-                    MessageId = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: true),
-                    SenderName = table.Column<string>(type: "text", nullable: false),
-                    DateDelivery = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Subject = table.Column<string>(type: "text", nullable: false),
-                    Body = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Messages", x => x.MessageId);
-                    table.ForeignKey(
-                        name: "FK_Messages_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Resumes",
                 columns: table => new
                 {
@@ -223,11 +224,10 @@ namespace HRProDatabaseImplement.Migrations
                     Title = table.Column<string>(type: "text", nullable: true),
                     City = table.Column<string>(type: "text", nullable: true),
                     Url = table.Column<string>(type: "text", nullable: true),
-                    Experience = table.Column<string>(type: "text", nullable: true),
-                    Education = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Skills = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
+                    LastWorkPlace = table.Column<string>(type: "text", nullable: true),
+                    LastJobTitle = table.Column<string>(type: "text", nullable: true),
+                    Source = table.Column<int>(type: "integer", nullable: true),
+                    Age = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Salary = table.Column<string>(type: "text", nullable: true),
                     CandidateInfo = table.Column<string>(type: "text", nullable: true)
@@ -244,7 +244,8 @@ namespace HRProDatabaseImplement.Migrations
                         name: "FK_Resumes_Vacancies_VacancyId",
                         column: x => x.VacancyId,
                         principalTable: "Vacancies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -300,6 +301,11 @@ namespace HRProDatabaseImplement.Migrations
                 column: "TemplateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExternalVacancies_CompanyId",
+                table: "ExternalVacancies",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Meetings_CompanyId",
                 table: "Meetings",
                 column: "CompanyId");
@@ -313,11 +319,6 @@ namespace HRProDatabaseImplement.Migrations
                 name: "IX_Meetings_VacancyId",
                 table: "Meetings",
                 column: "VacancyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Messages_UserId",
-                table: "Messages",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Resumes_CompanyId",
@@ -360,22 +361,22 @@ namespace HRProDatabaseImplement.Migrations
                 name: "DocumentTags");
 
             migrationBuilder.DropTable(
+                name: "ExternalVacancies");
+
+            migrationBuilder.DropTable(
                 name: "MeetingParticipants");
 
             migrationBuilder.DropTable(
                 name: "Meetings");
 
             migrationBuilder.DropTable(
-                name: "Messages");
-
-            migrationBuilder.DropTable(
                 name: "Tags");
 
             migrationBuilder.DropTable(
-                name: "Resumes");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Resumes");
 
             migrationBuilder.DropTable(
                 name: "Templates");

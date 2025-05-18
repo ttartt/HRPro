@@ -1,5 +1,4 @@
-﻿using HRProDataModels.Enums;
-using HRProDataModels.Models;
+﻿using HRProDataModels.Models;
 
 namespace HRProContracts.BindingModels
 {
@@ -10,9 +9,8 @@ namespace HRProContracts.BindingModels
         public int CompanyId { get; set; }
 
         public string Name { get; set; } = string.Empty;
-        public string FilePath { get; set; } = string.Empty;
 
-        public DocumentStatusEnum Status { get; set; }
+        public string FilePath { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime().AddHours(4);
 

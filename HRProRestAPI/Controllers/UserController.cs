@@ -21,15 +21,13 @@ namespace HRProRestApi.Controllers
         private readonly ILogger _logger;
         private readonly IUserLogic _logic;
         private readonly IConfiguration _config;
-        private readonly IMessageInfoLogic _mailLogic;
         private readonly AbstractMailWorker _mailWorker;
         private static Dictionary<int, string> _confirmationCodes = new Dictionary<int, string>();
-        public UserController(IUserLogic logic, ILogger<UserController> logger, IConfiguration config, IMessageInfoLogic mailLogic, AbstractMailWorker mailWorker)
+        public UserController(IUserLogic logic, ILogger<UserController> logger, IConfiguration config, AbstractMailWorker mailWorker)
         {
             _logger = logger;
             _logic = logic;
             _config = config;
-            _mailLogic = mailLogic;
             _mailWorker = mailWorker;
         }
         [AllowAnonymous]
@@ -257,23 +255,6 @@ namespace HRProRestApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка удаления профиля пользователя");
-                throw;
-            }
-        }
-
-        [HttpGet]
-        public List<MessageInfoViewModel>? GetMessages(int clientId)
-        {
-            try
-            {
-                return _mailLogic.ReadList(new MessageInfoSearchModel
-                {
-                    UserId = clientId
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка получения писем пользователя");
                 throw;
             }
         }

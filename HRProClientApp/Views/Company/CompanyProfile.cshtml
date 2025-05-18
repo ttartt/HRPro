@@ -48,7 +48,7 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2>Вакансии компании</h2>
-                    <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-companyId="@Model.Id"
+                    <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-companyId="@Model.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
                        class="btn btn-success"> <i class="bi bi-plus-circle me-2"></i> Добавить вакансию</a>
                 </div>
                 <div class="card-body">
@@ -75,7 +75,7 @@
                                                        class="btn btn-info btn-sm me-2" title="Просмотр">
                                                         <i class="bi bi-eye"></i> 
                                                     </a>
-                                                    <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@vacancy.Id"
+                                                    <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@vacancy.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
                                                        class="btn btn-warning btn-sm me-2" title="Редактировать">
                                                         <i class="bi bi-pencil-square"></i> 
                                                     </a>
@@ -91,11 +91,9 @@
                                 </tbody>
                             </table>
                         </div>
-                        @if (Model.Vacancies.Count > 5)
-                        {
-                            <a asp-action="Vacancies" asp-controller="Vacancy" asp-route-companyId="@Model.Id"
-                               class="btn btn-primary mt-3">Посмотреть все</a>
-                        }                        
+
+                        <a asp-action="Vacancies" asp-controller="Vacancy" asp-route-companyId="@Model.Id"
+                           class="btn btn-primary mt-3">Посмотреть все</a>
                     }
                     else
                     {
@@ -108,7 +106,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2>Сотрудники компании</h2>
                     @if (@isAdmin) {
-                    <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@Model.Id"
+                        <a asp-action="UserProfileEdit" asp-controller="User" asp-route-companyId="@Model.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
                        class="btn btn-success"> <i class="bi bi-plus-circle me-2"></i> Добавить сотрудника</a>
                     }                    
                 </div>
@@ -134,7 +132,7 @@
                                         <td>@employee.Name</td>
                                         <td>@employee.Email</td>
                                         <td>
-                                                <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                                <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" class="btn btn-warning btn-sm me-2" title="Редактировать">
                                                 <i class="bi bi-pencil"></i> 
                                             </a>
 

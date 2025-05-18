@@ -1,7 +1,6 @@
 ﻿using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
 using HRproDatabaseImplement.Models;
-using HRProDataModels.Enums;
 using HRProDataModels.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
@@ -25,9 +24,6 @@ namespace HRProDatabaseImplement.Models
         public string FilePath { get; set; } = string.Empty;
         [Required]
         [DataMember]
-        public DocumentStatusEnum Status { get; set; }
-        [Required]
-        [DataMember]
         public DateTime CreatedAt { get; set; }
         [DataMember]
         public int? TemplateId { get; set; }
@@ -49,7 +45,6 @@ namespace HRProDatabaseImplement.Models
                 CreatorId = model.CreatorId,
                 CompanyId = model.CompanyId,
                 Name = model.Name,
-                Status = model.Status,
                 CreatedAt = model.CreatedAt,
                 TemplateId = model.TemplateId,
                 FilePath = model.FilePath
@@ -64,7 +59,6 @@ namespace HRProDatabaseImplement.Models
                 CreatorId = model.CreatorId,
                 CompanyId = model.CompanyId,
                 Name = model.Name,
-                Status = model.Status,
                 CreatedAt = model.CreatedAt,
                 TemplateId = model.TemplateId,
                 FilePath = model.FilePath
@@ -78,7 +72,6 @@ namespace HRProDatabaseImplement.Models
                 return;
             }
             Name = model.Name;
-            Status = model.Status;
             CreatedAt = model.CreatedAt;
             TemplateId = model.TemplateId;
         }
@@ -89,7 +82,6 @@ namespace HRProDatabaseImplement.Models
             CreatorId = CreatorId,
             CompanyId = CompanyId,
             Name = Name,
-            Status = Status,
             CreatedAt = CreatedAt,
             TemplateId = TemplateId,
             FilePath = FilePath

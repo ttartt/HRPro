@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HRProDatabaseImplement.Migrations
 {
     [DbContext(typeof(HRproDatabase))]
-    [Migration("20250508191418_InitialCreate")]
+    [Migration("20250510195741_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -50,9 +50,6 @@ namespace HRProDatabaseImplement.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("TemplateId")
                         .HasColumnType("integer");
 
@@ -88,6 +85,36 @@ namespace HRProDatabaseImplement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DocumentTags");
+                });
+
+            modelBuilder.Entity("HRProDatabaseImplement.Models.ExternalVacancy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .HasColumnType("text");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Salary")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("ExternalVacancies");
                 });
 
             modelBuilder.Entity("HRProDatabaseImplement.Models.Meeting", b =>
@@ -157,36 +184,6 @@ namespace HRProDatabaseImplement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MeetingParticipants");
-                });
-
-            modelBuilder.Entity("HRProDatabaseImplement.Models.Message", b =>
-                {
-                    b.Property<string>("MessageId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("DateDelivery")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SenderName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MessageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("HRProDatabaseImplement.Models.Tag", b =>
@@ -283,6 +280,9 @@ namespace HRProDatabaseImplement.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Age")
+                        .HasColumnType("text");
+
                     b.Property<string>("CandidateInfo")
                         .HasColumnType("text");
 
@@ -295,22 +295,16 @@ namespace HRProDatabaseImplement.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("LastJobTitle")
                         .HasColumnType("text");
 
-                    b.Property<string>("Education")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Experience")
+                    b.Property<string>("LastWorkPlace")
                         .HasColumnType("text");
 
                     b.Property<string>("Salary")
                         .HasColumnType("text");
 
-                    b.Property<string>("Skills")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
+                    b.Property<int?>("Source")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
@@ -445,6 +439,17 @@ namespace HRProDatabaseImplement.Migrations
                     b.Navigation("Template");
                 });
 
+            modelBuilder.Entity("HRProDatabaseImplement.Models.ExternalVacancy", b =>
+                {
+                    b.HasOne("HRproDatabaseImplement.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("HRProDatabaseImplement.Models.Meeting", b =>
                 {
                     b.HasOne("HRproDatabaseImplement.Models.Company", "Company")
@@ -464,15 +469,6 @@ namespace HRProDatabaseImplement.Migrations
                     b.Navigation("Resume");
 
                     b.Navigation("Vacancy");
-                });
-
-            modelBuilder.Entity("HRProDatabaseImplement.Models.Message", b =>
-                {
-                    b.HasOne("HRproDatabaseImplement.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HRProDatabaseImplement.Models.Tag", b =>
