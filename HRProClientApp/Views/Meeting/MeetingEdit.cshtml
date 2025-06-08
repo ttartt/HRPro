@@ -39,7 +39,6 @@
             </select>
         </div>
 
-
         <div class="col-md-6">
             <label for="Date" class="form-label">Дата собеседования <span class="text-danger">*</span></label>
             <input type="date" class="form-control" id="Date" name="Date" value="@Model?.Date.ToString("yyyy-MM-dd")" required>
@@ -59,65 +58,45 @@
         </div>
 
         <div class="col-md-6">
-            <label for="Place" class="form-label">Место проведения</label>
+            <label for="Place" class="form-label">Место проведения <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="Place" name="Place" value="@Model?.Place" placeholder="Введите место проведения" required>
         </div>
 
         <div class="col-md-6">
-            <label for="Comment" class="form-label">Комментарий</label>
+            <label for="Comment" class="form-label">Комментарий <span class="text-danger">*</span></label>
             <textarea class="form-control" id="Comment" name="Comment" rows="3" placeholder="Введите комментарий" required>@Model?.Comment</textarea>
+        </div>
+
+        <div class="col-12">
+            <h3>Приглашение сотрудников</h3>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="employeeSearch" placeholder="Поиск по имени или фамилии">
+            </div>
+            <div id="employeeList" class="border rounded p-2 bg-light" style="max-height: 300px; overflow-y: auto;">
+                @foreach (var employee in ViewBag.Employees)
+                {
+                    bool isInvited = ViewBag.InvitedEmployeeIds != null && ViewBag.InvitedEmployeeIds.Contains(employee.Id);
+                    <div class="employee-item form-check mb-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               value="@employee.Id"
+                               id="employee@employee.Id"
+                               name="SelectedParticipantIds"
+                        @(isInvited ? "checked" : "")>
+                        <label class="form-check-label" for="employee@employee.Id">
+                            @employee.Name @employee.Surname
+                        </label>
+                    </div>
+                }
+            </div>
+            <div id="noResults" class="text-muted mt-2" style="display: none;">Нет результатов</div>
         </div>
 
         <div class="col-md-6">
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <button type="button" class="btn btn-secondary" onclick="window.history.back();">Назад</button>
         </div>
-
-        @* <div class="col-md-6">
-            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#inviteParticipantsModal">
-                Пригласить участников
-            </button>
-        </div> *@
     </form>
-</div>
-
-<div class="modal fade" id="inviteParticipantsModal" tabindex="-1" aria-labelledby="inviteParticipantsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" asp-controller="Meeting" asp-action="InviteParticipants" asp-route-meetingId="@Model?.Id" novalidate>
-                <div class="modal-header">
-                    <h5 class="modal-title" id="inviteParticipantsModalLabel">Выбор участников</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                </div>
-                <div class="modal-body">
-                    @foreach (var user in ViewBag.Users)
-                    {
-                        bool isInvited = ViewBag.InvitedUserIds != null && ViewBag.InvitedUserIds.Contains(user.Id);
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="@user.Id" id="participant@user.Id" name="userIds[]"
-                            @if (isInvited)
-                            {
-                                <text>checked</text>
-                            } />
-                            <label class="form-check-label" for="participant@user.Id">
-                                @user.Name @user.Surname
-                            </label>
-                        </div>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-info"
-                            data-bs-toggle="modal"
-                            data-bs-target="#inviteParticipantsModal"
-                            data-meeting-id="@Model?.Id">
-                        Пригласить участников
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -139,6 +118,7 @@
             })
     })()
 
+
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector("form.needs-validation");
 
@@ -146,7 +126,7 @@
             event.preventDefault();
 
             const formData = new FormData(form);
-
+            
             fetch(form.action, {
                 method: "POST",
                 body: formData
@@ -159,6 +139,7 @@
                 })
                 .then(data => {
                     if (data.success) {
+                        console.log(data.redirectUrl);
                         window.location.href = data.redirectUrl;
                     } else {
                         showToast(data.message, "danger");
@@ -168,30 +149,52 @@
                     showToast("Произошла ошибка при обработке запроса: " + error.message, "danger");
                 });
         });
+         const employeeSearch = document.getElementById('employeeSearch');
+        const employeeList = document.getElementById('employeeList');
+        const noResults = document.getElementById('noResults');
+        const employeeItems = Array.from(employeeList.getElementsByClassName('employee-item'));
+
+        employeeSearch.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            employeeItems.forEach(item => {
+                const label = item.querySelector('.form-check-label').textContent.toLowerCase();
+                if (label.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        });
+
     });
 
-    function showToast(message, type = "success") {
-        let toastContainer = document.querySelector(".toast-container");
+    function showToast(message, type = 'success') {
+        let toastContainer = document.querySelector('.toast-container');
         if (!toastContainer) {
-            toastContainer = document.createElement("div");
-            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
             document.body.appendChild(toastContainer);
         }
 
-        const toast = document.createElement("div");
+        const toast = document.createElement('div');
         toast.className = `toast show align-items-center text-white bg-${type} border-0`;
-        toast.setAttribute("role", "alert");
-        toast.setAttribute("aria-live", "assertive");
-        toast.setAttribute("aria-atomic", "true");
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
 
         toast.innerHTML = `
-                        <div class="d-flex">
-                            <div class="toast-body">${message}</div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
-                        </div>
-                    `;
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+            `;
 
-        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toast.querySelector('button').addEventListener('click', () => toast.remove());
         toastContainer.appendChild(toast);
 
         setTimeout(() => toast.remove(), 5000);
@@ -209,8 +212,32 @@
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-        .btn:hover {
-            background-color: #2200A4;
-            transform: scale(1.05);
-        }
+    .btn:hover {
+        background-color: #2200A4;
+        transform: scale(1.05);
+    }
+
+    .employee-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-check-input {
+        opacity: 1 !important;
+        position: static !important;
+        margin-right: 10px !important;
+        margin-left: 0 !important;
+        width: 1.2em !important;
+        height: 1.2em !important;
+    }
+
+    #employeeList {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
 </style>

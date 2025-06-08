@@ -141,7 +141,7 @@ namespace HRProRestApi.Controllers
             }
         }
 
-        /*[HttpPost]
+        [HttpPost]
         public IActionResult SendToMail(MailSendInfoBindingModel model)
         {
             try
@@ -154,7 +154,7 @@ namespace HRProRestApi.Controllers
                 _logger.LogError(ex, "Ошибка отправки email");
                 return StatusCode(500);
             }
-        }*/
+        }
 
         private string GenerateJwtToken(UserViewModel user)
         {

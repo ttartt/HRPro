@@ -185,15 +185,7 @@ namespace HRProClientApp.Controllers
             return Redirect(redirectUrl);
         }
 
-        /*private void SendEmail(string email, string code)
-        {
-            APIClient.PostRequest("api/user/SendToMail", new MailSendInfoBindingModel
-            {
-                MailAddress = email,
-                Subject = "Подтверждение электронной почты",
-                Text = $"Ваш код подтверждения: {code}"
-            });
-        }*/
+        
         [HttpGet]
         public IActionResult ConfirmEmail(int userId, string code)
         {

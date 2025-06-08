@@ -27,6 +27,6 @@ namespace HRProContracts.BindingModels
 
         public string? GoogleEventId { get; set; }
         [HiddenInput]
-        public string SelectedParticipantIds { get; set; } = string.Empty;
+        public List<int> SelectedParticipantIds { get; set; } = new();
     }
 }

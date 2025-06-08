@@ -17,35 +17,8 @@ namespace HRProRestApi.Controllers
         {
             _reportLogic = reportLogic;
             _logger = logger;
-        }
+        }       
 
-        [HttpPost]
-        public void Resume(ReportBindingModel model)
-        {
-            try
-            {
-                _reportLogic.SaveResumeToPdf(model);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        [HttpPost]
-        public void Statistics(ReportBindingModel model)
-        {
-            try
-            {
-                _reportLogic.SaveResumesStatisticsToPdf(model);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        // новые методы
         [HttpGet]
         public SalaryStatisticsViewModel? GetSalaryStats()
         {

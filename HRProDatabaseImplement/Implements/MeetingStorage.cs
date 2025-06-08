@@ -93,6 +93,7 @@ namespace HRProDatabaseImplement.Implements
             }
             meeting.Update(model);
             context.SaveChanges();
+            meeting.UpdateParticipants(context, model);
             return meeting.GetViewModel;
         }
         public MeetingViewModel? Delete(MeetingBindingModel model)

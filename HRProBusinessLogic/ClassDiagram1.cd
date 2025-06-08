@@ -43,7 +43,7 @@
   <Class Name="HRProBusinessLogic.BusinessLogic.ReportLogic" BaseTypeListCollapsed="true">
     <Position X="10.5" Y="3.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>EIAAAAAAAAAAAAAAABCAAAQAAAAAEAAAACAAAAAAAAA=</HashCode>
+      <HashCode>EIAQAogACAAAAAAAAAAAAAQgAAAAAIAAACAAAAAAAgA=</HashCode>
       <FileName>BusinessLogic\ReportLogic.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
@@ -57,7 +57,7 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="HRProBusinessLogic.BusinessLogic.TagLogic" BaseTypeListCollapsed="true">
-    <Position X="6" Y="6.25" Width="2" />
+    <Position X="6" Y="4.25" Width="2" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAAAAAAABAAAAAAAAAIAEAAEABAAAAAAAAARA=</HashCode>
       <FileName>BusinessLogic\TagLogic.cs</FileName>
@@ -73,7 +73,7 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="HRProBusinessLogic.BusinessLogic.UserLogic" BaseTypeListCollapsed="true">
-    <Position X="10.5" Y="6.5" Width="2" />
+    <Position X="8.25" Y="6.75" Width="2" />
     <TypeIdentifier>
       <HashCode>EAQAAAAAAAAAAAAAAAAAAAQAoAEAAEABAAAAAIAAARA=</HashCode>
       <FileName>BusinessLogic\UserLogic.cs</FileName>
@@ -81,40 +81,12 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="HRProBusinessLogic.BusinessLogic.VacancyLogic" BaseTypeListCollapsed="true">
-    <Position X="1.5" Y="6.5" Width="2" />
+    <Position X="6" Y="7.25" Width="2" />
     <TypeIdentifier>
       <HashCode>EAQAAAAAAAAAAAAAAAAAAAQAIAEAgEABAAAAAAAAARA=</HashCode>
       <FileName>BusinessLogic\VacancyLogic.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
-  </Class>
-  <Class Name="HRProBusinessLogic.OfficePackage.HelperModels.PdfInfo">
-    <Position X="6" Y="4" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAABAAAAAEAAhEAAA=</HashCode>
-      <FileName>OfficePackage\HelperModels\PdfInfo.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="HRProBusinessLogic.OfficePackage.HelperModels.PdfParagraph">
-    <Position X="8.25" Y="6.75" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIABAAACAAAAAA=</HashCode>
-      <FileName>OfficePackage\HelperModels\PdfParagraph.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="HRProBusinessLogic.OfficePackage.Implements.SaveToPdf">
-    <Position X="1.5" Y="2.5" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAEAABAAEAAAAAAAAAAAAAAAAAAAAAAgQAIAAAAAAQ=</HashCode>
-      <FileName>OfficePackage\Implements\SaveToPdf.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="HRProBusinessLogic.OfficePackage.AbstractSaveToPdf">
-    <Position X="1.5" Y="0.5" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAACAAAAAAAAAAAAAAAQAAAAAAAAAAgQAAAAAAAAQ=</HashCode>
-      <FileName>OfficePackage\AbstractSaveToPdf.cs</FileName>
-    </TypeIdentifier>
   </Class>
   <Class Name="HRProContracts.BindingModels.ApiResponse&lt;T&gt;">
     <Position X="16.75" Y="13.25" Width="1.5" />
@@ -296,6 +268,20 @@
     <TypeIdentifier />
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
+  <Class Name="HRProBusinessLogic.MailWorker.AbstractMailWorker">
+    <Position X="10.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAACAAIAACEBAAAAAAIIAAAAAQAAAAAAIAAAQA=</HashCode>
+      <FileName>MailWorker\AbstractMailWorker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HRProBusinessLogic.MailWorker.MailKitWorker">
+    <Position X="12.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MailWorker\MailKitWorker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Interface Name="HRProContracts.BusinessLogicsContracts.ICompanyLogic">
     <Position X="7.25" Y="13.25" Width="1.5" />
     <TypeIdentifier />
@@ -424,12 +410,5 @@
     <Position X="52.25" Y="13.5" Width="1.5" />
     <TypeIdentifier />
   </Interface>
-  <Enum Name="HRProBusinessLogic.OfficePackage.HelperEnums.PdfParagraphAlignmentType">
-    <Position X="1.5" Y="5.25" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACACAAAAIAAA=</HashCode>
-      <FileName>OfficePackage\HelperEnums\PdfParagraphAlignmentType.cs</FileName>
-    </TypeIdentifier>
-  </Enum>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

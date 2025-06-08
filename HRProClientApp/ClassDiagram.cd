@@ -8,9 +8,9 @@
     </TypeIdentifier>
   </Class>
   <Class Name="HRProClientApp.Controllers.DocumentController">
-    <Position X="9.25" Y="6.25" Width="1.75" />
+    <Position X="9.25" Y="5.75" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAKAEBAAACAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAQAAAAAAAgAAAAAKAEBAAACAAEAAAAAAAA=</HashCode>
       <FileName>Controllers\DocumentController.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -31,19 +31,19 @@
       </Class>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAIAEAAAAABAEAIAAAQAA=</HashCode>
+      <HashCode>AABAAAAAAAAACAAAAAQAAAAAIgEAAAQABAEAIAAAQAQ=</HashCode>
       <FileName>Controllers\MeetingController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="HRProClientApp.Controllers.ResumeController">
     <Position X="11.25" Y="5.5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAABAAAAAAQAAAAAAAAAAIQEBAAAAgAAEAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIQEBAAAAgAAEAAAAAAA=</HashCode>
       <FileName>Controllers\ResumeController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="HRProClientApp.Controllers.TagController">
-    <Position X="7.25" Y="6.5" Width="1.75" />
+    <Position X="5.25" Y="6.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAACAAAABAAAAAAAAAAAAIAEAAEAAAAAAAAAAAAA=</HashCode>
       <FileName>Controllers\TagController.cs</FileName>
@@ -52,21 +52,21 @@
   <Class Name="HRProClientApp.Controllers.TemplateController">
     <Position X="13.25" Y="6" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAEEAAAAAAAAAAgAAIAEAAAAAAAAAAAAAABA=</HashCode>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAgAAIAEAAAAAAAEAAAAAEAA=</HashCode>
       <FileName>Controllers\TemplateController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="HRProClientApp.Controllers.UserController">
-    <Position X="5.25" Y="4.25" Width="1.75" />
+    <Position X="5.25" Y="3" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAIAAAAAAAAAAAIAKAUAAAAAAAAAgAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAIAAAgAAAAAAAIAKAUAAIAAAAEAgAAAAAA=</HashCode>
       <FileName>Controllers\UserController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="HRProClientApp.Controllers.VacancyController">
     <Position X="9.25" Y="3" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>QAAAAAIAAAQAEAAAAAAAAAAAIIEAAAAAAAAAAgAAAAA=</HashCode>
+      <HashCode>QAAAAAIAAAAAAAAAAAAAAAAAIYEAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Controllers\VacancyController.cs</FileName>
     </TypeIdentifier>
   </Class>

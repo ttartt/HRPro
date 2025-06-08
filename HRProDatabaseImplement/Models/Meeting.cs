@@ -1,7 +1,9 @@
 ﻿using HRProContracts.BindingModels;
 using HRProContracts.ViewModels;
+using HRproDatabaseImplement;
 using HRproDatabaseImplement.Models;
 using HRProDataModels.Models;
+using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
@@ -61,9 +63,9 @@ namespace HRProDatabaseImplement.Models
                 Id = model.Id,
                 ResumeId = model.ResumeId,
                 Topic = model.Topic,
-                Date = model.Date.ToUniversalTime(),
-                TimeFrom = model.TimeFrom.ToUniversalTime(),
-                TimeTo = model.TimeTo.ToUniversalTime(),
+                Date = model.Date,
+                TimeFrom = model.TimeFrom,
+                TimeTo = model.TimeTo,
                 VacancyId = model.VacancyId,
                 Place = model.Place,
                 Comment = model.Comment,
@@ -97,9 +99,9 @@ namespace HRProDatabaseImplement.Models
                 return;
             }
             Topic = model.Topic;
-            Date = model.Date;
-            TimeFrom = model.TimeFrom;
-            TimeTo = model.TimeTo;
+            Date = model.Date.ToUniversalTime();
+            TimeFrom = model.TimeFrom.ToUniversalTime();
+            TimeTo = model.TimeTo.ToUniversalTime();
             VacancyId = model.VacancyId;
             Place = model.Place;
             Comment = model.Comment;
@@ -120,5 +122,46 @@ namespace HRProDatabaseImplement.Models
             CompanyId = CompanyId,
             GoogleEventId = GoogleEventId
         };
+
+        public void UpdateParticipants(HRproDatabase context, MeetingBindingModel model)
+        {
+            var existingParticipants = context.MeetingParticipants
+                .Where(p => p.MeetingId == model.Id)
+                .ToList();
+
+            var participantsToRemove = existingParticipants
+                .Where(ep => !model.SelectedParticipantIds.Contains(ep.UserId))
+                .ToList();
+
+            var participantsToAdd = model.SelectedParticipantIds
+                .Where(id => !existingParticipants.Any(ep => ep.UserId == id))
+                .Select(id => new MeetingParticipant
+                {
+                    MeetingId = model.Id,
+                    UserId = id
+                })
+                .ToList();
+
+            if (participantsToRemove.Any())
+            {
+                context.MeetingParticipants.RemoveRange(participantsToRemove);
+            }
+
+            if (participantsToAdd.Any())
+            {
+                var existingUserIds = context.Users
+                    .Where(u => participantsToAdd.Select(p => p.UserId).Contains(u.Id))
+                    .Select(u => u.Id)
+                    .ToList();
+
+                var validParticipants = participantsToAdd
+                    .Where(p => existingUserIds.Contains(p.UserId))
+                    .ToList();
+
+                context.MeetingParticipants.AddRange(validParticipants);
+            }
+
+            context.SaveChanges();
+        }
     }
 }

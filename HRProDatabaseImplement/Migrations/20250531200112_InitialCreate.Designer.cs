@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HRProDatabaseImplement.Migrations
 {
     [DbContext(typeof(HRproDatabase))]
-    [Migration("20250510195741_InitialCreate")]
+    [Migration("20250531200112_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -280,9 +280,6 @@ namespace HRProDatabaseImplement.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Age")
-                        .HasColumnType("text");
-
                     b.Property<string>("CandidateInfo")
                         .HasColumnType("text");
 
@@ -295,17 +292,20 @@ namespace HRProDatabaseImplement.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("LastJobTitle")
+                    b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<string>("LastWorkPlace")
+                    b.Property<string>("Education")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Experience")
                         .HasColumnType("text");
 
                     b.Property<string>("Salary")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Source")
-                        .HasColumnType("integer");
+                    b.Property<string>("Skills")
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");

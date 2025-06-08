@@ -2,7 +2,6 @@
 using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.ViewModels;
-using HRProDataModels.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
@@ -19,26 +18,24 @@ namespace HRProClientApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Resumes(ResumeSourceEnum? source = null)
+        public async Task<IActionResult> Resumes()
         {
             if (APIClient.User == null)
             {
                 return Redirect("~/Home/Enter");
             }
-
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cities.json");
             var json = await System.IO.File.ReadAllTextAsync(filePath);
             var cities = JsonConvert.DeserializeObject<List<CityViewModel>>(json);
             ViewBag.Cities = cities;
 
-            var apiUrl = $"api/resume/list?companyId={APIClient.Company?.Id}";
-            if (source.HasValue)
+            var list = APIClient.GetRequest<List<ResumeViewModel>?>($"api/resume/list?companyId={APIClient.Company?.Id}");
+            if (list == null)
             {
-                apiUrl += $"&source={source.Value}";
+                return View();
             }
 
-            var list = APIClient.GetRequest<List<ResumeViewModel>?>(apiUrl);
-            return View(list ?? new List<ResumeViewModel>());
+            return View(list);
         }
 
         [HttpGet]
@@ -53,13 +50,13 @@ namespace HRProClientApp.Controllers
             if (resume == null || !id.HasValue)
             {
                 return View();
-            }           
+            }
 
             return View(resume);
         }
 
         [HttpGet]
-        public IActionResult CollectFromAvito(string? cityName)
+        public IActionResult CollectResume(string? cityName)
         {
             string redirectUrl = "/Resume/Resumes";
             try
@@ -81,50 +78,6 @@ namespace HRProClientApp.Controllers
                 foreach (var resume in apiResponse.Data)
                 {
                     resume.CompanyId = APIClient.Company.Id;
-                    resume.Source = HRProDataModels.Enums.ResumeSourceEnum.Avito;
-                    APIClient.PostRequest("api/resume/create", resume);
-                }
-
-                return Json(new
-                {
-                    success = true,
-                    message = apiResponse.Data?.Count > 0
-                        ? $"Успешно собрано {apiResponse.Data.Count} резюме"
-                        : "Новые резюме не найдены",
-                    redirectUrl,
-                    resumes = apiResponse.Data
-                });  
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public IActionResult CollectFromHh(string? cityName)
-        {
-            string redirectUrl = "/Resume/Resumes";
-            try
-            {
-                if (APIClient.User == null)
-                    throw new Exception("Доступно только авторизованным пользователям");
-
-                if (APIClient.Company == null)
-                    throw new Exception("Компания не найдена");
-                var apiResponse = APIClient.GetRequest<ApiResponse<List<ResumeViewModel>>>(
-                $"api/parser/ParseResumeFromHH?cityName={cityName}");
-
-                if (apiResponse == null)
-                    return Json(new { success = false, message = "Не получен ответ от API" });
-
-                if (!apiResponse.Success)
-                    return Json(new { success = false, message = apiResponse.Message ?? "Ошибка API" });
-
-                foreach (var resume in apiResponse.Data)
-                {
-                    resume.CompanyId = APIClient.Company.Id;
-                    resume.Source = HRProDataModels.Enums.ResumeSourceEnum.Avito;
                     APIClient.PostRequest("api/resume/create", resume);
                 }
 
@@ -177,9 +130,9 @@ namespace HRProClientApp.Controllers
                 if (APIClient.User == null)
                 {
                     throw new Exception("Доступно только авторизованным пользователям");
-                }            
+                }
                 if (model.Id != 0)
-                {                    
+                {
                     APIClient.PostRequest("api/resume/update", model);
                 }
                 else
@@ -194,12 +147,18 @@ namespace HRProClientApp.Controllers
                             vacancy.Resumes.Add(new ResumeViewModel
                             {
                                 Id = model.Id,
-                                LastJobTitle = model.LastJobTitle,
-                                LastWorkPlace = model.LastWorkPlace,
-                                Age = model.Age,
+                                Description = model.Description,
+                                Education = model.Education,
+                                Experience = model.Experience,
+                                Skills = model.Skills,
                                 Title = model.Title,
                                 VacancyId = model.VacancyId,
-                                CompanyId = model.CompanyId
+                                CompanyId = model.CompanyId,
+                                CandidateInfo = model.CandidateInfo,
+                                City = model.City,
+                                CreatedAt = model.CreatedAt,
+                                Salary = model.Salary,
+                                Url = model.Url
                             });
                         }
                         else
@@ -221,19 +180,35 @@ namespace HRProClientApp.Controllers
         }
 
         public IActionResult Delete(int id)
-        {           
-            var resume = APIClient.GetRequest<ResumeViewModel?>($"api/resume/details?id={id}");
-            var vacancyId = resume.VacancyId;
-            if (vacancyId.HasValue)
+        {
+            try
             {
+                if (APIClient.User == null)
+                {
+                    return Json(new { success = false, message = "Доступно только авторизованным пользователям" });
+                }
+
+                if (APIClient.Company == null)
+                {
+                    return Json(new { success = false, message = "Компания не определена" });
+                }
+
                 APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
-                return Redirect($"~/Vacancy/VacancyDetails/{vacancyId}");
+
+                // Для AJAX-запросов возвращаем JSON, для обычных - редирект
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Redirect("~/Resume/Resumes");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                APIClient.PostRequest($"api/resume/delete", new ResumeBindingModel { Id = id });
-                return Redirect($"~/Resume/Resumes");
-            }            
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

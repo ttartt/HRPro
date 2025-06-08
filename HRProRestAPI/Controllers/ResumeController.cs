@@ -39,7 +39,7 @@ namespace HRProRestApi.Controllers
         }
 
         [HttpGet]
-        public List<ResumeViewModel>? List(int? companyId, ResumeSourceEnum? source)
+        public List<ResumeViewModel>? List(int? companyId)
         {
             try
             {
@@ -47,8 +47,7 @@ namespace HRProRestApi.Controllers
                 {
                     return _logic.ReadList(new ResumeSearchModel
                     {
-                        CompanyId = companyId,
-                        Source = source
+                        CompanyId = companyId
                     });
                 }
                 else return _logic.ReadList(null);

@@ -224,10 +224,10 @@ namespace HRProDatabaseImplement.Migrations
                     Title = table.Column<string>(type: "text", nullable: true),
                     City = table.Column<string>(type: "text", nullable: true),
                     Url = table.Column<string>(type: "text", nullable: true),
-                    LastWorkPlace = table.Column<string>(type: "text", nullable: true),
-                    LastJobTitle = table.Column<string>(type: "text", nullable: true),
-                    Source = table.Column<int>(type: "integer", nullable: true),
-                    Age = table.Column<string>(type: "text", nullable: true),
+                    Experience = table.Column<string>(type: "text", nullable: true),
+                    Education = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Skills = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Salary = table.Column<string>(type: "text", nullable: true),
                     CandidateInfo = table.Column<string>(type: "text", nullable: true)
@@ -239,7 +239,8 @@ namespace HRProDatabaseImplement.Migrations
                         name: "FK_Resumes_Companies_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Companies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Resumes_Vacancies_VacancyId",
                         column: x => x.VacancyId,
@@ -272,17 +273,20 @@ namespace HRProDatabaseImplement.Migrations
                         name: "FK_Meetings_Companies_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Companies",
-                        principalColumn: "Id");
+                        principalColumn: "Id", 
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Meetings_Resumes_ResumeId",
                         column: x => x.ResumeId,
                         principalTable: "Resumes",
-                        principalColumn: "Id");
+                        principalColumn: "Id", 
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Meetings_Vacancies_VacancyId",
                         column: x => x.VacancyId,
                         principalTable: "Vacancies",
-                        principalColumn: "Id");
+                        principalColumn: "Id", 
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

@@ -82,13 +82,9 @@ namespace HRProBusinessLogic.BusinessLogic
                     Url = element.Url,
                     //VacancyName = _vacancyStorage.GetElement(new VacancySearchModel { Id = element.VacancyId }).JobTitle,
                     Title = element.Title,
-                    LastWorkPlace = element.LastWorkPlace,
-                    LastJobTitle = element.LastJobTitle,
-                    Age = element.Age,
                     CreatedAt = element.CreatedAt,
                     Salary = element.Salary,
-                    CandidateInfo = element.CandidateInfo,
-                    Source = element.Source
+                    CandidateInfo = element.CandidateInfo
                 };
                 result.Add(resumeViewModel);
             }

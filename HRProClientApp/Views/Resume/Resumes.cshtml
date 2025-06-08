@@ -7,705 +7,502 @@
 
 <div class="container mt-4">
     <h1>Резюме</h1>
-
-    <!-- Вкладки -->
-    <ul class="nav nav-tabs mb-4" id="resumeTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="avito-tab" data-bs-toggle="tab" data-bs-target="#avito" type="button" role="tab" aria-controls="avito" aria-selected="true">
-                <i class="bi bi-house-door"></i> Авито
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="search" class="form-label">Поиск</label>
+            <input type="text" id="search" class="form-control" placeholder="Введите текст..." oninput="filterResumes()">
+        </div>
+        <div class="col-md-4">
+            <label for="sortDate" class="form-label">Сортировка по дате</label>
+            <select id="sortDate" class="form-select" onchange="sortResumes()">
+                <option value="desc">Сначала новые</option>
+                <option value="asc">Сначала старые</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectModal">
+                <i class="bi bi-download"></i> Собрать резюме
             </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="hh-tab" data-bs-toggle="tab" data-bs-target="#hh" type="button" role="tab" aria-controls="hh" aria-selected="false">
-                <i class="bi bi-briefcase"></i> HeadHunter
-            </button>
-        </li>
-    </ul>
+        </div>
+        <div class="col-md-4">
+            <a asp-action="ResumeStatistics" asp-controller="Analytics" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i> Статистика по резюме
+            </a>
+        </div>
+        </a>
+    </div>
 
-    <!-- Контент вкладок -->
-    <div class="tab-content" id="resumeTabsContent">
-        <!-- Вкладка Авито -->
-        <div class="tab-pane fade show active" id="avito" role="tabpanel" aria-labelledby="avito-tab">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="searchAvito" class="form-label">Поиск</label>
-                    <input type="text" id="searchAvito" class="form-control" placeholder="Введите текст..." oninput="filterResumes('avito')">
+    <table class="table table-striped" id="resumesTable">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Название</th>
+                <th>Зарплата</th>
+                <th>Кандидат</th>
+                <th>Город</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resume in Model)
+            {
+                var cityName = cities?.FirstOrDefault(c => c.Code == resume.City)?.Name ?? "Неизвестен";
+                <tr>
+                    <td class="text-nowrap">
+                        @{
+                            var icons = "";
+                            if (resume.CandidateInfo.Contains("Женщина"))
+                            {
+                                icons += "<i class=\"bi bi-gender-female text-pink me-1\" title=\"Женщина\"></i>";
+                            }
+                            else if (resume.CandidateInfo.Contains("Мужчина"))
+                            {
+                                icons += "<i class=\"bi bi-gender-male text-primary me-1\" title=\"Мужчина\"></i>";
+                            }
+
+                            if (resume.CandidateInfo.Contains("без опыта работы"))
+                            {
+                                icons += "<i class=\"bi bi-exclamation-triangle-fill text-warning me-1\" title=\"Без опыта работы\"></i>";
+                            }
+                            else if (resume.CandidateInfo.Contains("стаж"))
+                            {
+                                icons += "<i class=\"bi bi-briefcase-fill text-success me-1\" title=\"Опыт работы\"></i>";
+                            }
+
+                            if (resume.CandidateInfo.Contains("высшее образование"))
+                            {
+                                icons += "<i class=\"bi bi-mortarboard-fill text-info me-1\" title=\"Высшее образование\"></i>";
+                            }
+                            else if (resume.CandidateInfo.Contains("среднее образование"))
+                            {
+                                icons += "<i class=\"bi bi-book-half text-secondary me-1\" title=\"Среднее образование\"></i>";
+                            }
+                        }
+                        @Html.Raw(icons)
+                    </td>
+
+                    <td>@resume.Title</td>
+                    <td>@resume.Salary</td>
+                    <td>@resume.CandidateInfo</td>
+                    <td>@cityName</td>
+                    <td>
+                        <div class="d-flex justify-content-center gap-2">
+
+                            @if (!string.IsNullOrEmpty(resume.Url))
+                            {
+                                <a href="@resume.Url"
+                                   class="btn btn-primary btn-sm"
+                                   title="Перейти к резюме"
+                                   target="_blank">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-sm" disabled
+                                        title="Ссылка не указана">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </button>
+                            }
+
+                            <a asp-action="Delete" asp-controller="Resume" asp-route-id="@resume.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Нет доступных резюме.</div>
+    }
+
+    <nav aria-label="Page navigation" id="paginationContainer">
+        <ul class="pagination justify-content-center" id="pagination">
+        </ul>
+    </nav>
+</div>
+
+<div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="collectResumeForm" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="collectModalLabel">Выберите город</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
-                <div class="col-md-4">
-                    <label for="sortDateAvito" class="form-label">Сортировка по дате</label>
-                    <select id="sortDateAvito" class="form-select" onchange="sortResumes('avito')">
-                        <option value="desc">Сначала новые</option>
-                        <option value="asc">Сначала старые</option>
+                <div class="modal-body">
+                    <label for="cityName" class="form-label">Город:</label>
+                    <select id="cityName" name="cityName" class="form-select">
+                        @foreach (var city in cities)
+                        {
+                            <option value="@city.Code">@city.Name</option>
+                        }
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectAvitoModal">
-                        <i class="bi bi-download"></i> Собрать с Авито
-                    </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-info" id="collectButton">Начать сбор</button>
                 </div>
-            </div>
-
-            <table class="table table-striped" id="avitoResumesTable">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Название</th>
-                        <th>Зарплата</th>
-                        <th>Кандидат</th>
-                        <th>Город</th>
-                        <th>Дата добавления</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="avitoResumesTableBody">
-                    @foreach (var resume in Model.Where(r => r.Source == HRProDataModels.Enums.ResumeSourceEnum.Avito))
-                    {
-                        var cityName = cities?.FirstOrDefault(c => c.Code == resume.City)?.Name ?? "Неизвестен";
-                        <tr>
-                            <td class="text-nowrap">
-                                @Html.Raw(GetCandidateIcons(resume.CandidateInfo))
-                            </td>
-                            <td>@resume.Title</td>
-                            <td>@resume.Salary</td>
-                            <td>@resume.CandidateInfo</td>
-                            <td>@cityName</td>
-                            <td>@resume.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>
-                                <div class="d-flex justify-content-center gap-2">
-                                    @if (!string.IsNullOrEmpty(resume.Url))
-                                    {
-                                        <a href="@resume.Url" class="btn btn-primary btn-sm" title="Перейти к резюме" target="_blank">
-                                            <i class="bi bi-box-arrow-up-right"></i>
-                                        </a>
-                                    }
-                                    <a asp-action="Delete" asp-controller="Resume" asp-route-id="@resume.Id"
-                                       class="btn btn-danger btn-sm"
-                                       title="Удалить"
-                                       onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            @if (!Model.Any(r => r.Source == HRProDataModels.Enums.ResumeSourceEnum.Avito))
-            {
-                <div class="alert alert-info">Нет резюме с Авито.</div>
-            }
-            <nav aria-label="Page navigation" id="avitoPaginationContainer">
-                <ul class="pagination justify-content-center" id="avitoPagination">
-                </ul>
-            </nav>
-        </div>
-
-        <!-- Вкладка HeadHunter -->
-        <div class="tab-pane fade" id="hh" role="tabpanel" aria-labelledby="hh-tab">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="searchHh" class="form-label">Поиск</label>
-                    <input type="text" id="searchHh" class="form-control" placeholder="Введите текст..." oninput="filterResumes('hh')">
-                </div>
-                <div class="col-md-4">
-                    <label for="sortDateHh" class="form-label">Сортировка по дате</label>
-                    <select id="sortDateHh" class="form-select" onchange="sortResumes('hh')">
-                        <option value="desc">Сначала новые</option>
-                        <option value="asc">Сначала старые</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectHhModal">
-                        <i class="bi bi-download"></i> Собрать с HeadHunter
-                    </button>
-                </div>
-            </div>
-
-            <table class="table table-striped" id="hhResumesTable">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Название</th>
-                        <th>Возраст</th>
-                        <th>Зарплата</th>
-                        <th>Последнее место работы</th>
-                        <th>Последняя должность</th>
-                        <th>Город</th>
-                        <th>Дата добавления</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="hhResumesTableBody">
-                    @foreach (var resume in Model.Where(r => r.Source == HRProDataModels.Enums.ResumeSourceEnum.HH))
-                    {
-                        var cityName = cities?.FirstOrDefault(c => c.Code == resume.City)?.Name ?? "Неизвестен";
-                        <tr>
-                            <td class="text-nowrap">
-                                @Html.Raw(GetCandidateIcons(resume.CandidateInfo))
-                            </td>
-                            <td>@resume.Title</td>
-                            <td>@resume.Age</td>
-                            <td>@resume.Salary</td>
-                            <td>@resume.LastWorkPlace</td>
-                            <td>@resume.LastJobTitle</td>
-                            <td>@cityName</td>
-                            <td>@resume.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>
-                                <div class="d-flex justify-content-center gap-2">
-                                    @if (!string.IsNullOrEmpty(resume.Url))
-                                    {
-                                        <a href="@resume.Url" class="btn btn-primary btn-sm" title="Перейти к резюме" target="_blank">
-                                            <i class="bi bi-box-arrow-up-right"></i>
-                                        </a>
-                                    }
-                                    <a asp-action="Delete" asp-controller="Resume" asp-route-id="@resume.Id"
-                                       class="btn btn-danger btn-sm"
-                                       title="Удалить"
-                                       onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            @if (!Model.Any(r => r.Source == HRProDataModels.Enums.ResumeSourceEnum.HH))
-            {
-                <div class="alert alert-info">Нет резюме с HeadHunter.</div>
-            }
-            <nav aria-label="Page navigation" id="hhPaginationContainer">
-                <ul class="pagination justify-content-center" id="hhPagination">
-                </ul>
-            </nav>
-        </div>
-    </div>
-
-    <!-- Модальные окна для сбора резюме -->
-    <!-- Модальное для Авито -->
-    <div class="modal fade" id="collectAvitoModal" tabindex="-1" aria-labelledby="collectAvitoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="collectAvitoForm">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="collectAvitoModalLabel">Сбор резюме с Авито</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="avitoCity" class="form-label">Город</label>
-                            <select id="avitoCity" class="form-select">
-                                @foreach (var city in cities)
-                                {
-                                    <option value="@city.Code">@city.Name</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                        <button type="submit" class="btn btn-primary">Собрать</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное для HeadHunter -->
-    <div class="modal fade" id="collectHhModal" tabindex="-1" aria-labelledby="collectHhModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="collectHhForm">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="collectHhModalLabel">Сбор резюме с HeadHunter</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="hhCity" class="form-label">Город</label>
-                            <select id="hhCity" class="form-select">
-                                @foreach (var city in cities)
-                                {
-                                    <option value="@city.Code">@city.Name</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="hhProfession" class="form-label">Профессия</label>
-                            <input type="text" class="form-control" id="hhProfession" placeholder="Например, разработчик">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                        <button type="submit" class="btn btn-primary">Собрать</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Лоадер -->
-    <div id="modalLoader" class="d-none" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">
-        <div class="bg-white p-4 rounded shadow" style="width: 300px; text-align: center;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Загрузка...</span>
-            </div>
-            <p class="mt-2">Сбор резюме...</p>
+            </form>
         </div>
     </div>
 </div>
 
-@functions {
-    public static string GetCandidateIcons(string candidateInfo)
+<div id="modalLoader" class="d-none" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+    <div class="bg-white p-4 rounded shadow" style="width: 300px; text-align: center;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <p class="mt-2">Сбор резюме...</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const itemsPerPage = 10;
+    let currentPage = 1;
+    let allResumes = @Html.Raw(Json.Serialize(Model));
+    let sortOrder = 'desc';
+
+    const citiesMap = {
+    @foreach (var city in ViewBag.Cities)
     {
-        if (string.IsNullOrEmpty(candidateInfo)) return string.Empty;
-
-        var icons = "";
-
-        if (candidateInfo.Contains("Женщина"))
-        {
-            icons += "<i class=\"bi bi-gender-female text-pink me-1\" title=\"Женщина\"></i>";
-        }
-        else if (candidateInfo.Contains("Мужчина"))
-        {
-            icons += "<i class=\"bi bi-gender-male text-primary me-1\" title=\"Мужчина\"></i>";
-        }
-
-        if (candidateInfo.Contains("без опыта работы"))
-        {
-            icons += "<i class=\"bi bi-exclamation-triangle-fill text-warning me-1\" title=\"Без опыта работы\"></i>";
-        }
-        else if (candidateInfo.Contains("стаж"))
-        {
-            icons += "<i class=\"bi bi-briefcase-fill text-success me-1\" title=\"Опыт работы\"></i>";
-        }
-
-        if (candidateInfo.Contains("высшее образование"))
-        {
-            icons += "<i class=\"bi bi-mortarboard-fill text-info me-1\" title=\"Высшее образование\"></i>";
-        }
-        else if (candidateInfo.Contains("среднее образование"))
-        {
-            icons += "<i class=\"bi bi-book-half text-secondary me-1\" title=\"Среднее образование\"></i>";
-        }
-
-        return icons;
+        @:"@city.Code": "@city.Name",
     }
-}
+                };
 
-@section Scripts {
-    <script>
-        // Глобальные переменные
-        let avitoResumes = @Html.Raw(Json.Serialize(Model.Where(r => r.Source == HRProDataModels.Enums.ResumeSourceEnum.Avito)));
-        let hhResumes = @Html.Raw(Json.Serialize(Model.Where(r => r.Source == HRProDataModels.Enums.ResumeSourceEnum.HH)));
-        let filteredAvitoResumes = [...avitoResumes];
-        let filteredHhResumes = [...hhResumes];
-        const itemsPerPage = 10;
-        let currentAvitoPage = 1;
-        let currentHhPage = 1;
-        let avitoSortOrder = 'desc';
-        let hhSortOrder = 'desc';
+    document.addEventListener('DOMContentLoaded', function () {
+        updateTable();
+        setupPagination();
 
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function () {
-            // Инициализация модальных окон
-            const avitoModal = new bootstrap.Modal(document.getElementById('collectAvitoModal'));
-            const hhModal = new bootstrap.Modal(document.getElementById('collectHhModal'));
+        document.getElementById('collectResumeForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-            // Обработчики для модальных окон
-            document.getElementById('collectAvitoForm')?.addEventListener('submit', function (e) {
-                e.preventDefault();
-                collectResumes('Avito', avitoModal);
-            });
+            const modal = document.getElementById('collectModal');
+            const modalLoader = document.getElementById('modalLoader');
+            const collectButton = document.getElementById('collectButton');
 
-            document.getElementById('collectHhForm')?.addEventListener('submit', function (e) {
-                e.preventDefault();
-                collectResumes('Hh', hhModal);
-            });
+            modalLoader.classList.remove('d-none');
+            collectButton.disabled = true;
 
-            // Инициализация таблиц
-            updateTable('avito');
-            updateTable('hh');
-        });
-
-        // Функция сбора резюме
-        async function collectResumes(source, modal) {
-            const cityInput = document.getElementById(`${source.toLowerCase()}City`);
-            const professionInput = source.toLowerCase() === 'hh' ? document.getElementById('hhProfession') : null;
-
-            if (!cityInput) {
-                showToast('Не найдено поле для ввода города', 'danger');
-                return;
-            }
-
-            const city = cityInput.value.trim();
-            const profession = professionInput ? professionInput.value.trim() : '';
-
-            if (!city) {
-                showToast('Введите название города', 'danger');
-                return;
-            }
-
-            const loader = document.getElementById('modalLoader');
-            loader.classList.remove('d-none');
+            const cityName = document.getElementById('cityName').value;
 
             try {
-                let url = `/Resume/CollectFrom${source}?cityName=${encodeURIComponent(city)}`;
-                if (profession) {
-                    url += `&profession=${encodeURIComponent(profession)}`;
-                }
-
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-
+                const response = await fetch(`/Resume/CollectResume?cityName=${cityName}`);
                 const data = await response.json();
 
                 if (data.success) {
-                    showToast(`Успешно собрано ${data.count} резюме с ${source === 'Avito' ? 'Авито' : 'HeadHunter'}`, 'success');
-                    // Перезагружаем страницу для обновления данных
-                    window.location.reload();
+                    showToast(data.message, "success");
+
+                    if (data.resumes && data.resumes.length > 0) {
+                        const newResumes = data.resumes.map(r => ({
+                            ...r,
+                            createdAt: new Date(r.createdAt).toISOString()
+                        }));
+
+                        allResumes = [...newResumes, ...allResumes];
+
+                        currentPage = 1;
+                        updateTable();
+                        setupPagination();
+                    }
+
+                    setTimeout(() => {
+                        const modalInstance = bootstrap.Modal.getInstance(modal);
+                        modalInstance.hide();
+                    }, 1500);
                 } else {
-                    showToast(data.message || 'Ошибка при сборе резюме', 'danger');
+                    showToast(data.message, "danger");
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                showToast('Ошибка при сборе резюме: ' + error.message, 'danger');
+                showToast("Ошибка сети: " + error.message, "danger");
             } finally {
-                loader.classList.add('d-none');
-                modal.hide();
+                modalLoader.classList.add('d-none');
+                collectButton.disabled = false;
             }
+        });
+    });
+
+    function getCandidateIcons(candidateInfo) {
+        let icons = '';
+
+        if (!candidateInfo) return icons;
+
+        if (candidateInfo.includes('Женщина')) {
+            icons += '<i class="bi bi-gender-female text-pink me-1" title="Женщина"></i>';
+        } else if (candidateInfo.includes('Мужчина')) {
+            icons += '<i class="bi bi-gender-male text-primary me-1" title="Мужчина"></i>';
         }
 
-        // Функция для показа уведомлений
-        function showToast(message, type) {
-            const toastContainer = document.createElement('div');
-            toastContainer.style.position = 'fixed';
-            toastContainer.style.top = '20px';
-            toastContainer.style.right = '20px';
-            toastContainer.style.zIndex = '9999';
+        if (candidateInfo.includes('без опыта работы')) {
+            icons += '<i class="bi bi-exclamation-triangle-fill text-warning me-1" title="Без опыта работы"></i>';
+        } else if (candidateInfo.includes('стаж')) {
+            icons += '<i class="bi bi-briefcase-fill text-success me-1" title="Опыт работы"></i>';
+        }
 
-            const toast = document.createElement('div');
-            toast.className = `toast show align-items-center text-white bg-${type} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
+        if (candidateInfo.includes('высшее образование')) {
+            icons += '<i class="bi bi-mortarboard-fill text-info me-1" title="Высшее образование"></i>';
+        } else if (candidateInfo.includes('среднее образование')) {
+            icons += '<i class="bi bi-book-half text-secondary me-1" title="Среднее образование"></i>';
+        }
 
-            toast.innerHTML = `
+        return icons || '<span class="text-muted">—</span>';
+    }
+
+
+    function sortResumes() {
+        sortOrder = document.getElementById('sortDate').value;
+        applySorting();
+        updateTable();
+    }
+
+    function applySorting() {
+        allResumes.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        applySorting();
+        updateTable();
+        setupPagination();
+    });
+
+    function updateTable() {
+        const tableBody = document.querySelector("#resumesTable tbody");
+        tableBody.innerHTML = "";
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedResumes = allResumes.slice(startIndex, endIndex);
+
+        paginatedResumes.forEach(resume => {
+            const cityName = citiesMap[resume.city] || 'Неизвестен';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="text-nowrap">${getCandidateIcons(resume.candidateInfo)}</td>
+                <td>${resume.title ?? 'Нет данных'}</td>
+                <td>${resume.salary ?? 'Нет данных'}</td>
+                <td>${resume.candidateInfo ?? 'Нет данных'}</td>
+                <td>${cityName}</td>
+                <td>
+                    <div class="d-flex justify-content-center gap-2">
+                        ${resume.url
+                    ? `<a href="${resume.url}"
+                                class="btn btn-primary btn-sm"
+                                title="Перейти к резюме"
+                                target="_blank">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                              </a>`
+                    : `<button class="btn btn-secondary btn-sm" disabled
+                                title="Ссылка не указана">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                             </button>`
+                }
+                        <button class="btn btn-danger btn-sm me-2 delete-resume-btn"
+                                title="Удалить"
+                                data-id="${resume.Id || resume.id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        document.querySelectorAll('.delete-resume-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                deleteResume(this.getAttribute('data-id'));
+            });
+        });
+    }
+
+    async function deleteResume(id) {
+        if (!confirm('Вы уверены, что хотите удалить резюме?')) return;
+
+        try {
+            const response = await fetch(`/Resume/Delete?id=${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                const result = await response.json();
+                if (result.success) {
+                    updateTable(); 
+                } else {
+                    alert(result.message || 'Ошибка при удалении');
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось удалить резюме');
+        }
+    }
+
+    function formatDateTime(dateString) {
+        const options = {
+            timeZone: 'Europe/Ulyanovsk',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        return new Date(dateString).toLocaleString('ru-RU', options);
+    }
+
+    function setupPagination() {
+        const pagination = document.getElementById('pagination');
+        const pageCount = Math.ceil(allResumes.length / itemsPerPage);
+
+        pagination.innerHTML = "";
+
+        if (pageCount <= 1) {
+            document.getElementById('paginationContainer').classList.add('d-none');
+            return;
+        }
+
+        document.getElementById('paginationContainer').classList.remove('d-none');
+
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Назад"><span aria-hidden="true">&laquo;</span></a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        addPageItem(1);
+
+        if (currentPage > 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+            pagination.appendChild(dotsLi);
+        }
+
+        const startPage = Math.max(2, currentPage - 1);
+        const endPage = Math.min(pageCount - 1, currentPage + 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            addPageItem(i);
+        }
+
+        if (currentPage < pageCount - 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+            pagination.appendChild(dotsLi);
+        }
+
+        if (pageCount > 1) {
+            addPageItem(pageCount);
+        }
+
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Вперед"><span aria-hidden="true">&raquo;</span></a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+                currentPage++;
+                updateTable();
+                setupPagination();
+            }
+        });
+        pagination.appendChild(nextLi);
+    }
+
+    function addPageItem(pageNumber) {
+        const pagination = document.getElementById('pagination');
+        const li = document.createElement('li');
+        li.className = `page-item ${pageNumber === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${pageNumber}</a>`;
+
+        li.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage = pageNumber;
+            updateTable();
+            setupPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        pagination.appendChild(li);
+    }
+
+    function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
+
+    let originalResumes = @Html.Raw(Json.Serialize(Model));
+
+    function filterResumes() {
+        document.getElementById('search').addEventListener('input', debounce(filterResumes));
+        const searchInput = document.getElementById('search').value.toLowerCase();
+
+        if (searchInput === '') {
+            allResumes = [...originalResumes];
+        } else {
+            allResumes = originalResumes.filter(resume => {
+                return (resume.title && resume.title.toLowerCase().includes(searchInput)) ||
+                    (resume.candidateInfo && resume.candidateInfo.toLowerCase().includes(searchInput)) ||
+                    (resume.salary && resume.salary.toString().toLowerCase().includes(searchInput));
+            });
+        }
+
+        currentPage = 1;
+        updateTable();
+        setupPagination();
+    }
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
                         <div class="d-flex">
                             <div class="toast-body">${message}</div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
                         </div>
                     `;
 
-            toastContainer.appendChild(toast);
-            document.body.appendChild(toastContainer);
+        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toastContainer.appendChild(toast);
 
-            setTimeout(() => {
-                toastContainer.remove();
-            }, 5000);
-        }
-
-        // Функция фильтрации резюме
-        function filterResumes(source) {
-            const searchInput = document.getElementById(`search${source.charAt(0).toUpperCase() + source.slice(1)}`).value.toLowerCase();
-
-            if (source === 'avito') {
-                filteredAvitoResumes = avitoResumes.filter(resume => {
-                    return (
-                        (resume.title && resume.title.toLowerCase().includes(searchInput)) ||
-                        (resume.candidateInfo && resume.candidateInfo.toLowerCase().includes(searchInput)) ||
-                        (resume.salary && resume.salary.toString().toLowerCase().includes(searchInput)) ||
-                        (resume.city && citiesMap[resume.city] && citiesMap[resume.city].toLowerCase().includes(searchInput))
-                    );
-                });
-                currentAvitoPage = 1;
-                applySorting(source);
-                updateTable(source);
-            } else {
-                filteredHhResumes = hhResumes.filter(resume => {
-                    return (
-                        (resume.title && resume.title.toLowerCase().includes(searchInput)) ||
-                        (resume.lastWorkPlace && resume.lastWorkPlace.toLowerCase().includes(searchInput)) ||
-                        (resume.lastJobTitle && resume.lastJobTitle.toLowerCase().includes(searchInput)) ||
-                        (resume.salary && resume.salary.toString().toLowerCase().includes(searchInput)) ||
-                        (resume.city && citiesMap[resume.city] && citiesMap[resume.city].toLowerCase().includes(searchInput))
-                    );
-                });
-                currentHhPage = 1;
-                applySorting(source);
-                updateTable(source);
-            }
-        }
-
-        // Функция сортировки резюме
-        function sortResumes(source) {
-            const sortSelect = document.getElementById(`sortDate${source.charAt(0).toUpperCase() + source.slice(1)}`);
-            if (source === 'avito') {
-                avitoSortOrder = sortSelect.value;
-            } else {
-                hhSortOrder = sortSelect.value;
-            }
-            applySorting(source);
-            updateTable(source);
-        }
-
-        // Применение сортировки
-        function applySorting(source) {
-            if (source === 'avito') {
-                filteredAvitoResumes.sort((a, b) => {
-                    const dateA = new Date(a.createdAt);
-                    const dateB = new Date(b.createdAt);
-                    return avitoSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-                });
-            } else {
-                filteredHhResumes.sort((a, b) => {
-                    const dateA = new Date(a.createdAt);
-                    const dateB = new Date(b.createdAt);
-                    return hhSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-                });
-            }
-        }
-
-        // Обновление таблицы
-        function updateTable(source) {
-            const tableBodyId = `${source}ResumesTableBody`;
-            const paginationId = `${source}Pagination`;
-            const paginationContainerId = `${source}PaginationContainer`;
-
-            let currentResumes, currentPage;
-
-            if (source === 'avito') {
-                currentResumes = filteredAvitoResumes;
-                currentPage = currentAvitoPage;
-            } else {
-                currentResumes = filteredHhResumes;
-                currentPage = currentHhPage;
-            }
-
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedResumes = currentResumes.slice(startIndex, endIndex);
-
-            const tableBody = document.getElementById(tableBodyId);
-            tableBody.innerHTML = '';
-
-            if (paginatedResumes.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="9" class="text-center">Нет данных</td></tr>';
-                document.getElementById(paginationContainerId).classList.add('d-none');
-                return;
-            }
-
-            paginatedResumes.forEach(resume => {
-                const cityName = citiesMap[resume.city] || 'Неизвестен';
-                const createdAt = new Date(resume.createdAt).toLocaleString('ru-RU', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                const row = document.createElement('tr');
-
-                // Иконки кандидата
-                const iconsTd = document.createElement('td');
-                iconsTd.className = 'text-nowrap';
-                iconsTd.innerHTML = getCandidateIcons(resume.candidateInfo);
-                row.appendChild(iconsTd);
-
-                // Основные данные
-                row.appendChild(createTd(resume.title || 'Нет данных'));
-                if (source === 'avito') {
-                    row.appendChild(createTd(resume.salary || 'Нет данных'));
-                    row.appendChild(createTd(resume.candidateInfo || 'Нет данных'));
-                } else {
-                    row.appendChild(createTd(resume.age || 'Нет данных'));
-                    row.appendChild(createTd(resume.salary || 'Нет данных'));
-                    row.appendChild(createTd(resume.lastWorkPlace || 'Нет данных'));
-                    row.appendChild(createTd(resume.lastJobTitle || 'Нет данных'));
-                }
-                row.appendChild(createTd(cityName));
-                row.appendChild(createTd(createdAt));
-
-                // Действия
-                const actionsTd = document.createElement('td');
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'd-flex justify-content-center gap-2';
-
-                if (resume.url) {
-                    const linkBtn = document.createElement('a');
-                    linkBtn.href = resume.url;
-                    linkBtn.className = 'btn btn-primary btn-sm';
-                    linkBtn.title = 'Перейти к резюме';
-                    linkBtn.target = '_blank';
-                    linkBtn.innerHTML = '<i class="bi bi-box-arrow-up-right"></i>';
-                    actionsDiv.appendChild(linkBtn);
-                }
-
-                const deleteBtn = document.createElement('a');
-                deleteBtn.href = `/Resume/Delete/${resume.id}`;
-                deleteBtn.className = 'btn btn-danger btn-sm';
-                deleteBtn.title = 'Удалить';
-                deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
-                deleteBtn.onclick = () => confirm('Вы уверены, что хотите удалить резюме?');
-                actionsDiv.appendChild(deleteBtn);
-
-                actionsTd.appendChild(actionsDiv);
-                row.appendChild(actionsTd);
-
-                tableBody.appendChild(row);
-            });
-
-            setupPagination(source, currentResumes.length, currentPage);
-        }
-
-        // Создание ячейки таблицы
-        function createTd(text) {
-            const td = document.createElement('td');
-            td.textContent = text;
-            return td;
-        }
-
-        // Настройка пагинации
-        function setupPagination(source, totalItems, currentPage) {
-            const paginationId = `${source}Pagination`;
-            const paginationContainerId = `${source}PaginationContainer`;
-            const pageCount = Math.ceil(totalItems / itemsPerPage);
-
-            const pagination = document.getElementById(paginationId);
-            pagination.innerHTML = '';
-
-            if (pageCount <= 1) {
-                document.getElementById(paginationContainerId).classList.add('d-none');
-                return;
-            }
-
-            document.getElementById(paginationContainerId).classList.remove('d-none');
-
-            // Кнопка "Назад"
-            const prevLi = document.createElement('li');
-            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-            prevLi.innerHTML = '<a class="page-link" href="#" aria-label="Назад"><span aria-hidden="true">&laquo;</span></a>';
-            prevLi.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (currentPage > 1) {
-                    if (source === 'avito') currentAvitoPage--;
-                    else currentHhPage--;
-                    updateTable(source);
-                }
-            });
-            pagination.appendChild(prevLi);
-
-            // Номера страниц
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(pageCount, startPage + maxVisiblePages - 1);
-
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
-            }
-
-            if (startPage > 1) {
-                const firstLi = document.createElement('li');
-                firstLi.className = 'page-item';
-                firstLi.innerHTML = '<a class="page-link" href="#">1</a>';
-                firstLi.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (source === 'avito') currentAvitoPage = 1;
-                    else currentHhPage = 1;
-                    updateTable(source);
-                });
-                pagination.appendChild(firstLi);
-
-                if (startPage > 2) {
-                    const ellipsisLi = document.createElement('li');
-                    ellipsisLi.className = 'page-item disabled';
-                    ellipsisLi.innerHTML = '<span class="page-link">...</span>';
-                    pagination.appendChild(ellipsisLi);
-                }
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                const li = document.createElement('li');
-                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                li.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (source === 'avito') currentAvitoPage = i;
-                    else currentHhPage = i;
-                    updateTable(source);
-                });
-                pagination.appendChild(li);
-            }
-
-            if (endPage < pageCount) {
-                if (endPage < pageCount - 1) {
-                    const ellipsisLi = document.createElement('li');
-                    ellipsisLi.className = 'page-item disabled';
-                    ellipsisLi.innerHTML = '<span class="page-link">...</span>';
-                    pagination.appendChild(ellipsisLi);
-                }
-
-                const lastLi = document.createElement('li');
-                lastLi.className = 'page-item';
-                lastLi.innerHTML = `<a class="page-link" href="#">${pageCount}</a>`;
-                lastLi.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (source === 'avito') currentAvitoPage = pageCount;
-                    else currentHhPage = pageCount;
-                    updateTable(source);
-                });
-                pagination.appendChild(lastLi);
-            }
-
-            // Кнопка "Вперед"
-            const nextLi = document.createElement('li');
-            nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
-            nextLi.innerHTML = '<a class="page-link" href="#" aria-label="Вперед"><span aria-hidden="true">&raquo;</span></a>';
-            nextLi.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (currentPage < pageCount) {
-                    if (source === 'avito') currentAvitoPage++;
-                    else currentHhPage++;
-                    updateTable(source);
-                }
-            });
-            pagination.appendChild(nextLi);
-        }
-
-        // Функция для получения иконок кандидата
-        function getCandidateIcons(candidateInfo) {
-            if (!candidateInfo) return '';
-
-            let icons = '';
-
-            if (candidateInfo.includes('Женщина')) {
-                icons += '<i class="bi bi-gender-female text-pink me-1" title="Женщина"></i>';
-            } else if (candidateInfo.includes('Мужчина')) {
-                icons += '<i class="bi bi-gender-male text-primary me-1" title="Мужчина"></i>';
-            }
-
-            if (candidateInfo.includes('без опыта работы')) {
-                icons += '<i class="bi bi-exclamation-triangle-fill text-warning me-1" title="Без опыта работы"></i>';
-            } else if (candidateInfo.includes('стаж')) {
-                icons += '<i class="bi bi-briefcase-fill text-success me-1" title="Опыт работы"></i>';
-            }
-
-            if (candidateInfo.includes('высшее образование')) {
-                icons += '<i class="bi bi-mortarboard-fill text-info me-1" title="Высшее образование"></i>';
-            } else if (candidateInfo.includes('среднее образование')) {
-                icons += '<i class="bi bi-book-half text-secondary me-1" title="Среднее образование"></i>';
-            }
-
-            return icons;
-        }
-
-        // Карта городов
-        const citiesMap = @Html.Raw(Json.Serialize(cities?.ToDictionary(c => c.Code, c => c.Name) ?? new Dictionary<string, string>()));
-    </script>
-}
+        setTimeout(() => toast.remove(), 5000);
+    }
+</script>
 
 <style>
     .text-pink {

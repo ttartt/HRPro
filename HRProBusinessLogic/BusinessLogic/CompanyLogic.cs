@@ -72,7 +72,7 @@ namespace HRProBusinessLogic.BusinessLogic
                 Tags = v.Tags
             }).ToList() ?? new List<VacancyViewModel>();
 
-            var employees = _userStorage.GetFilteredList(new UserSearchModel { CompanyId = company.Id, Role = HRProDataModels.Enums.RoleEnum.Сотрудник });
+            var employees = _userStorage.GetFilteredList(new UserSearchModel { CompanyId = company.Id });
 
             var employeeViewModels = employees?.Select(u => new UserViewModel
             {

@@ -1,6 +1,4 @@
-﻿using HRProBusinessLogic.OfficePackage;
-using HRProBusinessLogic.OfficePackage.HelperModels;
-using HRProContracts.BindingModels;
+﻿using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.SearchModels;
 using HRProContracts.StoragesContracts;
@@ -15,11 +13,9 @@ namespace HRProBusinessLogic.BusinessLogic
         private readonly IResumeStorage _resumeStorage;
         private readonly IUserStorage _userStorage;
         private readonly IVacancyStorage _vacancyStorage;
-        private readonly AbstractSaveToPdf _saveToPdf;
-        public ReportLogic(IResumeStorage resumeStorage, AbstractSaveToPdf saveToPdf, IUserStorage userStorage, IVacancyStorage vacancyStorage)
+        public ReportLogic(IResumeStorage resumeStorage, IUserStorage userStorage, IVacancyStorage vacancyStorage)
         {
             _resumeStorage = resumeStorage;
-            _saveToPdf = saveToPdf;
             _userStorage = userStorage;
             _vacancyStorage = vacancyStorage;
         }
@@ -38,16 +34,6 @@ namespace HRProBusinessLogic.BusinessLogic
             return null;
         }
 
-        public void SaveResumeToPdf(ReportBindingModel model)
-        {
-            _saveToPdf.CreateDocReportResume(new PdfInfo
-            {
-                FileName = model.FileName,
-                Title = GetResume(model).VacancyName,
-                Resume = GetResume(model)
-            });
-        }
-
         public List<ResumeViewModel> GetResumesStatistics(ReportBindingModel model)
         {
             var list = _resumeStorage.GetFilteredList(new ResumeSearchModel { VacancyId = model.VacancyId }).Where(resume =>
@@ -60,18 +46,6 @@ namespace HRProBusinessLogic.BusinessLogic
                 return list;
             }
             return null;
-        }
-
-        public void SaveResumesStatisticsToPdf(ReportBindingModel model)
-        {
-            _saveToPdf.CreateDocStatistics(new PdfInfo
-            {
-                FileName = model.FileName,
-                Title = _vacancyStorage.GetElement(new VacancySearchModel { Id = model.VacancyId }).JobTitle,
-                Resumes = GetResumesStatistics(model),
-                DateFrom = model.DateFrom,
-                DateTo = model.DateTo
-            });
         }
 
         // новые методы

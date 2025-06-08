@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Interface Name="HRProDataModels.Models.ICompanyModel" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAggAAAAAAAEAQAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Models\ICompanyModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IDocumentModel" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAACACAAAAQAAAAAAABAAABAAAAAAAA=</HashCode>
+      <FileName>Models\IDocumentModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IDocumentTagModel" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAE=</HashCode>
+      <FileName>Models\IDocumentTagModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IMeetingModel" Collapsed="true">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAQAAAFAAIAAAAAAAAAAAAAAAAAAAABAEAABCAAAAA=</HashCode>
+      <FileName>Models\IMeetingModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IMeetingParticipantModel" Collapsed="true">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Models\IMeetingParticipantModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IResumeModel" Collapsed="true">
+    <Position X="2.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACABAAIgAEAIACAAAAAAAAAAAAAACAAgBAAAQAA=</HashCode>
+      <FileName>Models\IResumeModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.ITagModel" Collapsed="true">
+    <Position X="4" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAQAAAAAACAA=</HashCode>
+      <FileName>Models\ITagModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.ITemplateModel" Collapsed="true">
+    <Position X="5.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAAAAQAAAAAAAAAAQBAAAAAAAA=</HashCode>
+      <FileName>Models\ITemplateModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IUserModel" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACIAAAAAEAAAQAQABAAQAAACAAABAAAAAAg=</HashCode>
+      <FileName>Models\IUserModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HRProDataModels.Models.IVacancyModel" Collapsed="true">
+    <Position X="2.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAACAEAAIgAAAAACAAAAAAAAAAAEAAAAAAAAAIAAA=</HashCode>
+      <FileName>Models\IVacancyModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

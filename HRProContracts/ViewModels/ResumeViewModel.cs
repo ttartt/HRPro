@@ -16,11 +16,13 @@ namespace HRProContracts.ViewModels
 
         public string? Url { get; set; } = string.Empty;
 
-        public string? LastWorkPlace { get; set; } = string.Empty;
+        public string? Experience { get; set; } = string.Empty;
 
-        public string? LastJobTitle { get; set; } = string.Empty;
+        public string? Education { get; set; } = string.Empty;
 
-        public string? Age { get; set; } = string.Empty;
+        public string? Description { get; set; }
+
+        public string? Skills { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; }
 
@@ -29,7 +31,5 @@ namespace HRProContracts.ViewModels
         public string? Salary { get; set; } = string.Empty;
 
         public string? CandidateInfo { get; set; } = string.Empty;
-
-        public ResumeSourceEnum? Source { get; set; }
     }
 }

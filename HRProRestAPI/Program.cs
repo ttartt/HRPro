@@ -1,7 +1,5 @@
 using HRProBusinessLogic.BusinessLogic;
 using HRProBusinessLogic.MailWorker;
-using HRProBusinessLogic.OfficePackage;
-using HRProBusinessLogic.OfficePackage.Implements;
 using HRProContracts.BindingModels;
 using HRProContracts.BusinessLogicsContracts;
 using HRProContracts.StoragesContracts;
@@ -43,7 +41,6 @@ builder.Services.AddTransient<IDocumentLogic, DocumentLogic>();
 builder.Services.AddTransient<IReportLogic, ReportLogic>();
 
 builder.Services.AddSingleton<AbstractMailWorker, MailKitWorker>();
-builder.Services.AddTransient<AbstractSaveToPdf, SaveToPdf>();
 
 builder.Services.AddAuthentication(options =>
 {

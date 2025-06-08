@@ -41,6 +41,12 @@ namespace HRProClientApp.Controllers
             {
                 var list = APIClient.GetRequest<List<MeetingViewModel>>($"api/meeting/list?userId={userId}&companyId={APIClient.Company?.Id}");
                 ViewData["GoogleClientId"] = _configuration["Google:ClientId"];
+                foreach (var meeting in list)
+                {
+                    meeting.Date = meeting.Date.ToLocalTime();
+                    meeting.TimeFrom = meeting.TimeFrom.ToLocalTime();
+                    meeting.TimeTo = meeting.TimeTo.ToLocalTime();
+                }
 
                 return View(list);
             }
@@ -62,79 +68,120 @@ namespace HRProClientApp.Controllers
             {
                 return Redirect("/Home/Index");
             }
-            
+
             ViewBag.Users = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={APIClient.Company?.Id}");
             ViewBag.Vacancies = APIClient.GetRequest<List<VacancyViewModel>>($"api/vacancy/list?companyId={APIClient.Company?.Id}");
             ViewBag.Resumes = APIClient.GetRequest<List<ResumeViewModel>>($"api/resume/list?companyId={APIClient.Company?.Id}");
-            if (id.HasValue)
-            {
-                var invitedParticipants = APIClient.GetRequest<List<MeetingParticipantViewModel>>($"api/meeting/participants?meetingId={id}");
+            var employees = APIClient.GetRequest<List<UserViewModel>>($"api/user/list?companyId={APIClient.Company?.Id}");
+            ViewBag.Employees = employees.Where(x => x.Id != APIClient.User.Id);
 
-                var invitedUserIds = invitedParticipants.Select(p => p.UserId).ToList();
-
-                ViewBag.InvitedUserIds = invitedUserIds;
-            }
             if (!id.HasValue)
-            {                
+            {
+                ViewBag.InvitedEmployeeIds = new List<int>();
                 return View();
             }
-            else 
+            else
             {
                 var meeting = APIClient.GetRequest<MeetingViewModel?>($"api/meeting/details?id={id}");
+                ViewBag.InvitedEmployeeIds = APIClient.GetRequest<List<MeetingParticipantViewModel>?>($"api/meeting/Participants?meetingId={id}")?
+                    .Select(p => p.UserId)  
+                    .ToList() ?? new List<int>();
+                meeting.Date = meeting.Date.ToLocalTime();
+                meeting.TimeFrom = meeting.TimeFrom.ToLocalTime();
+                meeting.TimeTo = meeting.TimeTo.ToLocalTime();
                 return View(meeting);
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> MeetingEdit(MeetingBindingModel model)
+        public async Task<IActionResult> MeetingEdit(MeetingBindingModel model, string redirectUrl)
         {
-            string redirectUrl = $"/Meeting/Meetings/{APIClient.User?.Id}";
             try
             {
-                // Валидация модели
                 ValidateMeetingModel(model);
 
-                // Проверка на дубликаты (только для новых встреч)
                 if (model.Id == 0)
                 {
                     CheckForDuplicateMeetings(model);
                 }
-
-                // Обработка времени (приведение к UTC)
+                var timeFrom = model.TimeFrom;
+                var timeTo = model.TimeTo;
+                model.Date = model.Date.ToUniversalTime();
                 model.TimeFrom = model.TimeFrom.ToUniversalTime();
                 model.TimeTo = model.TimeTo.ToUniversalTime();
                 model.CompanyId = APIClient.Company?.Id;
 
                 string googleEventId = null;
 
-                // Если пользователь авторизован через Google - создаем событие в календаре
                 if (!string.IsNullOrEmpty(APIClient.User?.GoogleToken))
                 {
                     googleEventId = await CreateGoogleCalendarEvent(model);
                 }
 
-                // Сохраняем Google Event ID в модели
                 model.GoogleEventId = googleEventId;
 
-                APIClient.PostRequest("api/meeting/create", model);
-
-                // Обновляем локальный список встреч (если нужно)
                 if (model.Id == 0)
                 {
+                    var meetingId = await APIClient.PostRequestAsync("api/meeting/create", model);
+
+                    if (model.SelectedParticipantIds != null && model.SelectedParticipantIds.Count > 0)
+                    {
+                        foreach (var id in model.SelectedParticipantIds)
+                        {
+                            var participantModel = new { MeetingId = meetingId, UserId = id };
+                            APIClient.PostRequest("api/meeting/createParticipant", participantModel);
+
+                            var participant = APIClient.GetRequest<UserViewModel?>($"api/user/profile?id={id}");
+                            if (participant != null)
+                            {
+                                SendEmail(participant.Email,
+                                        model.Date.ToShortDateString(),
+                                        timeFrom.ToShortTimeString(),
+                                        timeTo.ToShortTimeString(),
+                                        model.Topic);
+                            }
+                        }
+                    }
+
                     APIClient.User?.Meetings.Add(new MeetingViewModel
                     {
-                        Id = model.Id,
-                        TimeFrom = model.TimeFrom,
+                        Id = meetingId,
+                        TimeFrom = timeFrom,
                         ResumeId = model.ResumeId,
                         Date = model.Date,
                         Place = model.Place,
-                        TimeTo = model.TimeTo,
+                        TimeTo = timeTo,
                         Topic = model.Topic,
                         VacancyId = model.VacancyId,
                         Comment = model.Comment,
-                        GoogleEventId = googleEventId,
+                        GoogleEventId = model.GoogleEventId,
                         CompanyId = model.CompanyId
                     });
+                }
+                else
+                {
+                    var currentParticipants = APIClient.GetRequest<List<MeetingParticipantViewModel>>($"api/meeting/participants?meetingId={model.Id}");
+
+                    var currentParticipantIds = currentParticipants.Select(p => p.UserId).ToList();
+
+                    var newParticipantIds = model.SelectedParticipantIds?
+                        .Except(currentParticipantIds)
+                        .ToList() ?? new List<int>();
+
+                    APIClient.PostRequest("api/meeting/update", model);
+
+                    foreach (var userId in newParticipantIds)
+                    {
+                        var participant = APIClient.GetRequest<UserViewModel?>($"api/user/profile?id={userId}");
+                        if (participant != null)
+                        {
+                            SendEmail(participant.Email,
+                                    model.Date.ToShortDateString(),
+                                    timeFrom.ToShortTimeString(),
+                                    timeTo.ToShortTimeString(),
+                                    model.Topic);
+                        }
+                    }
                 }
 
                 return Json(new { success = true, redirectUrl });
@@ -292,6 +339,16 @@ namespace HRProClientApp.Controllers
                 _logger.LogError(ex, "Ошибка при удалении встречи");
                 return BadRequest(ex.Message);
             }
+        }
+
+        private void SendEmail(string email, string date, string timeFrom, string timeTo, string meetingName)
+        {
+            APIClient.PostRequest("api/user/SendToMail", new MailSendInfoBindingModel
+            {
+                MailAddress = email,
+                Subject = $"Приглашение на встречу: {meetingName}",
+                Text = $"Вас пригласили на встречу, которая состоится {date} с {timeFrom} до {timeTo}"
+            });
         }
 
         public class GoogleCalendarEventModel

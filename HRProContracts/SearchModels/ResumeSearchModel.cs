@@ -19,7 +19,5 @@ namespace HRProContracts.SearchModels
         public int? Id { get; set; }
 
         public int? CompanyId { get; set; }
-        
-        public ResumeSourceEnum? Source { get; set; }
     }
 }

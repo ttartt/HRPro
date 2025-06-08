@@ -42,7 +42,6 @@ namespace HRProClientApp.Controllers
                 {
                     resume.CompanyId = APIClient.Company.Id;
                     resume.VacancyId = vacancyId;
-                    resume.Source = HRProDataModels.Enums.ResumeSourceEnum.Avito;
                     APIClient.PostRequest("api/resume/create", resume);
                 }
                 return Json(new
@@ -194,7 +193,6 @@ namespace HRProClientApp.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
         public IActionResult Delete(int id)
         {
             try
@@ -210,8 +208,6 @@ namespace HRProClientApp.Controllers
                 }
 
                 APIClient.PostRequest($"api/vacancy/delete", new VacancyBindingModel { Id = id });
-                APIClient.Company = APIClient.GetRequest<CompanyViewModel?>($"api/company/profile?id={APIClient.User?.CompanyId}");
-
                 return Json(new { success = true });
             }
             catch (Exception ex)
