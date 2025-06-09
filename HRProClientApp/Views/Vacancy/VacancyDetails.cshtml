@@ -7,6 +7,7 @@
     bool userRole = APIClient.User?.Role == HRProDataModels.Enums.RoleEnum.Сотрудник || APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Администратор;
     var resumes = ViewBag.Resumes as List<ResumeViewModel>;
     var cities = ViewBag.Cities as List<CityViewModel>;
+    var isEmployee = APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Сотрудник ? true : false;
 }
 
 <div class="container mt-5">
@@ -16,10 +17,13 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            @if (!isEmployee)
+            {
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#collectModal">
                 <i class="bi bi-download"></i> Собрать резюме на эту вакансию
             </button>
-            <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@Model.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
+            
+                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@Model.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
                class="btn btn-warning btn-sm" title="Редактировать">
                 <i class="bi bi-pencil-square"></i>
             </a>
@@ -27,7 +31,8 @@
                class="btn btn-danger btn-sm" title="Удалить"
                onclick="return confirm('Вы уверены, что хотите удалить вакансию?');">
                 <i class="bi bi-trash"></i>
-            </a>            
+            </a>    
+            }                    
             <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
         </div>
     </div>
@@ -152,12 +157,15 @@
                                     <i class="bi bi-box-arrow-up-right"></i>
                                 </button>
                             }
-
-                            <button class="btn btn-danger btn-sm"
-                                    title="Удалить"
-                                    onclick="deleteResume(@resume.Id)">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (!isEmployee)
+                            {
+                                <button class="btn btn-danger btn-sm"
+                                        title="Удалить"
+                                        onclick="deleteResume(@resume.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            }
+                            
                         </div>
                     </td>
                 </tr>
@@ -213,6 +221,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const isEmployee = @Json.Serialize(isEmployee);
     const itemsPerPage = 10;
     let currentPage = 1;
     let allResumes = @Html.Raw(Json.Serialize(resumes ?? new List<ResumeViewModel>()));
@@ -358,11 +367,13 @@
                                     <i class="bi bi-box-arrow-up-right"></i>
                                  </button>`
                 }
-                            <button class="btn btn-danger btn-sm me-2 delete-resume-btn"
-                                    title="Удалить"
-                                    data-id="${resume.Id || resume.id}">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                                 ${!isEmployee ? `
+                        <button class="btn btn-danger btn-sm me-2 delete-resume-btn"
+                                title="Удалить"
+                                data-id="${resume.Id || resume.id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    ` : ''}
                         </div>
                     </td>
                 `;

@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Вакансии";
+    var isAdmin = APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Администратор ? true : false;
+    var isEmployee = APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Сотрудник ? true : false;
 }
 
 <div class="container mt-5">
@@ -16,9 +18,12 @@
                 <a asp-action="VacancyStatusStatistics" asp-controller="Analytics" class="btn btn-success">
                     <i class="bi bi-plus-circle me-2"></i> Статистика по статусам вакансий
                 </a>
-                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-companyId="@APIClient.Company?.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i> Добавить вакансию
-                </a>
+                @if (!isEmployee)
+                {
+                    <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-companyId="@APIClient.Company?.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-2"></i> Добавить вакансию
+                    </a>
+                }                
                 <button class="btn btn-secondary" onclick="window.history.back();">Назад</button>
             </div>
             @if (Model != null)
@@ -52,15 +57,18 @@
                                                    class="btn btn-info btn-sm me-2" title="Просмотр">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@vacancy.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                                   class="btn btn-warning btn-sm me-2" title="Редактировать">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
-                                                <button class="btn btn-danger btn-sm"
-                                                        title="Удалить"
-                                                        onclick="deleteVacancy(@vacancy.Id)">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                                @if (!isEmployee)
+                                                {
+                                                    <a asp-action="EditVacancy" asp-controller="Vacancy" asp-route-id="@vacancy.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                                       class="btn btn-warning btn-sm me-2" title="Редактировать">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </a>
+                                                    <button class="btn btn-danger btn-sm"
+                                                            title="Удалить"
+                                                            onclick="deleteVacancy(@vacancy.Id)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                }                                                
                                             </div>
                                         </td>
                                     </tr>
@@ -87,6 +95,8 @@
 </div>
 
 <script>
+    const isAdmin = @Json.Serialize(isAdmin);
+    const isEmployee = @Json.Serialize(isEmployee);
     const itemsPerPage = 10;
     let currentPage = 1;
     let allVacancies = @Html.Raw(Json.Serialize(Model)) || [];
@@ -161,32 +171,44 @@
         const paginatedVacancies = allVacancies.slice(startIndex, endIndex);
 
         paginatedVacancies.forEach(vacancy => {
-            const row = `
-                        <tr>
-                    <td>${vacancy.jobTitle || vacancy.JobTitle || 'Нет данных'}</td>
-                    <td>${getJobTypeName(vacancy.jobType ?? vacancy.JobType ?? '')}</td>
-                    <td>${vacancy.salary || vacancy.Salary || 'Нет данных'}</td>
-                    <td>${getStatusName(vacancy.status ?? vacancy.Status ?? '')}</td>
-                    <td>${vacancy.tags || vacancy.Tags || 'Нет данных'}</td>
-                    <td>
-                        <div class="d-flex justify-content-center">
-                            <a href="/Vacancy/VacancyDetails/${vacancy.id || vacancy.Id}"
-                               class="btn btn-info btn-sm me-2" title="Просмотр">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                                <a href="/Vacancy/EditVacancy/${vacancy.id || vacancy.Id}?redirectUrl=${encodeURIComponent(window.location.pathname + window.location.search)}"
-                               class="btn btn-warning btn-sm me-2" title="Редактировать">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            <button class="btn btn-danger btn-sm"
-                                    title="Удалить"
-                                    onclick="deleteVacancy(${vacancy.id || vacancy.Id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+            const vacancyId = vacancy.id || vacancy.Id;
+            const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+
+            let actionButtons = `
+            <a href="/Vacancy/VacancyDetails/${vacancyId}"
+               class="btn btn-info btn-sm me-2" title="Просмотр">
+                <i class="bi bi-eye"></i>
+            </a>
+        `;
+
+            if (!isEmployee) {
+                actionButtons += `
+                <a href="/Vacancy/EditVacancy/${vacancyId}?redirectUrl=${currentUrl}"
+                   class="btn btn-warning btn-sm me-2" title="Редактировать">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+                <button class="btn btn-danger btn-sm"
+                        title="Удалить"
+                        onclick="deleteVacancy(${vacancyId})">
+                    <i class="bi bi-trash"></i>
+                </button>
             `;
+            }
+
+            const row = `
+            <tr>
+                <td>${vacancy.jobTitle || vacancy.JobTitle || 'Нет данных'}</td>
+                <td>${getJobTypeName(vacancy.jobType ?? vacancy.JobType ?? '')}</td>
+                <td>${vacancy.salary || vacancy.Salary || 'Нет данных'}</td>
+                <td>${getStatusName(vacancy.status ?? vacancy.Status ?? '')}</td>
+                <td>${vacancy.tags || vacancy.Tags || 'Нет данных'}</td>
+                <td>
+                    <div class="d-flex justify-content-center">
+                        ${actionButtons}
+                    </div>
+                </td>
+            </tr>
+        `;
             tableBody.innerHTML += row;
         });
     }

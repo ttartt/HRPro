@@ -3,13 +3,14 @@
 @model MeetingViewModel
 
 @{
-    var title = "Собеседование";
+    var title = "Встреча";
 }
 
 <div class="container">
     <h1>@title</h1>
     <form method="post" class="row g-3 needs-validation" novalidate>
         <input type="hidden" name="Id" value="@Model?.Id" />
+        <input type="hidden" name="GoogleEventId" value="@Model?.GoogleEventId" />
 
         <div class="col-md-6">
             <label for="Topic" class="form-label">Тема собеседования <span class="text-danger">*</span></label>

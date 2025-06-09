@@ -105,7 +105,7 @@ namespace HRProDatabaseImplement.Models
             VacancyId = model.VacancyId;
             Place = model.Place;
             Comment = model.Comment;
-            GoogleEventId = model.GoogleEventId;
+            GoogleEventId = model.GoogleEventId;            
         }
 
         public MeetingViewModel GetViewModel => new()

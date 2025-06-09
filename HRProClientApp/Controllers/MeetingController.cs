@@ -48,7 +48,7 @@ namespace HRProClientApp.Controllers
                     meeting.TimeTo = meeting.TimeTo.ToLocalTime();
                 }
 
-                return View(list);
+                return View(list.OrderByDescending(x => x.Date).ToList());
             }
             catch (Exception ex)
             {
@@ -106,16 +106,19 @@ namespace HRProClientApp.Controllers
                 }
                 var timeFrom = model.TimeFrom;
                 var timeTo = model.TimeTo;
+                var date = model.Date;
                 model.Date = model.Date.ToUniversalTime();
                 model.TimeFrom = model.TimeFrom.ToUniversalTime();
                 model.TimeTo = model.TimeTo.ToUniversalTime();
                 model.CompanyId = APIClient.Company?.Id;
+                timeFrom = date.Date.Add(timeFrom.TimeOfDay);
+                timeTo = date.Date.Add(timeTo.TimeOfDay);
 
                 string googleEventId = null;
 
-                if (!string.IsNullOrEmpty(APIClient.User?.GoogleToken))
+                if (!string.IsNullOrEmpty(APIClient.User?.GoogleToken) && string.IsNullOrEmpty(model.GoogleEventId))
                 {
-                    googleEventId = await CreateGoogleCalendarEvent(model);
+                    googleEventId = await CreateGoogleCalendarEvent(model, timeFrom, timeTo);                    
                 }
 
                 model.GoogleEventId = googleEventId;
@@ -123,9 +126,10 @@ namespace HRProClientApp.Controllers
                 if (model.Id == 0)
                 {
                     var meetingId = await APIClient.PostRequestAsync("api/meeting/create", model);
+                    model.SelectedParticipantIds.Add(APIClient.User.Id);
 
                     if (model.SelectedParticipantIds != null && model.SelectedParticipantIds.Count > 0)
-                    {
+                    {                        
                         foreach (var id in model.SelectedParticipantIds)
                         {
                             var participantModel = new { MeetingId = meetingId, UserId = id };
@@ -135,7 +139,7 @@ namespace HRProClientApp.Controllers
                             if (participant != null)
                             {
                                 SendEmail(participant.Email,
-                                        model.Date.ToShortDateString(),
+                                        date.ToShortDateString(),
                                         timeFrom.ToShortTimeString(),
                                         timeTo.ToShortTimeString(),
                                         model.Topic);
@@ -148,7 +152,7 @@ namespace HRProClientApp.Controllers
                         Id = meetingId,
                         TimeFrom = timeFrom,
                         ResumeId = model.ResumeId,
-                        Date = model.Date,
+                        Date = date,
                         Place = model.Place,
                         TimeTo = timeTo,
                         Topic = model.Topic,
@@ -161,25 +165,42 @@ namespace HRProClientApp.Controllers
                 else
                 {
                     var currentParticipants = APIClient.GetRequest<List<MeetingParticipantViewModel>>($"api/meeting/participants?meetingId={model.Id}");
-
                     var currentParticipantIds = currentParticipants.Select(p => p.UserId).ToList();
 
                     var newParticipantIds = model.SelectedParticipantIds?
                         .Except(currentParticipantIds)
                         .ToList() ?? new List<int>();
 
+                    model.SelectedParticipantIds.Add(APIClient.User.Id);
+
+                    var participantsToRemove = currentParticipantIds
+                        .Except(model.SelectedParticipantIds ?? new List<int>())
+                        .ToList();
+
                     APIClient.PostRequest("api/meeting/update", model);
 
-                    foreach (var userId in newParticipantIds)
+                    foreach (var id in participantsToRemove)
                     {
-                        var participant = APIClient.GetRequest<UserViewModel?>($"api/user/profile?id={userId}");
+                        APIClient.PostRequest($"api/meeting/DeleteParticipant", new MeetingParticipantBindingModel { Id = id });
+                    }
+
+                    foreach (var id in newParticipantIds)
+                    {
+                        var participantModel = new { MeetingId = model.Id, UserId = id };
+                        var existingParticipant = APIClient.GetRequest<MeetingParticipantViewModel>($"api/meeting/participant?meetingId={model.Id}&userId={id}");
+                        if (existingParticipant == null) 
+                            APIClient.PostRequest("api/meeting/createParticipant", participantModel);
+
+                        var participant = APIClient.GetRequest<UserViewModel?>($"api/user/profile?id={id}");
                         if (participant != null)
                         {
-                            SendEmail(participant.Email,
-                                    model.Date.ToShortDateString(),
-                                    timeFrom.ToShortTimeString(),
-                                    timeTo.ToShortTimeString(),
-                                    model.Topic);
+                            SendEmail(
+                                participant.Email,
+                                date.ToShortDateString(),
+                                timeFrom.ToShortTimeString(),
+                                timeTo.ToShortTimeString(),
+                                model.Topic
+                            );
                         }
                     }
                 }
@@ -223,14 +244,14 @@ namespace HRProClientApp.Controllers
             }
         }
 
-        private async Task<string> CreateGoogleCalendarEvent(MeetingBindingModel model)
+        private async Task<string> CreateGoogleCalendarEvent(MeetingBindingModel model, DateTime localStart, DateTime localEnd)
         {
             var calendarEvent = new GoogleCalendarEventModel
             {
                 Title = model.Topic,
                 Description = model.Comment,
-                StartDateTime = model.Date.Date.Add(model.TimeFrom.TimeOfDay).ToLocalTime(),
-                EndDateTime = model.Date.Date.Add(model.TimeTo.TimeOfDay).ToLocalTime(),
+                StartDateTime = localStart,
+                EndDateTime = localEnd,
                 Location = model.Place
             };
 
@@ -373,7 +394,7 @@ namespace HRProClientApp.Controllers
             await DeleteMeeting(id);
             APIClient.PostRequest($"api/meeting/delete", new MeetingBindingModel { Id = id });
             
-            return Redirect($"~/Meeting/Meetings?={APIClient.User?.Id}&companyId={APIClient.Company?.Id}");
+            return Redirect($"~/Meeting/Meetings?userId={APIClient.User?.Id}");
         }
     }
 }

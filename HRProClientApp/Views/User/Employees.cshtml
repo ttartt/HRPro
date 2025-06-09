@@ -45,16 +45,19 @@
                                         <td>@employee.PhoneNumber</td>
                                         <td>@employee.Role</td>
                                         <td class="d-flex justify-content-start">
-                                            <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)" 
-                                            class="btn btn-warning btn-sm me-2" 
-                                            title="Редактировать">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button class="btn btn-danger btn-sm"
-                                                    title="Удалить"
-                                                    onclick="deleteEmployee(@employee.Id)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                            @if (isAdmin)
+                                            {
+                                                <a asp-action="UserProfileEdit" asp-controller="User" asp-route-id="@employee.Id" asp-route-redirectUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                                   class="btn btn-warning btn-sm me-2"
+                                                   title="Редактировать">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button class="btn btn-danger btn-sm"
+                                                        title="Удалить"
+                                                        onclick="deleteEmployee(@employee.Id)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            }                                           
                                         </td>
                                     </tr>
                                 }
@@ -76,6 +79,7 @@
 </div>
 
 <script>
+    const isAdmin = @Json.Serialize(isAdmin);
     function deleteEmployee(id) {
         if (confirm('Вы уверены, что хотите удалить сотрудника?')) {
             fetch(`/User/Delete?id=${id}`, {
@@ -124,28 +128,33 @@
         const paginatedEmployees = allEmployees.slice(startIndex, endIndex);
 
         paginatedEmployees.forEach(employee => {
+            const employeeId = employee.id || employee.Id;
+            const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+
+            const actionButtons = isAdmin ? `
+            <div class="d-flex justify-content-center">
+                <a href="/User/UserProfileEdit/${employeeId}?redirectUrl=${currentUrl}"
+                    class="btn btn-warning btn-sm me-2" title="Редактировать">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+                <button class="btn btn-danger btn-sm"
+                        title="Удалить"
+                        onclick="deleteEmployee(${employeeId})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        ` : '';
+
             const row = `
-                    <tr>
-                        <td>${employee.surname || employee.Surname || 'Нет данных'}</td>
-                        <td>${employee.name || employee.Name || 'Нет данных'}</td>
-                        <td>${employee.email || employee.Email || 'Нет данных'}</td>
-                        <td>${employee.phoneNumber || employee.PhoneNumber || 'Нет данных'}</td>
-                        <td>${getRoleName(employee.role ?? employee.Role ?? '')}</td>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <a href="/User/UserProfileEdit/${employee.id || employee.Id}?redirectUrl=${encodeURIComponent(window.location.pathname + window.location.search)}"
-                                   class="btn btn-warning btn-sm me-2" title="Редактировать">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <button class="btn btn-danger btn-sm"
-                                        title="Удалить"
-                                        onclick="deleteEmployee(${employee.id || employee.Id})">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td>${employee.surname || employee.Surname || 'Нет данных'}</td>
+                <td>${employee.name || employee.Name || 'Нет данных'}</td>
+                <td>${employee.email || employee.Email || 'Нет данных'}</td>
+                <td>${employee.phoneNumber || employee.PhoneNumber || 'Нет данных'}</td>
+                <td>${getRoleName(employee.role ?? employee.Role ?? '')}</td>
+                <td>${actionButtons}</td>
+            </tr>
+        `;
             tableBody.innerHTML += row;
         });
     }

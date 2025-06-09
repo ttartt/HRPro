@@ -3,6 +3,7 @@
 
 @{
     var cities = ViewBag.Cities as List<CityViewModel>;
+    var isEmployee = APIClient.User.Role == HRProDataModels.Enums.RoleEnum.Сотрудник ? true : false;
 }
 
 <div class="container mt-4">
@@ -20,9 +21,12 @@
             </select>
         </div>
         <div class="col-md-4">
-            <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectModal">
-                <i class="bi bi-download"></i> Собрать резюме
-            </button>
+            @if (!isEmployee)
+            {
+                <button class="btn btn-success mt-4" data-bs-toggle="modal" data-bs-target="#collectModal">
+                    <i class="bi bi-download"></i> Собрать резюме
+                </button>
+            }            
         </div>
         <div class="col-md-4">
             <a asp-action="ResumeStatistics" asp-controller="Analytics" class="btn btn-success">
@@ -104,10 +108,12 @@
                                     <i class="bi bi-box-arrow-up-right"></i>
                                 </button>
                             }
-
-                            <a asp-action="Delete" asp-controller="Resume" asp-route-id="@resume.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
-                                <i class="bi bi-trash"></i>
-                            </a>
+                            @if (!isEmployee)
+                            {
+                                <a asp-action="Delete" asp-controller="Resume" asp-route-id="@resume.Id" class="btn btn-danger btn-sm me-2" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить резюме?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            }                            
                         </div>
                     </td>
                 </tr>
@@ -163,6 +169,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const isEmployee = @Json.Serialize(isEmployee);
     const itemsPerPage = 10;
     let currentPage = 1;
     let allResumes = @Html.Raw(Json.Serialize(Model));
@@ -305,11 +312,13 @@
                                 <i class="bi bi-box-arrow-up-right"></i>
                              </button>`
                 }
-                        <button class="btn btn-danger btn-sm me-2 delete-resume-btn"
-                                title="Удалить"
-                                data-id="${resume.Id || resume.id}">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                            ${!isEmployee ? `
+                            <button class="btn btn-danger btn-sm me-2 delete-resume-btn"
+                                    title="Удалить"
+                                    data-id="${resume.Id || resume.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </td>
             `;
@@ -587,5 +596,9 @@
             margin-top: 1rem;
             font-size: 1.1rem;
             color: #333;
+        }
+
+        #search {
+            margin-bottom: 1rem;
         }
 </style>

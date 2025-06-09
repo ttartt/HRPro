@@ -57,16 +57,12 @@ namespace HRProRestAPI.Controllers
                     });
                     foreach (var item in list)
                     {
-                        var found = _logic.ReadElement(new MeetingSearchModel { Id = item.MeetingId });
+                        var found = _logic.ReadElement(new MeetingSearchModel { Id = item.MeetingId, CompanyId = companyId });
                         if (found != null)
                         {
                             result.Add(found);
                         }
                     }
-                    result.AddRange(_logic.ReadList(new MeetingSearchModel
-                    {
-                        CompanyId = companyId
-                    }));
                     return result;
                 }
                 else if (companyId.HasValue)
@@ -112,7 +108,21 @@ namespace HRProRestAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка получения собеседований");
+                _logger.LogError(ex, "Ошибка получения участников");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        public MeetingParticipantViewModel? Participant(int? meetingId, int? userId)
+        {
+            try
+            {
+                return _logicMP.ReadElement(new MeetingParticipantSearchModel { MeetingId = meetingId, UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка получения участника собеседования");
                 throw;
             }
         }

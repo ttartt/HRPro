@@ -40,15 +40,23 @@ namespace HRProDatabaseImplement.Implements
         }
         public MeetingParticipantViewModel? GetElement(MeetingParticipantSearchModel model)
         {
+            using var context = new HRproDatabase();
             if (!model.Id.HasValue)
             {
                 return null;
             }
-            using var context = new HRproDatabase();
+            if (model.MeetingId.HasValue && model.UserId.HasValue)
+            {
+                return context.MeetingParticipants
+                .FirstOrDefault(x => x.MeetingId == model.MeetingId && x.UserId == model.UserId)
+                ?.GetViewModel;
+            }
+           
             return context.MeetingParticipants
                 .FirstOrDefault(x => x.Id == model.Id)
                 ?.GetViewModel;
         }
+
         public MeetingParticipantViewModel? Insert(MeetingParticipantBindingModel model)
         {
             var newMeetingParticipant = MeetingParticipant.Create(model);
